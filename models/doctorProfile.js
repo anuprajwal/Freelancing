@@ -70,36 +70,22 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      age: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
-      },
       gender: {
         type: DataTypes.ENUM("Male", "Female", "Others"),
         allowNull: false,
       },
-      profile_picture: {
-        type: DataTypes.STRING,
-        allowNull: true,
-      },
       specialization: {
-        type: DataTypes.JSON,
+        type: DataTypes.STRING(150),
         allowNull: false,
       },
       experience_years: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      hospital_affiliation: {
-        type: DataTypes.STRING(200),
         allowNull: true,
-        defaultValue: null,
       },
       organisation_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: null,
+        defaultValue: 0,
         references: {
           model: "organisation_profiles",
           key: "id",
