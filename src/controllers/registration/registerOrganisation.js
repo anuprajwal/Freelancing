@@ -30,7 +30,7 @@ const createOrgProfile = async (req, res)=>{
 
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
-    if (!org_type && !org_name && !org_license){
+    if (!org_type || !org_name || !org_license){
        logger.warning(`required fields for regestering the organisation from user: ${id} are not complete`)
        return req.status(400).json({error:"all fields are required"})
     }
@@ -55,6 +55,13 @@ const createOrgProfile = async (req, res)=>{
 const updateOrgProfile = async (req, res)=>{
     const org_obj = await organisationProfile.findOne({where:{user_id:req.user.payload.id}})
 
+    const valid_type = ['hospital','clinic','pharmacy','laboratory']
+
+    if (!valid_type.includes(org_type)){
+        logger.warning(`organisation type: ${org_type} is not valid`)
+        return req.status(400).json({error:"organisation type is not valid"})
+    }
+
     const {
         org_name = org_obj.organisation_name,
         org_type = org_obj.organisation_type,
@@ -76,7 +83,7 @@ const updateOrgProfile = async (req, res)=>{
         profile_picture:org_profile,
         ambulance_available:org_ambulance,
         specializations_provided:org_services
-    })
+    }, {where:{user_id:req.user.payload.id}})
 
     return res.status(200).json({message:"organisation profile is updated succesfully"})
 }
