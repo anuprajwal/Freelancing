@@ -36,10 +36,6 @@ module.exports =  (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: true,
       },
-      age: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
       gender: {
         type: DataTypes.ENUM("Male", "Female", "Others"),
         allowNull: true,
@@ -47,7 +43,7 @@ module.exports =  (sequelize, DataTypes) => {
       profile_picture: {
         type: DataTypes.TEXT,
         allowNull: true,
-        defaultValue:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Q9gV4zXwrEtfOJvfv_fugNlYgrnzfKV9_F5CGb_g7IE133yjQVLANrJhKCh1lIgu9tA&usqp=CAU"
+        defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270802/profile_11121549_dtesby.png"
       },
       created_at: {
         type: DataTypes.DATE,

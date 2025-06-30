@@ -72,25 +72,12 @@ module.exports = (sequelize, DataTypes) => {
       },
       specializations_provided: {
         type: DataTypes.JSON,
-        allowNull: false,
-      },
-      amount_of_staff: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 0,
+        allowNull: true,
       },
       ambulance_available: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false,
-      },
-      contact_number: {
-        type: DataTypes.STRING(10),
-        allowNull: false,
-      },
-      contact_email: {
-        type: DataTypes.STRING(255),
-        allowNull: false,
       },
       website_url: {
         type: DataTypes.STRING(255),
@@ -100,6 +87,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("pending", "approved", "rejected"), 
         defaultValue: "pending",
         allowNull: false,
+      },
+      profile_picture: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png"
       },
       created_at: {
         type: DataTypes.DATE,

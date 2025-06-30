@@ -4,8 +4,6 @@ const jwt = require("jsonwebtoken");
 
 
 // the api to login any user 
-//the dynamicity is to be expanded as it is static.
-// the logic of storing the jwt securely in http only cookies is removed now during testing.
 
 const loginUser = async (req, res) => {
     const {email, password, role="general_user"} = req.body;
@@ -66,6 +64,7 @@ const loginDoctor = async (req, res) => {
 
 const loginHospital = async (req, res) => {
     const {email, password, role="hospital_organisation"} = req.body;
+    const user_ip = req.ip;
 
     try {
         const hospital = await Hospital.findOne({where: {email, role}});

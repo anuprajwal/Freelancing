@@ -124,6 +124,11 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: false,
         allowNull: false,
       },
+      profile_picture: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+        defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png"
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,

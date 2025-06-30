@@ -5,8 +5,9 @@ const validateUserRole = require("../../utils/validateRole");
 // api to complete doctor profile
 const completeDoctorProfile = async (req, res) => {
   try {
-    const { payload } = req.user; // Extracted from authentication middleware
+    const { payload } = req.user; 
     const { id } = payload;
+    
     const user = await validateUserRole(id, "doctor", res);
     if (!user){
       return res.status(401).json({error:"user is not authorised to this route"})
