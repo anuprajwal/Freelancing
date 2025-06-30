@@ -1,0 +1,5 @@
+node_modules/
+.env
+.env.*
+videocall-174e6-firebase-adminsdk-fbsvc-c3715fdb23.json
+logs/
