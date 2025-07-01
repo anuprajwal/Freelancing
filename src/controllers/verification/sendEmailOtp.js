@@ -1,9 +1,8 @@
 const { User, otpStorage } = require("../../../models");
-const { sendOtpEmail } = require("../../services/emailService");
 
 const sendEmailOtp = async (req, res) => {
   const { email } = req.body;
-  const { id } = req.user;
+  const { id } = req.user.payload;
 
   if (!email) return res.status(400).json({ message: "Email is required" });
 
@@ -26,7 +25,7 @@ const sendEmailOtp = async (req, res) => {
     otp: otp,
   });
 
-  const sent = await sendOtpEmail(email, otp);
+  // placeholder
   if (!sent) {
     return res.status(500).json({ message: "Failed to send OTP" });
   }
