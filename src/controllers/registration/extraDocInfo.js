@@ -58,3 +58,5 @@ const addAvailabilitySchedule= async (req, res, availability_schedule)=>{
 
     return true
 }
+
+module.exports = {updateExtraDocInfo}
