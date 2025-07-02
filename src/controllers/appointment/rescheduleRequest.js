@@ -1,5 +1,5 @@
 const logger = require("../../../logger");
-const { appointments, User, appointmentReschedule, doctorProfile } = require("../../../models");
+const { appointments, appointmentReschedule, doctorProfile } = require("../../../models");
 
 
 // api to request rescheduling by doctor

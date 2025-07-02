@@ -1,5 +1,5 @@
-const { doctorProfile } = require("../models");
-const logger = require("../logger");
+const { doctorProfile } = require("../../models");
+const logger = require("../../logger");
 
 // Helper function to convert time string to minutes for accurate comparison
 const timeToMinutes = (timeString) => {
@@ -7,11 +7,21 @@ const timeToMinutes = (timeString) => {
   return hours * 60 + minutes;
 };
 
-const validateDoctorAvailability = async (req, res, next) => {
+const validateDoctorAvailability = async (req, res, next=null, appointmentDetails=null) => {
   try {
     const { payload } = req.user;
     const { id } = payload;
-    const { doctor_id, appointment_date, appointment_time } = req.body;
+    let doctor_id,appointment_date, appointment_time 
+    if (appointmentDetails){
+      doctor_id = appointmentDetails.doctor_id
+      appointment_date = appointmentDetails.appointment_date
+      appointment_time = appointmentDetails.appointment_time
+    }else{
+      doctor_id = req.body
+      appointment_date = req.body
+      appointment_time = req.body
+    }
+    
 
     // Get doctor profile
     const doctor = await doctorProfile.findByPk(doctor_id);
@@ -46,6 +56,17 @@ const validateDoctorAvailability = async (req, res, next) => {
     const requestedMinutes = timeToMinutes(requestedTime);
     const startMinutes = timeToMinutes(daySchedule.start);
     const endMinutes = timeToMinutes(daySchedule.end);
+
+    const now = new Date();
+    const appointmentDateTime = new Date(`${appointment_date}T${appointment_time}:00`);
+    
+    // Check if appointment is in the past
+    if (appointmentDateTime <= now) {
+      logger.warning(`Request is scheduling appointment in the past time`);
+      return res.status(400).json({ 
+        error: "Cannot schedule appointments in the past" 
+      });
+    }
     
     if (requestedMinutes < startMinutes || requestedMinutes >= endMinutes) {
       logger.warning(`User: ${id} is trying to schedule doctor outside working hours`);
@@ -71,6 +92,41 @@ const validateDoctorAvailability = async (req, res, next) => {
       }
     }
 
+
+    const appointmentDateTimeUTC = new Date(`${appointment_date}T${appointmentTimeFormatted}Z`);
+    // Calculate the time window: 30 minutes before and after
+    const windowStart = new Date(appointmentDateTimeUTC.getTime() - 30 * 60 * 1000);
+    const windowEnd = new Date(appointmentDateTimeUTC.getTime() + 30 * 60 * 1000);
+    
+
+    // Check for existing appointments within the time window for the same doctor
+    const existingAppointment = await appointments.findOne({
+      where: {
+        doctor_id,
+        appointment_date: Sequelize.where(
+          Sequelize.fn('DATE', Sequelize.col('appointment_date')),
+          '=',
+          appointment_date
+        ),
+        appointment_time: {
+          [Op.between]: [
+            windowStart.toISOString().slice(11, 19),
+            windowEnd.toISOString().slice(11, 19)
+          ]
+        },
+        appointment_status: {
+          [Op.notIn]: ['cancelled', 'completed']
+        }
+      }
+    });
+
+    if (existingAppointment) {
+      logger.warning(`User: ${id} trying to schedule doctor who has another appointment within 30 mins`);
+      return res.status(409).json({
+        error: "Doctor has another appointment within 30 minutes of the requested time"
+      });
+    }
+
     // Attach doctor and formatted time data to request for controller use
     req.doctorAvailabilityData = {
       doctor,
@@ -78,8 +134,9 @@ const validateDoctorAvailability = async (req, res, next) => {
       dayOfWeek
     };
 
-    next();
-
+    if (next){
+      next();
+    }
   } catch (error) {
     logger.error("Error in doctor availability validation middleware:", error);
     return res.status(500).json({ error: "Internal server error" });

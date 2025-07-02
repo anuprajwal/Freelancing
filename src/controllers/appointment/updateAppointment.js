@@ -1,8 +1,10 @@
-const { appointments, doctorProfile, User } = require("../../../models");
+const { appointments, User } = require("../../../models");
+const { validateDoctorAvailability } = require("../../middlewares/doctorAvailablityValidation");
 
 
 // api to update appointment
-// it is not complete yet. it is built completely on resumin the project
+//error in doctorUser finding
+
 const updateAppointment = async (req, res) => {
   const { appointment_id} = req.body;
   const { payload } = req.user;
@@ -20,57 +22,53 @@ const updateAppointment = async (req, res) => {
     return res.status(404).json({error: "Appointment not found"});
   }
 
-  const { appointment_status= appointment.appointment_status, appointment_type= appointment.appointment_type, appointment_date= appointment.appointment_date, appointment_time= appointment.appointment_time, prescription= appointment.prescription } = req.body;
+  const {appointment_date=appointment.appointment_date, appointment_type= appointment.appointment_type, prescription= appointment.prescription } = req.body;
+
+  const validAppointmentTypes = ['online_video','online_audio','offline']
+  validateDoctorAvailability(req, res, null ,appointment)
 
 
-  if (appointment_date < new Date()) {
-    return res.status(400).json({ error: "Appointment date cannot be in the past" });
+  const { doctor, appointmentTimeFormatted } = req.doctorAvailabilityData;
+  const doctorUser = await User.findByPk(doctor?.user_id);
+
+  if (user.email === doctorUser.email) {
+    logger.warning(`User is recognized as patient scheduling to his own account`);
+    return res.status(400).json({ error: "You cannot schedule an appointment with yourself" });
   }
 
-  const doctor = await doctorProfile.findOne({where: {id: appointment.doctor_id}});
-  
-  if (!doctor) {
-    return res.status(404).json({error: "Doctor not found"});
+  const appointmentDateTime = new Date(`${appointment_date}T${appointment_time}:00`);
+
+  // Check minimum advance notice (1 hour)
+  const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
+  if (appointmentDateTime < oneHourFromNow) {
+    logger.warning(`User: ${id} is scheduling appointment within 1 hour`);
+    return res.status(400).json({ 
+      error: "Appointments must be scheduled at least 1 hour in advance" 
+    });
   }
 
   if (user.id !== appointment.user_id) {
-
     return res.status(400).json({ error: "only appointment creator can update appointment" });
-
-    if (appointment.appointment_status === "closed") {
-      return res.status(400).json({ error: "Appointment is already closed" });
-    }
-
-    if (appointment_date||appointment_time||appointment_type) {
-      return res.status(400).json({ error: "Doctor cannot change appointment date, time or type" });
-    }
-
-    if (prescription && appointment_status !== "closed") {
-      return res.status(400).json({ error: "Appointment is not closed yet" });
-    }
-
-    if (appointment_status || (prescription && appointment_status === "closed")) {
-      await appointment.update({appointment_status, prescription});
-      return res.status(200).json({ message: "Appointment updated successfully", appointment });
-    }
-
-  }else{
-    try {
-        if (appointment_status !== "cancelled") {
-            return res.status(400).json({ error: "user cannot change appointment status" });
-        }
-
-        if (prescription) {
-          return res.status(400).json({ error: "user cannot make prescription" });
-        }
-        
-        await appointment.update({appointment_type, appointment_date, appointment_time, appointment_status});
-        return res.status(200).json({ message: "Appointment updated successfully", appointment });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: "Failed to update appointment" });
-    }
   }
+
+  if (appointment.appointment_status !== "pending") {
+    return res.status(400).json({ error: "Appointment is not in initial stage" });
+  }
+  
+  if (prescription) {
+    return res.status(400).json({ error: "User can't descide prescription" });
+  }
+
+  if (!validAppointmentTypes.includes(appointment_type)){
+    return res.status(400).json({error:"appointment type is not valid"})
+  }
+
+  appointments.update({
+    appointment_date,
+    appointment_time: appointmentTimeFormatted,
+    appointment_type,
+    appointment_status: "pending"
+  }, {where:{id:appointment_id , user_id : id}})
 };
 
 module.exports = updateAppointment;

@@ -7,15 +7,18 @@ const  showAllAppointments  = require("../controllers/appointment/showAllAppoint
 const  removeRescheduled  = require("../controllers/appointment/removeRescheduled.js");
 const {getSortedDoctors} = require("../middlewares/getSortedDoctors.js");
 const  protect  = require("../middlewares/authMiddleware.js");
+const { validateDoctorAvailability } = require("../middlewares/doctorAvailablityValidation.js");
+const appointmentUpdateByDoctor = require("../controllers/appointment/doctorUpdateAppointments.js");
 
 const router = express.Router();
 
-router.post("/create-appointment", protect, scheduleAppointment);
+router.post("/create-appointment", protect, validateDoctorAvailability, scheduleAppointment);
 router.delete("/delete-appointment", protect, deleteAppointment);
 router.put("/update-appointment", protect, updateAppointment);
 router.put("/reschedule-appointment", protect, rescheduleRequest);
 router.get("/list-appointments", protect, showAllAppointments);
 router.delete("/remove-rescheduled", protect, removeRescheduled);
+router.put("/doctor-update-appointment", protect, appointmentUpdateByDoctor)
 router.get("/get-sorted-doctors", protect, getSortedDoctors);
 
 

@@ -1,5 +1,5 @@
 const { appointments, User, doctorProfile } = require("../../../models");
-const { Op, Sequelize } = require("sequelize");
+const { Op } = require("sequelize");
 const logger = require("../../../logger");
 
 const scheduleAppointment = async (req, res) => {
@@ -51,17 +51,7 @@ const scheduleAppointment = async (req, res) => {
       return res.status(400).json({ error: "Invalid appointment type" });
     }
 
-    // Check current time and prevent past date/time bookings
-    const now = new Date();
     const appointmentDateTime = new Date(`${appointment_date}T${appointment_time}:00`);
-    
-    // Check if appointment is in the past
-    if (appointmentDateTime <= now) {
-      logger.warning(`Request is scheduling appointment in the past time`);
-      return res.status(400).json({ 
-        error: "Cannot schedule appointments in the past" 
-      });
-    }
 
     // Check minimum advance notice (1 hour)
     const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
@@ -109,41 +99,6 @@ const scheduleAppointment = async (req, res) => {
       logger.warning(`User: ${id} has already scheduled this doctor in the same slot`);
       return res.status(409).json({
         error: "You already have an appointment with this doctor at this date and time"
-      });
-    }
-
-    // Convert appointment_date + appointment_time to a Date object in UTC
-    const appointmentDateTimeUTC = new Date(`${appointment_date}T${appointmentTimeFormatted}Z`);
-
-    // Calculate the time window: 30 minutes before and after
-    const windowStart = new Date(appointmentDateTimeUTC.getTime() - 30 * 60 * 1000);
-    const windowEnd = new Date(appointmentDateTimeUTC.getTime() + 30 * 60 * 1000);
-
-    // Check for existing appointments within the time window for the same doctor
-    const existingAppointment = await appointments.findOne({
-      where: {
-        doctor_id,
-        appointment_date: Sequelize.where(
-          Sequelize.fn('DATE', Sequelize.col('appointment_date')),
-          '=',
-          appointment_date
-        ),
-        appointment_time: {
-          [Op.between]: [
-            windowStart.toISOString().slice(11, 19),
-            windowEnd.toISOString().slice(11, 19)
-          ]
-        },
-        appointment_status: {
-          [Op.notIn]: ['cancelled', 'completed']
-        }
-      }
-    });
-
-    if (existingAppointment) {
-      logger.warning(`User: ${id} trying to schedule doctor who has another appointment within 30 mins`);
-      return res.status(409).json({
-        error: "Doctor has another appointment within 30 minutes of the requested time"
       });
     }
 
