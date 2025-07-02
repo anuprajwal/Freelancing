@@ -87,6 +87,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "offline",
       },
+      checkup_time:{
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       prescription: {
         type: DataTypes.TEXT,
         allowNull: true,

@@ -87,3 +87,5 @@ const updateOrgProfile = async (req, res)=>{
 
     return res.status(200).json({message:"organisation profile is updated succesfully"})
 }
+
+module.exports = {registerOrganisation}

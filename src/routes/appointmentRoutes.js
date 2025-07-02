@@ -5,6 +5,7 @@ const  updateAppointment  = require("../controllers/appointment/updateAppointmen
 const  rescheduleRequest  = require("../controllers/appointment/rescheduleRequest.js");
 const  showAllAppointments  = require("../controllers/appointment/showAllAppointments.js");
 const  removeRescheduled  = require("../controllers/appointment/removeRescheduled.js");
+const {getSortedDoctors} = require("../middlewares/getSortedDoctors.js");
 const  protect  = require("../middlewares/authMiddleware.js");
 
 const router = express.Router();
@@ -15,7 +16,7 @@ router.put("/update-appointment", protect, updateAppointment);
 router.put("/reschedule-appointment", protect, rescheduleRequest);
 router.get("/list-appointments", protect, showAllAppointments);
 router.delete("/remove-rescheduled", protect, removeRescheduled);
-
+router.get("/get-sorted-doctors", protect, getSortedDoctors);
 
 
 
