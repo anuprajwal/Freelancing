@@ -115,6 +115,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png"
       },
+      appointment_time:{
+        type : DataTypes.INTEGER,
+        allowNull: false,
+        defaultValue: 45
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,

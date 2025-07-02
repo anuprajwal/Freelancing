@@ -36,22 +36,14 @@ const getSortedDoctors = async (req, res, next)=>{
       order: [[literal('appointment_count'), 'ASC']] // doctors with least appointments first
     });
 
-    let doctors = doctorsInHospitals.map(async doctor => {
-        return  {
-            doctor_id : doctor.id,
-            appointments : await appointments.findAll({where:{doctor_id : doctor.id, appointment_status: "confirmed" || "pending"}})
-        }
-    })
 
-    let sortedDoctors = doctors.sort((a, b) => {
-        return a.appointments.length - b.appointments.length
-    })
-
-    console.log(sortedDoctors)
+    const threshold = 5;
+    const lowLoadDoctorIds = appointmentsCount
+    .filter(item => parseInt(item.get('appointment_count')) < threshold)
+    .map(item => item.doctor_id);
 
     req.sortedDoctors = {
-        sortedDoctors,
-        doctors
+        lowLoadDoctorIds,
     }
     next()
 }
