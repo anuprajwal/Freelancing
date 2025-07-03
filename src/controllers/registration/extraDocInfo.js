@@ -4,6 +4,13 @@ const generateWeeklySlots = require("../slots/createSlots");
 
 const updateExtraDocInfo = async(req, res)=>{
     const {id} = req.user.payload
+
+    const requestUser = await doctorProfile.findOne({where:{user_id:id}})
+
+    if (!requestUser){
+        return res.status(404).json({error:"couldnot find doctor profile on this account"})
+    }
+
     const {availability_schedule, consultation_fee, experience_years, appointment_slot} = req.body
 
     if (!availability_schedule || !consultation_fee || !experience_years || !appointment_slot){
@@ -26,23 +33,12 @@ const updateExtraDocInfo = async(req, res)=>{
 }
 
 const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
-    const slots = await generateWeeklySlots(availability_schedule, appointment_slot);
-
-    // Convert the slots array into an object for DB
-    const slotData = {
-        slot_monday: slots[0],
-        slot_tuesday: slots[1],
-        slot_wednesday: slots[2],
-        slot_thursday: slots[3],
-        slot_friday: slots[4],
-        slot_saturday: slots[5],
-        slot_sunday: slots[6],
-        doctor_id: req.user.payload.id, // make sure this is defined
-    };
-
-    await doctorSlots.create(slotData);
-
-    return true
+    const slots = await generateWeeklySlots(req.user.payload.id,availability_schedule, appointment_slot);
+    
+    if (slots){
+        return true
+    }
+    
 }
 
 const addExperience = async(req, res, experience_years)=>{
@@ -77,9 +73,9 @@ const addAvailabilitySchedule= async (req, res, availability_schedule)=>{
       }
     }
 
-    await doctorProfile.update({availability_schedule}, {where:{user_id:id}})
+    await doctorProfile.update({availability_schedule}, {where:{user_id:req.user.payload.id}})
 
     return true
 }
 
-module.exports = {updateExtraDocInfo}
+module.exports = updateExtraDocInfo

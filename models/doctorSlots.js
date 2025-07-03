@@ -5,7 +5,7 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
   class doctorSlots extends Model {
     static associate(models) {
-      doctorSlots.belongsTo(models.doctorProfile, {
+      doctorSlots.belongsTo(models.User, {
         foreignKey: "doctor_id",
         targetKey: "id",
         as: "doctor",
@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "doctor_profiles",
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",

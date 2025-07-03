@@ -1,3 +1,5 @@
+const {appointments} = require("../../../models")
+
 const checkAnotherAppointment = async (doctor_id, date, start, end) => {
     const existing = await appointments.findOne({
       where: {

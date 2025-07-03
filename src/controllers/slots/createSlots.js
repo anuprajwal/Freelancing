@@ -1,69 +1,91 @@
 // function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
-//     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-  
-//     const weekSlots = [];
-  
-//     for (const dayName of daysOfWeek) {
-//       const daySchedule = weeklySchedule.find(d => d.day.toLowerCase() === dayName.toLowerCase());
-  
-//       if (!daySchedule) {
-//         // No schedule provided for this day → empty slot list
-//         weekSlots.push([]);
-//         continue;
-//       }
-  
-//       const { loginTime, logoutTime, breaks } = daySchedule;
-  
-//       const slots = [];
-//       const login = toMinutes(loginTime);
-//       const logout = toMinutes(logoutTime);
-//       const breakIntervals = (breaks || []).map(b => {
-//         const [start, end] = b.split('-');
-//         return [toMinutes(start), toMinutes(end)];
+//   const weekSlots = [];
+
+//   for (let i = 0; i < 7; i++) {
+//     const date = new Date();
+//     date.setDate(date.getDate() + i);
+
+//     const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
+//     const dayName = date.toLocaleString('en-US', { weekday: 'long' }).toLowerCase(); // "monday", etc.
+
+//     const daySchedule = weeklySchedule.find(d => d.day.toLowerCase() === dayName);
+
+//     if (!daySchedule) {
+//       // No availability for this day
+//       weekSlots.push({
+//         date: dateString,
+//         day: dayName,
+//         slots: []
 //       });
-  
-//       let current = login;
-//       while (current + slotDurationMinutes <= logout) {
-//         const slotStart = current;
-//         const slotEnd = current + slotDurationMinutes;
-  
-//         const isInBreak = breakIntervals.some(
-//           ([breakStart, breakEnd]) =>
-//             slotStart < breakEnd && slotEnd > breakStart
-//         );
-  
-//         if (!isInBreak) {
-//           slots.push({
-//             day: dayName,
-//             start: formatTime(slotStart),
-//             end: formatTime(slotEnd)
-//           });
-//         }
-  
-//         current += slotDurationMinutes;
-//       }
-  
-//       weekSlots.push(slots);
+//       continue;
 //     }
-  
-//     return weekSlots;
+
+//     const { loginTime, logoutTime, breaks } = daySchedule;
+
+//     const login = toMinutes(loginTime);
+//     const logout = toMinutes(logoutTime);
+//     const breakIntervals = (breaks || []).map(b => {
+//       const [start, end] = b.split('-');
+//       return [toMinutes(start), toMinutes(end)];
+//     });
+
+//     const slots = [];
+//     let current = login;
+//     while (current + slotDurationMinutes <= logout) {
+//       const slotStart = current;
+//       const slotEnd = current + slotDurationMinutes;
+
+//       const isInBreak = breakIntervals.some(
+//         ([breakStart, breakEnd]) =>
+//           slotStart < breakEnd && slotEnd > breakStart
+//       );
+
+//       if (!isInBreak) {
+//         slots.push({
+//           start: formatTime(slotStart),
+//           end: formatTime(slotEnd)
+//         });
+//       }
+
+//       current += slotDurationMinutes;
+//     }
+
+//     weekSlots.push({
+//       date: dateString,
+//       day: dayName,
+//       slots
+//     });
 //   }
-  
-//   function toMinutes(timeStr) {
-//     const [h, m] = timeStr.split(':').map(Number);
-//     return h * 60 + m;
-//   }
-  
-//   function formatTime(minutes) {
-//     const h = Math.floor(minutes / 60).toString().padStart(2, '0');
-//     const m = (minutes % 60).toString().padStart(2, '0');
-//     return `${h}:${m}`;
-//   }
-  
-// module.exports = generateWeeklySlots
+
+//   return weekSlots;
+// }
+
+// function toMinutes(timeStr) {
+//   const [h, m] = timeStr.split(':').map(Number);
+//   return h * 60 + m;
+// }
+
+// function formatTime(minutes) {
+//   const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+//   const m = (minutes % 60).toString().padStart(2, '0');
+//   return `${h}:${m}`;
+// }
+
+// module.exports = generateWeeklySlots;
 
 
+const { doctorSlots } = require("../../../models");
 
+function toMinutes(timeStr) {
+  const [h, m] = timeStr.split(":").map(Number);
+  return h * 60 + m;
+}
+
+function formatTime(minutes) {
+  const h = Math.floor(minutes / 60).toString().padStart(2, "0");
+  const m = (minutes % 60).toString().padStart(2, "0");
+  return `${h}:${m}`;
+}
 
 function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
   const weekSlots = [];
@@ -72,13 +94,13 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
     const date = new Date();
     date.setDate(date.getDate() + i);
 
-    const dateString = date.toISOString().split('T')[0]; // YYYY-MM-DD
-    const dayName = date.toLocaleString('en-US', { weekday: 'long' }).toLowerCase(); // "monday", etc.
+    const dateString = date.toISOString().split("T")[0]; // YYYY-MM-DD
+    const dayName = date.toLocaleString("en-US", { weekday: "long" }).toLowerCase();
 
-    const daySchedule = weeklySchedule.find(d => d.day.toLowerCase() === dayName);
+    const daySchedule = weeklySchedule.find(d => d.day?.toLowerCase() === dayName);
 
-    if (!daySchedule) {
-      // No availability for this day
+    // Fallback: no schedule or incomplete
+    if (!daySchedule || !daySchedule.loginTime || !daySchedule.logoutTime) {
       weekSlots.push({
         date: dateString,
         day: dayName,
@@ -87,24 +109,35 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
       continue;
     }
 
-    const { loginTime, logoutTime, breaks } = daySchedule;
+    let login, logout;
+    try {
+      login = toMinutes(daySchedule.loginTime);
+      logout = toMinutes(daySchedule.logoutTime);
+    } catch {
+      weekSlots.push({
+        date: dateString,
+        day: dayName,
+        slots: []
+      });
+      continue;
+    }
 
-    const login = toMinutes(loginTime);
-    const logout = toMinutes(logoutTime);
-    const breakIntervals = (breaks || []).map(b => {
-      const [start, end] = b.split('-');
-      return [toMinutes(start), toMinutes(end)];
-    });
+    const breakIntervals = Array.isArray(daySchedule.breaks)
+      ? daySchedule.breaks.map(b => {
+          const [start, end] = b.split("-");
+          return [toMinutes(start), toMinutes(end)];
+        })
+      : [];
 
     const slots = [];
     let current = login;
+
     while (current + slotDurationMinutes <= logout) {
       const slotStart = current;
       const slotEnd = current + slotDurationMinutes;
 
       const isInBreak = breakIntervals.some(
-        ([breakStart, breakEnd]) =>
-          slotStart < breakEnd && slotEnd > breakStart
+        ([bStart, bEnd]) => slotStart < bEnd && slotEnd > bStart
       );
 
       if (!isInBreak) {
@@ -127,15 +160,51 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
   return weekSlots;
 }
 
-function toMinutes(timeStr) {
-  const [h, m] = timeStr.split(':').map(Number);
-  return h * 60 + m;
-}
+const createOrMergeDoctorSlots = async (doctor_id, weeklySchedule, slotDurationMinutes = 30) => {
+  const newGenerated = generateWeeklySlots(weeklySchedule, slotDurationMinutes);
 
-function formatTime(minutes) {
-  const h = Math.floor(minutes / 60).toString().padStart(2, '0');
-  const m = (minutes % 60).toString().padStart(2, '0');
-  return `${h}:${m}`;
-}
+  const existing = await doctorSlots.findOne({ where: { doctor_id } });
 
-module.exports = generateWeeklySlots;
+  for (let i of newGenerated){
+    for (let j of i.slots){
+      console.log(j)
+    }
+  }
+
+  if (!existing) {
+    await doctorSlots.create({
+      doctor_id,
+      slots: newGenerated
+    });
+    return { message: "Slots created for next 7 days." };
+  }
+
+  const existingSlots = existing.slots || [];
+
+  for (const newDay of newGenerated) {
+    const existingDay = existingSlots.find(d => d.date === newDay.date);
+
+    if (!existingDay) {
+      existingSlots.push(newDay);
+    } else {
+      const existingTimeStrings = new Set(
+        existingDay.slots.map(s => `${s.start}-${s.end}`)
+      );
+
+      for (const newSlot of newDay.slots) {
+        const key = `${newSlot.start}-${newSlot.end}`;
+        if (!existingTimeStrings.has(key)) {
+          existingDay.slots.push(newSlot);
+        }
+      }
+
+      existingDay.slots.sort((a, b) => a.start.localeCompare(b.start));
+    }
+  }
+
+  await doctorSlots.update({ slots: existingSlots }, { where: { doctor_id } });
+
+  return { message: "New slots merged with existing ones." };
+};
+
+module.exports = createOrMergeDoctorSlots;

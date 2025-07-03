@@ -1,3 +1,6 @@
+const { doctorSlots } = require("../../../models")
+
+
 const checkSlotAvailability = async (doctor_id, start, end, date) => {
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
   if (!slotRecord || !slotRecord.slots) return false;

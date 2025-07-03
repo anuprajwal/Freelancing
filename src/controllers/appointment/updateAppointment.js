@@ -1,74 +1,103 @@
-const { appointments, User } = require("../../../models");
-const { validateDoctorAvailability } = require("../../middlewares/doctorAvailablityValidation");
+const { appointments, doctorSlots } = require("../../../models");
+const checkSlotAvailability = require("../slots/checkSlots");
 
+const reschedulePendingAppointment = async (req, res) => {
+  const { appointment_id, newDate, newStart, newEnd } = req.body;
 
-// api to update appointment
-//error in doctorUser finding
+  // Step 1: Find the original appointment
+  const oldAppointment = await appointments.findOne({
+    where: {
+      id: appointment_id,
+      appointment_status: "pending"
+    }
+  });
 
-const updateAppointment = async (req, res) => {
-  const { appointment_id} = req.body;
-  const { payload } = req.user;
-  const { id } = payload;
-
-  if (!appointment_id) {
-    return res.status(400).json({ error: "Appointment ID is required" });
+  if (!oldAppointment) {
+    return res.status(404).json({ error: "Pending appointment not found." });
   }
 
-  const user = await User.findByPk(id);
+  const {
+    doctor_id,
+    appointment_date,
+    appointment_start_time,
+    appointment_end_time
+  } = oldAppointment;
 
-  const appointment = await appointments.findOne({where: {id: appointment_id, user_id: id}});
-
-  if (!appointment) {
-    return res.status(404).json({error: "Appointment not found"});
+  // Step 2: Check new slot availability
+  const isSlotAvailable = await checkSlotAvailability(doctor_id, newStart, newEnd, newDate);
+  if (!isSlotAvailable) {
+    return res.status(400).json({ error: "The new slot is not available." });
   }
 
-  const {appointment_date=appointment.appointment_date, appointment_type= appointment.appointment_type, prescription= appointment.prescription } = req.body;
+  // Step 3: Fetch existing doctor slots
+  const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
 
-  const validAppointmentTypes = ['online_video','online_audio','offline']
-  validateDoctorAvailability(req, res, null ,appointment)
-
-
-  const { doctor, appointmentTimeFormatted } = req.doctorAvailabilityData;
-  const doctorUser = await User.findByPk(doctor?.user_id);
-
-  if (user.email === doctorUser.email) {
-    logger.warning(`User is recognized as patient scheduling to his own account`);
-    return res.status(400).json({ error: "You cannot schedule an appointment with yourself" });
+  if (!slotRecord || !Array.isArray(slotRecord.slots)) {
+    return res.status(500).json({ error: "Doctor slot record not found or invalid." });
   }
 
-  const appointmentDateTime = new Date(`${appointment_date}T${appointment_time}:00`);
+  const updatedSlots = [...slotRecord.slots];
 
-  // Check minimum advance notice (1 hour)
-  const oneHourFromNow = new Date(now.getTime() + 60 * 60 * 1000);
-  if (appointmentDateTime < oneHourFromNow) {
-    logger.warning(`User: ${id} is scheduling appointment within 1 hour`);
-    return res.status(400).json({ 
-      error: "Appointments must be scheduled at least 1 hour in advance" 
+  // Step 3.1: Restore old slot
+  const oldDateIndex = updatedSlots.findIndex(s => s.date === appointment_date);
+  if (oldDateIndex !== -1) {
+    if (!Array.isArray(updatedSlots[oldDateIndex].slots)) {
+      updatedSlots[oldDateIndex].slots = [];
+    }
+
+    const slotExists = updatedSlots[oldDateIndex].slots.some(
+      slot => slot.start === appointment_start_time && slot.end === appointment_end_time
+    );
+
+    if (!slotExists) {
+      updatedSlots[oldDateIndex].slots.push({
+        start: appointment_start_time,
+        end: appointment_end_time
+      });
+
+      // Optional: sort by time
+      updatedSlots[oldDateIndex].slots.sort((a, b) => a.start.localeCompare(b.start));
+    }
+  } else {
+    // If no entry for old date, add a new one
+    updatedSlots.push({
+      date: appointment_date,
+      slots: [
+        {
+          start: appointment_start_time,
+          end: appointment_end_time
+        }
+      ]
     });
   }
 
-  if (user.id !== appointment.user_id) {
-    return res.status(400).json({ error: "only appointment creator can update appointment" });
+  // Step 3.2: Remove the new slot from schedule
+  const newDateIndex = updatedSlots.findIndex(s => s.date === newDate);
+  if (newDateIndex !== -1 && Array.isArray(updatedSlots[newDateIndex].slots)) {
+    updatedSlots[newDateIndex].slots = updatedSlots[newDateIndex].slots.filter(
+      slot => !(slot.start === newStart && slot.end === newEnd)
+    );
   }
 
-  if (appointment.appointment_status !== "pending") {
-    return res.status(400).json({ error: "Appointment is not in initial stage" });
-  }
-  
-  if (prescription) {
-    return res.status(400).json({ error: "User can't descide prescription" });
-  }
+  // Step 4: Update doctorSlots in DB
+  await doctorSlots.update(
+    { slots: updatedSlots },
+    { where: { doctor_id } }
+  );
 
-  if (!validAppointmentTypes.includes(appointment_type)){
-    return res.status(400).json({error:"appointment type is not valid"})
-  }
+  // Step 5: Update the appointment
+  await appointments.update(
+    {
+      appointment_date: newDate,
+      appointment_start_time: newStart,
+      appointment_end_time: newEnd
+    },
+    {
+      where: { id: appointment_id }
+    }
+  );
 
-  appointments.update({
-    appointment_date,
-    appointment_time: appointmentTimeFormatted,
-    appointment_type,
-    appointment_status: "pending"
-  }, {where:{id:appointment_id , user_id : id}})
+  return res.status(200).json({ message: "Appointment rescheduled successfully." });
 };
 
-module.exports = updateAppointment;
+module.exports = reschedulePendingAppointment;

@@ -1,16 +1,23 @@
-const { appointments, doctorProfile } = require("../../../models");
+const { appointments, doctorProfile, doctorSlots } = require("../../../models");
 const { Op } = require("sequelize");
 const logger = require("../../../logger");
 const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
 
 const scheduleAppointment = async (req, res) => {
-  const { doctor_id, date, start, end } = req.body
+  try{
+    const { doctor_id, date, start, end, type } = req.body
 
   const doctorObj = await doctorProfile.findOne({where:{user_id:doctor_id}})
 
   if (!doctorObj){
     return res.status(404).json({error:"cant find the doctor, user wants to find"})
+  }
+
+  const validType = ['online_video','online_audio','offline']
+
+  if (!validType.includes(type)){
+    return res.status(400).json({error:"appointment type is not valid"})
   }
 
   // Step 1: Check if the slot is in the doctor's available slots
@@ -59,6 +66,10 @@ const scheduleAppointment = async (req, res) => {
 
 
   return res.status(200).json({message:"appointment scheduled"})
+  }catch(Error){
+    return res.status(400).json({error:Error.message})
+  }
+  
 }
 
 module.exports = scheduleAppointment
