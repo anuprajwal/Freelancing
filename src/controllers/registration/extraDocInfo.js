@@ -1,11 +1,19 @@
-const { doctorProfile, User } = require("../../../models");
+const { doctorProfile, doctorSlots } = require("../../../models");
+const generateWeeklySlots = require("../slots/createSlots");
 
 
 const updateExtraDocInfo = async(req, res)=>{
     const {id} = req.user.payload
-    const {availability_schedule, consultation_fee, experience_years} = req.body
 
-    if (!availability_schedule || !consultation_fee || !experience_years){
+    const requestUser = await doctorProfile.findOne({where:{user_id:id}})
+
+    if (!requestUser){
+        return res.status(404).json({error:"couldnot find doctor profile on this account"})
+    }
+
+    const {availability_schedule, consultation_fee, experience_years, appointment_slot} = req.body
+
+    if (!availability_schedule || !consultation_fee || !experience_years || !appointment_slot){
         return res.status(400).json({error:"all the required fields are not satisfied in the request"})
     }
     
@@ -17,9 +25,20 @@ const updateExtraDocInfo = async(req, res)=>{
     const experienceSaved = await addExperience(req, res, experience_years)
     const availabilitySaved = await addAvailabilitySchedule(req, res, availability_schedule)
 
-    if (consultationSaved && experienceSaved && availabilitySaved){
-        return res.status(200).json({message:"succesfully completed addin the extra info of doctors"})
+    const slotSaved = await createSlot(req, res, availability_schedule, appointment_slot)
+
+    if (consultationSaved && experienceSaved && availabilitySaved && slotSaved){
+        return res.status(200).json({message:"succesfully completed adding the extra info of doctors"})
     }
+}
+
+const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
+    const slots = await generateWeeklySlots(req.user.payload.id,availability_schedule, appointment_slot);
+    
+    if (slots){
+        return true
+    }
+    
 }
 
 const addExperience = async(req, res, experience_years)=>{
@@ -54,9 +73,9 @@ const addAvailabilitySchedule= async (req, res, availability_schedule)=>{
       }
     }
 
-    await doctorProfile.update({availability_schedule}, {where:{user_id:id}})
+    await doctorProfile.update({availability_schedule}, {where:{user_id:req.user.payload.id}})
 
     return true
 }
 
-module.exports = {updateExtraDocInfo}
+module.exports = updateExtraDocInfo

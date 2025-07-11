@@ -73,7 +73,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      appointment_time: {
+      appointment_start_time: {
+        type: DataTypes.TIME,
+        allowNull: false,
+      },
+      appointment_end_time: {
         type: DataTypes.TIME,
         allowNull: false,
       },

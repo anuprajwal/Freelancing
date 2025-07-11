@@ -1,5 +1,5 @@
 // this is the basic user registration mapping to ../models/user.js
-const {User, generalUser} = require("../../../models");
+const {User, generalUser, doctorProfile, organisationProfile} = require("../../../models");
 const bcrypt = require("bcrypt");
 const {generateToken} = require("../login/login");
 
@@ -8,6 +8,8 @@ const {generateToken} = require("../login/login");
  const registerUser = async (req, res) => {
   try {
     const { username, email, phone_number, password, role } = req.body;
+
+    console.log(User)
 
     // Validate required fields
     if (!username || !email || !phone_number || !password || !role) {
@@ -44,10 +46,14 @@ const {generateToken} = require("../login/login");
       is_active: false, 
     });
 
-    const userProfile = await generalUser.create({
-      user_id : user.id,
-      profile_picture : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS5Q9gV4zXwrEtfOJvfv_fugNlYgrnzfKV9_F5CGb_g7IE133yjQVLANrJhKCh1lIgu9tA&usqp=CAU"
-    })
+    if (role === "general_user"){
+      createUserProfile(user.id)
+    }else if(role === "doctor"){
+      createDoctorProfile(user.id)
+    }else if (role === "hospital_organisation"){
+      createHospitalProfile(user.id)
+    }
+
 
     const token = generateToken(user, req.ip);
 
@@ -68,4 +74,28 @@ const {generateToken} = require("../login/login");
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+
+const createUserProfile = async (id)=>{
+  await generalUser.create({
+    user_id : id,
+    profile_picture : "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270802/profile_11121549_dtesby.png"
+  })
+}
+
+const createDoctorProfile = async(id)=>{
+  await doctorProfile.create({
+    user_id : id,
+    profile_picture : "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png"
+  })
+}
+
+
+const createHospitalProfile = async  (id) =>{
+  await organisationProfile.create({
+    user_id : id,
+    profile_picture : "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png"
+  })
+}
+
 module.exports = registerUser

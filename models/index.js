@@ -6,7 +6,7 @@ require("dotenv").config();
 // Database configuration for localhost
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
   host: process.env.DB_HOST,
-  dialect: process.env.DB_DIALECT,  
+  dialect: process.env.DB_DIALECT || 'mysql',  
   logging: false, 
 });
 
@@ -22,7 +22,7 @@ async function connectDB() {
 
 async function syncDB() {
   try {
-    await db.sequelize.sync(force=true);
+    await db.sequelize.sync({alter:true});
     console.log("Database synced successfully.");
   } catch (error) {
     console.error("Unable to sync the database:", error);
@@ -32,14 +32,6 @@ async function syncDB() {
 connectDB();
 
 const db = {};
-
-// readdirSync(__dirname)
-//   .filter((file) => file !== "index.js" && file.endsWith(".js"))
-//   .forEach((file) => {
-//     console.log(file)
-//     const model = require(join(__dirname, file))(sequelize, Sequelize.DataTypes);
-//     db[model.name] = model;
-//   });
 
 readdirSync(__dirname)
   .filter((file) => file !== "index.js" && file.endsWith(".js"))
@@ -60,8 +52,6 @@ readdirSync(__dirname)
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db);
-    // console.log(`Associations for ${modelName} have been established successfully.`);
-    // console.log(db[modelName].associate);
   }
 });
 

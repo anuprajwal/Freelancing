@@ -7,6 +7,7 @@ const {completeDoctorProfile} = require("../controllers/registration/completeDoc
 require("../controllers/registration/googleOAuth.js");
 const  protect  = require("../middlewares/authMiddleware.js");
 const passport = require("passport");
+const updateExtraDocInfo = require("../controllers/registration/extraDocInfo.js");
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.post("/register", registerUser);
 // Step 2: Complete Profile (Role-Based)
 router.put("/profile/complete/general_user", protect, completePatientProfile);
 router.put("/profile/complete/doctor", protect, completeDoctorProfile);
+router.put("/profile/complete/extra-doc-info", protect, updateExtraDocInfo)
 // router.put("/profile/complete/hospital_organisation", protect, completeOrganisationProfile);
 
 

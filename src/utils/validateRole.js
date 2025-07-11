@@ -2,13 +2,12 @@ const { User } = require("../../models");
 
 // not much use full
 
-const validateUserRole = async (userId, expectedRole, res) => {
+const validateUserRole = async (userId, expectedRole) => {
   const user = await User.findByPk(userId);
   console.log("expectedRole",expectedRole);
-  console.log("id",user);
 
   if (!user) {
-    return none
+    return null
   }
 
   if (user.role !== expectedRole) {

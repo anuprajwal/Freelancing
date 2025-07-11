@@ -3,8 +3,8 @@ const express = require("express");
 const addAddress=require("../controllers/address/addAddress")
 const removeAddress=require("../controllers/address/removeAddress")
 const updateAddress=require("../controllers/address/updateAddress")
-const getActiveAddress=require("../controllers/address/showAddress")
-const sendAddresses=require("../controllers/address/showAddress");
+const getActiveAddress=require("../controllers/address/ShowAddress")
+const sendAddresses=require("../controllers/address/ShowAddress");
 const protect = require("../middlewares/authMiddleware");
 
 const router = express.Router()

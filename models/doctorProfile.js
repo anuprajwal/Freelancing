@@ -68,15 +68,15 @@ module.exports = (sequelize, DataTypes) => {
       },
       date_of_birth: {
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       gender: {
         type: DataTypes.ENUM("Male", "Female", "Others"),
-        allowNull: false,
+        allowNull: true,
       },
       specialization: {
         type: DataTypes.STRING(150),
-        allowNull: false,
+        allowNull: true,
       },
       experience_years: {
         type: DataTypes.INTEGER,
@@ -85,7 +85,7 @@ module.exports = (sequelize, DataTypes) => {
       organisation_id: {
         type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: 0,
+        defaultValue: null,
         references: {
           model: "organisation_profiles",
           key: "id",
@@ -99,11 +99,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       availability_schedule:{
         type: DataTypes.JSON,
-        allowNull: false,
+        allowNull: true,
       },
       license_number: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       verified_status: {
         type: DataTypes.BOOLEAN, 
@@ -114,6 +114,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
         allowNull: true,
         defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png"
+      },
+      appointment_time:{
+        type : DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 45
       },
       created_at: {
         type: DataTypes.DATE,
