@@ -24,7 +24,7 @@ const loginUser = async (req, res) => {
             httpOnly: true,  
             secure: false,   
             sameSite: "None",
-            maxAge: token.expiresIn, 
+            maxAge: parseInt(token.expiresIn,10), 
         });
         res.status(200).json({message:"Login Success"});
     } catch (error) {
