@@ -26,7 +26,7 @@ const loginUser = async (req, res) => {
             sameSite: "None",
             maxAge: parseInt(token.expiresIn,10), 
         });
-        res.status(200).json({message:"Login Success"});
+        return res.status(200).json({message:"Login Success"});
     } catch (error) {
         console.log(error);
         res.status(500).json({error: "Login failed"});
