@@ -40,6 +40,20 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: "id",
         onDelete: "CASCADE",
       });
+
+      appointments.hasMany(models.checkupAppointment, { 
+        foreignKey: 'appointmentId',
+        as: "checkupAppointment",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+
+      appointments.hasMany(models.followUp, {
+        foreignKey: 'appointmentId',
+        as: 'followUp',
+        onDelete: 'CASCADE',
+      });
+      
     }
   }
   appointments.init(
