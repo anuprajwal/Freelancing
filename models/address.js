@@ -61,11 +61,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull : true
       },
-      delivary_name:{
+      delivery_name:{
         type: DataTypes.STRING,
         allowNull: false
       },
-      delivary_pno:{
+      delivery_pno:{
         type: DataTypes.STRING,
         allowNull: false
       },
