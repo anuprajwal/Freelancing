@@ -82,11 +82,11 @@ const getUserAppointmentsWithChildren = async (req, res) => {
       include: [
         {
           model: checkupAppointment,
-          as: 'checkups'
+          as: 'checkupAppointment'
         },
         {
           model: followUp,
-          as: 'followups'
+          as: 'followUp'
         }
       ],
       order: [['appointment_date', 'DESC']]

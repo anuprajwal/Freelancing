@@ -8,6 +8,9 @@ require("../controllers/registration/googleOAuth.js");
 const  protect  = require("../middlewares/authMiddleware.js");
 const passport = require("passport");
 const updateExtraDocInfo = require("../controllers/registration/extraDocInfo.js");
+const getUserDetails = require("../controllers/registration/getUserData.js")
+const showSlots = require("../controllers/slots/showSlots.js")
+
 
 const router = express.Router();
 
@@ -49,5 +52,9 @@ router.route("/login/general_user")
 
 
 router.post("/login/doctor")
+
+router.get("/get-user-data", protect, getUserDetails)
+
+router.get("/show-slots", protect, showSlots)
 
 module.exports = router;

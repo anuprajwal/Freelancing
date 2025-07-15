@@ -165,11 +165,6 @@ const createOrMergeDoctorSlots = async (doctor_id, weeklySchedule, slotDurationM
 
   const existing = await doctorSlots.findOne({ where: { doctor_id } });
 
-  for (let i of newGenerated){
-    for (let j of i.slots){
-      console.log(j)
-    }
-  }
 
   if (!existing) {
     await doctorSlots.create({
@@ -179,7 +174,23 @@ const createOrMergeDoctorSlots = async (doctor_id, weeklySchedule, slotDurationM
     return { message: "Slots created for next 7 days." };
   }
 
-  const existingSlots = existing.slots || [];
+  let existingSlots = [];
+
+  if (existing && existing.slots) {
+    if (Array.isArray(existing.slots)) {
+      existingSlots = existing.slots;
+    } else if (typeof existing.slots === 'string') {
+      try {
+        const parsed = JSON.parse(existing.slots);
+        if (Array.isArray(parsed)) existingSlots = parsed;
+      } catch (err) {
+        console.error('Could not parse slots JSON:', err);
+      }
+    } else if (typeof existing.slots === 'object') {
+      existingSlots = Object.values(existing.slots);
+    }
+  }
+
 
   for (const newDay of newGenerated) {
     const existingDay = existingSlots.find(d => d.date === newDay.date);

@@ -3,22 +3,58 @@ const logger = require('./logger');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./src/routes/userRoutes.js');
-const  handleError  = require('./src/middlewares/errorMiddleware.js');
+const handleError  = require('./src/middlewares/errorMiddleware.js');
 const cookieParser = require('cookie-parser');
 const appointmentRoutes = require('./src/routes/appointmentRoutes.js');
 const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
 const callerRoutes = require('./src/routes/userCallRoutes.js')
-// const verificationRoutes = require('./src/routes/verificationRoutes.js')
 const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
+const verificationRoutes = require('./src/routes/verificationRoutes.js')
 
 dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:8080",
+  "http://3.108.233.123",
+  "https://3.108.233.123",
+  "https://docapp.co.in",
+  "http://localhost:8000",
+];
+
+// CORS middleware
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Important: Handle preflight requests for all routes
+app.options("*", cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+                               
 app.use(express.json());
-app.use(cors({ origin: "*" }));
 app.use(cookieParser());
 
 // Routes
@@ -28,7 +64,7 @@ app.use('/api/filter', filterRoutes);
 app.use("/api/address", addressRoutes)
 app.use("/api/payment",paymentRoutes)
 app.use("/api/call/", callerRoutes)
-// app.use("/api/verify", verificationRoutes)
+app.use("/api/verify", verificationRoutes)
 
 //admin routes
 app.use("/api/admin", adminAuthRoutes);

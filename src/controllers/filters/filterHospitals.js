@@ -4,7 +4,8 @@ const { Op, literal } = require('sequelize');
 
 // the api to filter out the good rated hospitals or organisations and also based on the pincode.
 const filterHospitals = async (req, res) => {
-    const { userId } = req.user;
+    const { id } = req.user.payload;
+    const userId = id
 
     const userAddress = await address.findOne({where: {user_id: userId, active: true}});
     if (!userAddress) {
