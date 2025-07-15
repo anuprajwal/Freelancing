@@ -1,6 +1,7 @@
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
 const { payments, appointments, User } = require('../../../models');
+const { log } = require('console');
 // const { sendPaymentConfirmationEmail } = require('../../utils/emailService');
 
 // Initialize Razorpay
@@ -10,9 +11,10 @@ const razorpay = new Razorpay({
 });
 
 // Create Razorpay Order
-async function createOrder(req, res) {
+const createOrder = async (req, res) =>{
   try {
     const {
+      user_id,
       amount,
       appointmentId,
       patientName,
@@ -23,10 +25,13 @@ async function createOrder(req, res) {
       appointmentTime
     } = req.body;
 
-    if (!amount || !appointmentId || !patientEmail) {
+
+    console.log('wc',amount, appointmentId, patientEmail , user_id)
+
+    if (!amount || !appointmentId || !patientEmail || !user_id) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields',
+        message: 'Missing required fields heerer',
       });
     }
 
@@ -44,10 +49,11 @@ async function createOrder(req, res) {
       }
     };
 
+   
     const order = await razorpay.orders.create(options);
 
     await payments.create({
-      user_id: req.user?.id || null,
+      user_id: req.body.user_id,
       appointment_id: appointmentId,
       payment_status: 'pending',
       payment_date: new Date(),
@@ -74,6 +80,7 @@ async function createOrder(req, res) {
 
 // Verify Payment Signature
 async function verifyPayment(req, res) {
+  
   try {
     const {
       razorpay_order_id,
@@ -90,7 +97,10 @@ async function verifyPayment(req, res) {
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest('hex');
-
+    console.log(expectedSignature);
+    console.log(razorpay_signature);
+    
+    
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({ success: false, message: 'Invalid payment signature' });
     }

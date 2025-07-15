@@ -10,6 +10,7 @@ const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
 const callerRoutes = require('./src/routes/userCallRoutes.js')
+const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
 const verificationRoutes = require('./src/routes/verificationRoutes.js')
 
 dotenv.config();
@@ -65,8 +66,8 @@ app.use("/api/payment",paymentRoutes)
 app.use("/api/call/", callerRoutes)
 app.use("/api/verify", verificationRoutes)
 
-
-
+//admin routes
+app.use("/api/admin", adminAuthRoutes);
 // Error handling middleware
 app.use(handleError);
 
@@ -76,6 +77,7 @@ const PORT = process.env.PORT || 5000;
 
 // loging all the url endpoints
 app.listen(PORT,'0.0.0.0' , () => logger.info(`Server started to run on port ${PORT}`));
+console.log(PORT)
 app._router.stack.forEach((middleware) => {
     if (middleware.route) { // Routes registered directly on the app
         logger.info(`${Object.keys(middleware.route.methods).join(', ').toUpperCase()} ${middleware.route.path}`)

@@ -35,7 +35,7 @@ const scheduleAppointment = async (req, res) => {
   // Step 3: Proceed to confirm the appointment
   await appointments.create({
     user_id: req.user.payload.id,
-    doctor_id: doctorObj.id,
+    doctor_id : doctorObj.id,
     appointment_date: date,
     appointment_start_time:start,
     appointment_end_time:end,
