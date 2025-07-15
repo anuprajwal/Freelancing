@@ -47,6 +47,13 @@ module.exports = (sequelize, DataTypes) => {
         as: "favourateDoctors",
         sourceKey: "id",
       });
+
+      doctorProfile.hasOne(models.doctorSlots, {
+        as: 'doctorSlots',        // ← store this spelling
+        foreignKey: 'doctor_id',
+        sourceKey: 'id',
+      });
+      
     }
   }
   doctorProfile.init(

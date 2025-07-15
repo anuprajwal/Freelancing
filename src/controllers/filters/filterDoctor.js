@@ -1,4 +1,4 @@
-const { doctorProfile, address, doctorRatings, User } = require("../../../models");
+const { doctorProfile, address, doctorSlots, User } = require("../../../models");
 const { Op, literal, Sequelize } = require('sequelize');
 
 
@@ -53,38 +53,10 @@ const filterDoctor = async (req, res) => {
     //     ]
     // });
 
-
+    console.log(specialization, pincode)
 
     const doctors = await doctorProfile.findAll({
-        where: specialization
-          ? { specialization: { [Op.contains]: specialization } }
-          : {},
-        include: [
-          {
-            model: User,
-            as: 'user', // This must match the alias in doctorProfile model
-            required: true,
-            include: [
-              {
-                model: address,
-                as: 'address', // This must match the alias in address model
-                where: {
-                  active: true,
-                  pincode: { [Op.like]: `${pincode}%` },
-                },
-              },
-            ],
-          },
-          {
-            model: doctorRatings,
-            as: 'doctorRatings',
-            attributes: ['doctor_rating'],
-          },
-        ],
-        order: [
-            [Sequelize.col('doctorRatings.doctor_rating'), 'DESC'],
-            [literal(`ABS(\`user->address\`.pincode - ${userPincode})`), 'ASC']
-          ]          
+      where: specialization ? { specialization } : {},
       });
       
 
@@ -92,6 +64,7 @@ const filterDoctor = async (req, res) => {
 
     return res.status(200).json({ doctors });
   } catch (error) {
+    console.log(`error fount: ${error}`)
     return res.status(500).json({ error: `Failed to filter doctor:${error}` });
   }
 
