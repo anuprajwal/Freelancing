@@ -10,7 +10,7 @@ const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
 const callerRoutes = require('./src/routes/userCallRoutes.js')
-// const verificationRoutes = require('./src/routes/verificationRoutes.js')
+const verificationRoutes = require('./src/routes/verificationRoutes.js')
 
 dotenv.config();
 
@@ -63,7 +63,7 @@ app.use('/api/filter', filterRoutes);
 app.use("/api/address", addressRoutes)
 app.use("/api/payment",paymentRoutes)
 app.use("/api/call/", callerRoutes)
-// app.use("/api/verify", verificationRoutes)
+app.use("/api/verify", verificationRoutes)
 
 
 

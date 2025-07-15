@@ -1,12 +1,19 @@
 const { User, otpStorage } = require("../../../models");
 
 const sendEmailOtp = async (req, res) => {
-  const { email } = req.body;
   const { id } = req.user.payload;
 
-  if (!email) return res.status(400).json({ message: "Email is required" });
+  const user = User.findByPk(id)
 
-  const user = await User.findOne({ where: { email: email, id: id } });
+  const email = user.email
+
+  if (user.is_email_verified){
+    return res.status(200).json({message:"Email already verified."})
+  }
+
+  if (!email){
+    return res.status(400).json({ message: "Email is required" });
+  } 
 
   if (!user) {
     return res.status(404).json({ message: "User not found with this email" });
@@ -33,4 +40,4 @@ const sendEmailOtp = async (req, res) => {
   res.status(200).json({ message: "OTP sent successfully" });
 };
 
-module.exports = { sendEmailOtp };
+module.exports = sendEmailOtp;
