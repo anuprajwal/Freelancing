@@ -1,7 +1,7 @@
 const { doctorSlots } = require("../../../models");
 
 const showSlots = async (req, res)=>{
-    const {doctor_id} = req.body
+    const {doctor_id} = req.params
 
     if (!doctor_id){
         return res.status(404).json({error:"cant find the doctor_id in the request body"})

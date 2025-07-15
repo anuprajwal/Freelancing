@@ -7,10 +7,10 @@ module.exports =  (sequelize, DataTypes) => {
     // user is the base table for all the other relational tables
     static associate(models) {
       User.hasOne(models.generalUser, {
-        foreignKey: "user_id", // Foreign key in the Cart table
+        foreignKey: "user_id",
         as: "generalUser",
         sourceKey: "id",
-        onDelete: "CASCADE", // If a user is deleted, delete the cart too
+        onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
 

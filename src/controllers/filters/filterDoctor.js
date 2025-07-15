@@ -18,43 +18,6 @@ const filterDoctor = async (req, res) => {
     let userPincode = userAddress.pincode;
   const { specialization, pincode = userPincode.substring(0, 3) } = req.query;
   try {
-
-    // const doctors = await doctorProfile.findAll({
-    //     where: {
-    //         specialization: {[Op.contains]: specialization},
-    //     },
-    //     include: [{
-    //         model: address,
-    //         where: {
-    //             pincode: {[Op.like]: `${pincode}%`},
-    //         },
-    //         on: {
-    //             user_id: { [Op.eq]: Sequelize.col('doctorProfile.user_id') } 
-    //         },
-    //         as: "address",
-    //         include: [
-    //         {
-    //             model: doctorRatings,
-    //             as: "doctorRatings",
-    //             required: true,
-    //             attributes: ["doctor_rating"],
-    //             where:{
-    //                 doctor_id: { [Op.eq]: Sequelize.col('doctorProfile.id') }
-    //             },
-    //             on: {
-    //                 doctor_id: { [Op.eq]: Sequelize.col('doctorProfile.id') }
-    //             }
-    //         }
-    //     ]
-    //     }],        
-    //     order: [
-    //         ['doctorRatings.doctor_rating', 'DESC'],
-    //         [literal(`ABS(pincode - ${userPincode})`), 'ASC']
-    //     ]
-    // });
-
-    console.log(specialization, pincode)
-
     const doctors = await doctorProfile.findAll({
       where: specialization ? { specialization } : {},
       });

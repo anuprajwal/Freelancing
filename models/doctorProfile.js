@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       doctorProfile.hasOne(models.doctorSlots, {
-        as: 'doctorSlots',        // ← store this spelling
+        as: 'doctorSlots',    
         foreignKey: 'doctor_id',
         sourceKey: 'id',
       });
