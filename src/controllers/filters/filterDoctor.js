@@ -20,6 +20,20 @@ const filterDoctor = async (req, res) => {
   try {
     const doctors = await doctorProfile.findAll({
       where: specialization ? { specialization } : {},
+      attributes: ["id", "user_id", "date_of_birth", "gender", "specialization", "experience_years", "consultation_fee", "verified_status", "profile_picture", "appointment_time"],
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ['phone_number', 'username', 'email', 'is_email_verified', 'is_phone_verified'], 
+          include : [
+            {
+              model: doctorSlots,
+          as : "doctorSlots"
+            }
+          ]
+        }
+      ]
       });
       
 

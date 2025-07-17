@@ -69,7 +69,8 @@ const addAvailabilitySchedule= async (req, res, availability_schedule)=>{
       availabilityTimeTable[i.day] = {
         start : i.loginTime || null,
         end : i.logoutTime || null,
-        breaks : i.breaks || null
+        breaks : i.breaks || null,
+        appointment_mode : i.mode || null
       }
     }
 
