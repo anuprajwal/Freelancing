@@ -1,13 +1,23 @@
 const { doctorSlots } = require("../../../models")
 
 
-const checkSlotAvailability = async (doctor_id, start, end, date) => {
+const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
   if (!slotRecord || !slotRecord.slots) return false;
+
+  if (mode.includes("online")){
+    mode = 'online'
+  }else if (mode.includes("offline")){
+    mode = 'offline'
+  }
 
   // Find slots for the given date
   const dayEntry = slotRecord.slots.find(entry => entry.date === date);
   if (!dayEntry || !dayEntry.slots) return false;
+
+  if (!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online') || !((dayEntry.mode === "offline" || dayEntry.mode === "hybrid") && mode === 'offline')){
+    return false
+  }
 
   // Check if the exact slot exists
   return dayEntry.slots.some(slot =>

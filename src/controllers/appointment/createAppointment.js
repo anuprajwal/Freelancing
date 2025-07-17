@@ -21,7 +21,7 @@ const scheduleAppointment = async (req, res) => {
   }
 
   // Step 1: Check if the slot is in the doctor's available slots
-  const isAvailable = await checkSlotAvailability(doctor_id, start, end, date);
+  const isAvailable = await checkSlotAvailability(doctor_id, start, end, date, type);
   if (!isAvailable) {
     throw new Error("Slot is not available in doctor's schedule.");
   }

@@ -27,6 +27,10 @@ const updateExtraDocInfo = async(req, res)=>{
 
     const slotSaved = await createSlot(req, res, availability_schedule, appointment_slot)
 
+    if (!slotSaved){
+        return res.status(400).json({error:"appointment mode is not acceptable, slots not created"})
+    }
+
     if (consultationSaved && experienceSaved && availabilitySaved && slotSaved){
         return res.status(200).json({message:"succesfully completed adding the extra info of doctors"})
     }
@@ -34,8 +38,10 @@ const updateExtraDocInfo = async(req, res)=>{
 
 const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
     const slots = await createOrMergeDoctorSlots(req.user.payload.id,availability_schedule, appointment_slot);
-    
-    if (slots){
+    console.log("printin slots in main",slots)
+    if (slots.error){
+        return false
+    }else if (slots){
         return true
     }
     

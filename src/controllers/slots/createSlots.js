@@ -25,6 +25,12 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
 
     const appointment_mode = daySchedule.mode
 
+    console.log(appointment_mode)
+
+    if (appointment_mode !== "online" && appointment_mode !== "offline" && appointment_mode !== "hybrid" && appointment_mode !== ""){
+      return {error:"appointment mode is not acceptable"}
+    }
+
     // Fallback: no schedule or incomplete
     if (!daySchedule || !daySchedule.loginTime || !daySchedule.logoutTime) {
       weekSlots.push({
@@ -93,6 +99,12 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
 
 const createOrMergeDoctorSlots = async (doctor_id, weeklySchedule, slotDurationMinutes = 30) => {
   const newGenerated = generateWeeklySlots(weeklySchedule, slotDurationMinutes);
+
+  console.log("printing slots before main:",newGenerated)
+
+  if (newGenerated.error === "appointment mode is not acceptable"){
+    return {error: "appointment mode is not acceptable"}
+  }
 
   const existing = await doctorSlots.findOne({ where: { doctor_id } });
 
