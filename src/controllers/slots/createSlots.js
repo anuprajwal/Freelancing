@@ -12,8 +12,6 @@ function formatTime(minutes) {
 }
 
 function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
-
-  console.log(weeklySchedule, slotDurationMinutes)
   const weekSlots = [];
 
   for (let i = 0; i < 7; i++) {
@@ -25,11 +23,14 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
 
     const daySchedule = weeklySchedule.find(d => d.day?.toLowerCase() === dayName);
 
+    const appointment_mode = daySchedule.mode
+
     // Fallback: no schedule or incomplete
     if (!daySchedule || !daySchedule.loginTime || !daySchedule.logoutTime) {
       weekSlots.push({
         date: dateString,
         day: dayName,
+        mode : appointment_mode,
         slots: []
       });
       continue;
@@ -43,6 +44,7 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
       weekSlots.push({
         date: dateString,
         day: dayName,
+        mode : appointment_mode,
         slots: []
       });
       continue;
@@ -79,9 +81,12 @@ function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
     weekSlots.push({
       date: dateString,
       day: dayName,
+      mode : appointment_mode,
       slots
     });
   }
+
+  console.log(weekSlots)
 
   return weekSlots;
 }

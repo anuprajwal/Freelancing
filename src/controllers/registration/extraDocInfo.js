@@ -1,5 +1,5 @@
 const { doctorProfile, doctorSlots } = require("../../../models");
-const generateWeeklySlots = require("../slots/createSlots");
+const createOrMergeDoctorSlots = require("../slots/createSlots");
 
 
 const updateExtraDocInfo = async(req, res)=>{
@@ -33,7 +33,7 @@ const updateExtraDocInfo = async(req, res)=>{
 }
 
 const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
-    const slots = await generateWeeklySlots(req.user.payload.id,availability_schedule, appointment_slot);
+    const slots = await createOrMergeDoctorSlots(req.user.payload.id,availability_schedule, appointment_slot);
     
     if (slots){
         return true
