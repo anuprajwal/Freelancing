@@ -5,6 +5,8 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
   if (!slotRecord || !slotRecord.slots) return false;
 
+  console.log('about the search:', doctor_id, start, end, date, mode)
+
   if (mode.includes("online")){
     mode = 'online'
   }else if (mode.includes("offline")){
@@ -15,7 +17,11 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   const dayEntry = slotRecord.slots.find(entry => entry.date === date);
   if (!dayEntry || !dayEntry.slots) return false;
 
-  if (!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online') || !((dayEntry.mode === "offline" || dayEntry.mode === "hybrid") && mode === 'offline')){
+  console.log(dayEntry)
+
+  console.log(!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online'))
+
+  if (!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online') && !((dayEntry.mode === "offline" || dayEntry.mode === "hybrid") && mode === 'offline')){
     return false
   }
 
