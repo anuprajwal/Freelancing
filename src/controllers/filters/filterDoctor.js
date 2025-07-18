@@ -8,8 +8,6 @@ const filterDoctor = async (req, res) => {
     const { id } = req.user.payload;
     const userId = id
 
-    console.log("user found",userId)
-
     const userAddress = await address.findOne({where: {user_id: userId}});
     if (!userAddress) {
         return res.status(404).json({ error: "No active address found" });
@@ -20,7 +18,7 @@ const filterDoctor = async (req, res) => {
   try {
     const doctors = await doctorProfile.findAll({
       where: specialization ? { specialization } : {},
-      attributes: ["id", "user_id", "date_of_birth", "gender", "specialization", "experience_years", "consultation_fee", "verified_status", "profile_picture", "appointment_time"],
+      attributes: ["id", "user_id", "date_of_birth", "gender", "specialization", "experience_years", "consultation_fee", "organisation_id", "verified_status", "profile_picture", "appointment_time"],
       include: [
         {
           model: User,
@@ -30,6 +28,10 @@ const filterDoctor = async (req, res) => {
             {
               model: doctorSlots,
           as : "doctorSlots"
+            },
+            {
+              model : address,
+              as:"address"
             }
           ]
         }

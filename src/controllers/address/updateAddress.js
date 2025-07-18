@@ -35,7 +35,12 @@ const updateAddress =async(req, res)=>{
         return res.status(400).json({error:"pincode can only be 6 numbers"})
     }
 
-    await getAddress.update({country:country, state:state, city:city, pincode:pincode, street:street, landmark:landmark, house_no:houseNo, delivery_name:deliveryName, delivery_pno:deliveryPNo})
+    await address.update(
+        { active: false },
+        { where: { user_id: id } }
+    );
+
+    await getAddress.update({country:country, state:state, city:city, pincode:pincode, street:street, landmark:landmark, house_no:houseNo, delivery_name:deliveryName, delivery_pno:deliveryPNo, active:true})
 
     logger.info(`the request to update address: ${addressId} by user: ${id}, is complete succesfully`)
     return res.status(200).json({message:"address updated succesfully"})
