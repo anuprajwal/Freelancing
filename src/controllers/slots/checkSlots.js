@@ -19,22 +19,23 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
     } catch (e) {
       slots = []; // fallback if parsing fails
     }
+  }else{
+    slots = slotRecord.slots
   }
   
 
-	console.log("slots are:",slots)
   // Find slots for the given date
   const dayEntry = slots.find(entry => entry.date === date);
-  console.log('doctor slot found:',dayEntry)
+  
   if (!dayEntry || !dayEntry.slots) return false;
-
-  console.log(dayEntry)
 
   console.log(!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online'))
 
   if (!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online') && !((dayEntry.mode === "offline" || dayEntry.mode === "hybrid") && mode === 'offline')){
     return false
   }
+
+  console.log("day entry slots:",dayEntry.slots)
 
   // Check if the exact slot exists
   return dayEntry.slots.some(slot =>

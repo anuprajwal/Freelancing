@@ -49,6 +49,8 @@ const scheduleAppointment = async (req, res) => {
     let slots;
     if (typeof slotRecord.slots === "string"){
       slots = JSON.parse(slotRecord.slots);
+    }else{
+      slots = slotRecord.slots
     }
     const updatedSlots = [...slots]; // deep copy
     const dateIndex = updatedSlots.findIndex(s => s.date === date);
