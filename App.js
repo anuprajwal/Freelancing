@@ -24,6 +24,7 @@ const allowedOrigins = [
   "https://3.108.233.123",
   "https://docapp.co.in",
   "http://localhost:8000",
+  "https://docwebsite-ecru.vercel.app"
 ];
 
 // CORS middleware
