@@ -15,6 +15,7 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
 
   // Find slots for the given date
   const dayEntry = slotRecord.slots.find(entry => entry.date === date);
+  console.log('doctor slot found:',dayEntry)
   if (!dayEntry || !dayEntry.slots) return false;
 
   console.log(dayEntry)
