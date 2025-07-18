@@ -46,7 +46,11 @@ const scheduleAppointment = async (req, res) => {
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
 
   if (slotRecord && Array.isArray(slotRecord.slots)) {
-    const updatedSlots = [...slotRecord.slots]; // deep copy
+    let slots;
+    if (typeof slotRecord.slots === "string"){
+      slots = JSON.parse(slotRecord.slots);
+    }
+    const updatedSlots = [...slots]; // deep copy
     const dateIndex = updatedSlots.findIndex(s => s.date === date);
 
     if (dateIndex !== -1) {
