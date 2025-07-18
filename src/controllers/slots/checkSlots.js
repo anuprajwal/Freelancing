@@ -15,13 +15,14 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   let slots;
   if (typeof slotRecord.slots === "string") {
     try {
-      slots = JSON.parse(slots);
+      slots = JSON.parse(slotRecord.slots);
     } catch (e) {
       slots = []; // fallback if parsing fails
     }
   }
   
 
+	console.log("slots are:",slots)
   // Find slots for the given date
   const dayEntry = slots.find(entry => entry.date === date);
   console.log('doctor slot found:',dayEntry)
