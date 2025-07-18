@@ -10,6 +10,8 @@ const passport = require("passport");
 const updateExtraDocInfo = require("../controllers/registration/extraDocInfo.js");
 const getUserDetails = require("../controllers/registration/getUserData.js")
 const showSlots = require("../controllers/slots/showSlots.js")
+const uploadProfilePic = require("../controllers/registration/changeProfilePic.js")
+const upload = require("../controllers/registration/connectCloudDb.js")
 
 
 const router = express.Router();
@@ -56,5 +58,7 @@ router.post("/login/doctor")
 router.get("/get-user-data", protect, getUserDetails)
 
 router.get("/show-slots/:doctor_id", protect, showSlots)
+
+router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
 
 module.exports = router;
