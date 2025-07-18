@@ -13,7 +13,8 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
     mode = 'offline'
   }
 
-  console.log(slotRecord.slots)
+  console.log(typeof slotRecord.slots, slotRecord.slots);
+
 
   // Find slots for the given date
   const dayEntry = slotRecord.slots.find(entry => entry.date === date);
