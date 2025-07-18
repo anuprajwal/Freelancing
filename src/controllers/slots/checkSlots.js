@@ -12,12 +12,16 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   }else if (mode.includes("offline")){
     mode = 'offline'
   }
-
-  console.log(typeof slotRecord.slots, slotRecord.slots);
-
+  const normalizedData = data.map(slotRecord => {
+    return {
+      ...slotRecord,
+      slots: Array.isArray(slotRecord.slots) ? slotRecord.slots : []
+    };
+  });
+  
 
   // Find slots for the given date
-  const dayEntry = slotRecord.slots.find(entry => entry.date === date);
+  const dayEntry = normalizedData.find(entry => entry.date === date);
   console.log('doctor slot found:',dayEntry)
   if (!dayEntry || !dayEntry.slots) return false;
 
