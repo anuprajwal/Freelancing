@@ -11,7 +11,7 @@ const updateExtraDocInfo = require("../controllers/registration/extraDocInfo.js"
 const getUserDetails = require("../controllers/registration/getUserData.js")
 const showSlots = require("../controllers/slots/showSlots.js")
 const uploadProfilePic = require("../controllers/registration/changeProfilePic.js")
-const upload = require("../controllers/registration/connectCloudDb.js")
+const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 
 
 const router = express.Router();

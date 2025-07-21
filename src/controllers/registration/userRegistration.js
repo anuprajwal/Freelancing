@@ -2,6 +2,7 @@
 const {User, generalUser, doctorProfile, organisationProfile} = require("../../../models");
 const bcrypt = require("bcrypt");
 const {generateToken} = require("../login/login");
+const createS3UserFolders = require("../savingSpaces/createUserSpace")
 
 
 // basic gateway api where user regesteres with a email or phone number
@@ -9,12 +10,8 @@ const {generateToken} = require("../login/login");
   try {
     const { username, email, phone_number, password, role } = req.body;
 
-    console.log(User)
-
     // Validate required fields
-    if (!username || !email || !phone_number || !password || !role) {
-      console.log(req.body);
-      
+    if (!username || !email || !phone_number || !password || !role) {      
       return res.status(400).json({ error: "All fields are required" });
     }
 
@@ -64,13 +61,17 @@ const {generateToken} = require("../login/login");
       maxAge: token.expiresIn, 
   });
 
+  const emailUnique = email.split('@')
+
+  createS3UserFolders("user-profile-pics-docapp", `${role}_${emailUnique}_${phone_number}_main_folder`)
+
     res.status(201).json({
       message: "User registered. Complete profile next.",
       userId: user.id,
       next_step_url: `/profile/complete/${user.role}`, 
     });
   } catch (error) {
-    console.error(error);
+    console.log(error);
     res.status(500).json({ error: "Internal server error" });
   }
 };

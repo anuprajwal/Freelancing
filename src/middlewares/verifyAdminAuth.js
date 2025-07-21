@@ -17,7 +17,7 @@ const verifyAdminAuth = (req, res, next) => {
       return res.status(403).json({ error: "Admin access only" });
     }
 
-    req.admin = decoded; // { id, email, scope, ip }
+    req.admin = decoded;
     next();
   } catch (err) {
     return res.status(403).json({ error: "Invalid or expired admin token" });

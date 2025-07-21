@@ -35,7 +35,7 @@ const loginUser = async (req, res) => {
 
 
 const generateToken = (user, user_ip) => {
-    const token = jwt.sign({id: user.id, email: user.email, ip: user_ip}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRES_IN});
+    const token = jwt.sign({id: user.id, email: user.email, ip: user_ip, scope: user.role}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRES_IN});
     console.log("token generated for user", user.email, "id", token);
     console.log("token expires in:", process.env.JWT_EXPIRES_IN)
     return {token, expiresIn: process.env.JWT_EXPIRES_IN};

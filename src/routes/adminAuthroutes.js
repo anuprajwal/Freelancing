@@ -5,8 +5,9 @@ const {
   getDoctorCount,
   getPatientCount,
   getHospitalCount,
-  getAppointmentCount
+  getAppointmentCount,
 } = require("../controllers/admin/adminPanelstats.js");
+const sendEmails = require("../controllers/admin/sendEmails.js")
 const verifyAdminAuth = require("../middlewares/verifyAdminAuth.js");
 
 router.post("/login", loginAdmin);
@@ -16,6 +17,7 @@ router.get("/stats/doctors", verifyAdminAuth, getDoctorCount);
 router.get("/stats/patients", verifyAdminAuth, getPatientCount);
 router.get("/stats/hospitals", verifyAdminAuth, getHospitalCount);
 router.get("/stats/appointments", verifyAdminAuth, getAppointmentCount);
+router.post("/send-email", verifyAdminAuth, sendEmails)
 
 
 
