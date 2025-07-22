@@ -7,14 +7,14 @@ const changeCallStatus = async (req, res)=>{
         const {call_id, payload, call_status} = req.body
         const {id} = payload
 
-        logger.info(`request to change the call status is made by the user: ${id}`)
+        // logger.info(`request to change the call status is made by the user: ${id}`)
         if (!call_id){
-          logger.warning(`Call status update failed: Missing call_id from request made by user: ${id}`);
+          // logger.warning(`Call status update failed: Missing call_id from request made by user: ${id}`);
             return res.status(400).json({error:'Call id is needed to reject a call'})
         }
 
         if (call_status !== 'Call on hold' || call_status !== 'Call rejected' || call_status !== 'Call Complete'){
-            logger.warning(`Call status update failed: Invalid call_status '${call_status}' provided by user: ${id}`);
+            // logger.warning(`Call status update failed: Invalid call_status '${call_status}' provided by user: ${id}`);
             return res.status(400).json({warning:'Value of call status is not valid'})
         }
 
@@ -24,7 +24,7 @@ const changeCallStatus = async (req, res)=>{
         const call_history_snap = await call_history.get()
 
         if (!call_history_snap.exists){
-            logger.warning(`Call status update failed: No records found for call_id ${call_id}`);
+            // logger.warning(`Call status update failed: No records found for call_id ${call_id}`);
             return res.status(400).json({error:`no records found with the call id: ${call_id}`})
         }
 
@@ -33,16 +33,16 @@ const changeCallStatus = async (req, res)=>{
         if (call_status === 'Call rejected'){
             try{
                 await processRejectingCall(call_history, firebase_db)
-                logger.info(`Call rejection logic executed successfully for call_id ${call_id}`);
+                // logger.info(`Call rejection logic executed successfully for call_id ${call_id}`);
             }catch(e){
-                logger.error(`Call rejection failed for call_id ${call_id}: ${e}`);
+                // logger.error(`Call rejection failed for call_id ${call_id}: ${e}`);
                 return res.status(500).json({error:`Internal server error: ${e}`})
             }
         }
-        logger.info(`Final response: call_id ${call_id} status update completed successfully`);
+        // logger.info(`Final response: call_id ${call_id} status update completed successfully`);
         return res.status(200).json({message:'Succesfully updated call status'})
     }catch (err){
-        logger.error(`error at file changeCallStatus: ${err}`)
+        // logger.error(`error at file changeCallStatus: ${err}`)
         return res.status(500).json({error:`internal server error: ${err}`})
     }
 }
