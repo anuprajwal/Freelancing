@@ -2,7 +2,7 @@ const logger = require('../../../logger')
 const admin = require('./firebaseDbConnect')
 
 const addOfferCandidates = async (req, res)=>{
-    const {offer_candidate} = req.body
+    const {offer_candidate, call_id} = req.body
     const {id} = req.user.payload
     const firebase_db = admin.firestore()
 
@@ -16,7 +16,7 @@ const addOfferCandidates = async (req, res)=>{
         return res.status(400).json({error:"Missing required fields in offer candidate"})
     }
 
-    const call_history = firebase_db.collection('call_history').doc(id)
+    const call_history = firebase_db.collection('call_history').doc(call_id)
     const call_history_snap = await call_history.get()
 
     if (! call_history_snap.exists){
@@ -31,7 +31,7 @@ const addOfferCandidates = async (req, res)=>{
         return res.status(403).json({error:"the candidate we got in the request are not from the calee"})
     }
 
-    const call_history_offer_candidate = firebase_db.collection('call_history').doc(id).collection('offerCandidates')
+    const call_history_offer_candidate = firebase_db.collection('call_history').doc(call_id).collection('offerCandidates')
     await call_history_offer_candidate.add(offer_candidate)
 
     // logger.info(`request made by the user : ${id} to add candidates is done`)
