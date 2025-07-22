@@ -2,8 +2,8 @@ const logger = require('../../../logger')
 const admin = require('./firebaseDbConnect')
 
 const addOfferCandidates = async (req, res)=>{
-    const {payload, offer_candidate} = req.body
-    const {id} = payload
+    const {offer_candidate} = req.body
+    const {id} = req.user.payload
     const firebase_db = admin.firestore()
 
     if (!offer_candidate){

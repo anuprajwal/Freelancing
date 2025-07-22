@@ -4,8 +4,8 @@ const { FieldValue } = require('firebase-admin/firestore');
 
 const changeCallStatus = async (req, res)=>{
     try{
-        const {call_id, payload, call_status} = req.body
-        const {id} = payload
+        const {call_id, call_status} = req.body
+        const {id} = req.user.payload
 
         // logger.info(`request to change the call status is made by the user: ${id}`)
         if (!call_id){

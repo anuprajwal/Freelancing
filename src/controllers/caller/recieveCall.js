@@ -1,8 +1,8 @@
 const admin = require('./firebaseDbConnect')
 
 const recieveCall = async (req, res)=>{
-    const {call_id, payload, answer} = req.body
-    const {id} = payload
+    const {call_id, answer} = req.body
+    const {id} = req.user.payload
 
     // logger.info(`request to recieve call is found from the user: ${id}`)
     const firebase_db = admin.firestore()

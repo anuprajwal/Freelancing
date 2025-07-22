@@ -2,8 +2,8 @@ const { logger } = require('../../../logger')
 const admin = require('./firebaseDbConnect')
 
 const addAnswerCandidates = async (req, res)=>{
-    const {call_id, payload, answer_candidate} = req.body
-    const {id} = payload
+    const {call_id, answer_candidate} = req.body
+    const {id} = req.user.payload
 
     // logger.info(`Request to add candidated from calee side is made by the user : ${id}`)
     const firebase_db = admin.firestore()

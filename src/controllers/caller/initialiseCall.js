@@ -6,8 +6,7 @@ const { merge } = require('../../routes/userRoutes')
 
 const initialiseCall = async (req, res)=>{
     try{
-        const {payload} = req.user
-        const {id} = payload
+        const {id} = req.user.payload
 
         // logger.info(`request to start a call from the user: ${id} is recieved`)
         const {call_to_user = null, offer = null} = req.body
