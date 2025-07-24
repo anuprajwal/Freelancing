@@ -1,13 +1,17 @@
-const { appointments, requestAppointments, doctorSlots } = require("../../../models");
+const { appointments, requestAppointments, doctorSlots, doctorProfile } = require("../../../models");
 
 const deleteAppointmentRestoreSlot = async (req, res) => {
-  const { appointment_id } = req.params;
+  const { appointment_id } = req.query;
+
+  if(!appointment_id){
+    return res.status(400).json({error:"cant find field appointment_id in request"})
+  }
 
   // Step 1: Find the appointment
   const appt = await appointments.findOne({
     where: {
       id: appointment_id,
-      status: ['pending', 'confirmed']
+      appointment_status: ['pending', 'confirmed']
     }
   });
 
@@ -17,15 +21,26 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
 
   const { doctor_id, user_id, appointment_date, appointment_start_time, appointment_end_time } = appt;
 
+  const doctor_profile_data = await doctorProfile.findOne({
+    where:{
+      id : doctor_id
+    }
+  })
+
   // Step 2: Delete the appointment
   await appointments.destroy({ where: { id: appointment_id } });
 
   // Step 3: Add the slot back to doctorSlots
-  const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
+  const slotRecord = await doctorSlots.findOne({ where: { doctor_id : doctor_profile_data.user_id } });
+
+  console.log(appointment_start_time, appointment_end_time)
+  const converted_date = appointment_date.toISOString().split('T')[0];
 
   if (slotRecord && Array.isArray(slotRecord.slots)) {
     const updatedSlots = [...slotRecord.slots];
-    const dateIndex = updatedSlots.findIndex(s => s.date === appointment_date);
+    const dateIndex = updatedSlots.findIndex(s => s.date === converted_date);
+
+    console.log(dateIndex)
 
     if (dateIndex !== -1) {
       const daySlots = updatedSlots[dateIndex].slots || [];
@@ -34,6 +49,9 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
       const isAlreadyThere = daySlots.some(slot =>
         slot.start === appointment_start_time && slot.end === appointment_end_time
       );
+
+      console.log(isAlreadyThere)
+      console.log(daySlots)
 
       if (!isAlreadyThere) {
         daySlots.push({
@@ -46,6 +64,8 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
 
         updatedSlots[dateIndex].slots = daySlots;
 
+        console.log(updatedSlots)
+
         await doctorSlots.update(
           { slots: updatedSlots },
           { where: { doctor_id } }
@@ -54,14 +74,6 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
     }
   }
 
-  // Step 4: Delete related requestAppointment if exists
-  await requestAppointments.destroy({
-    where: {
-      user_id,
-      doctor_id,
-      original_date: appointment_date
-    }
-  });
 
   return res.status(200).json({
     message: "Appointment deleted. Slot restored. Related request (if any) removed."
