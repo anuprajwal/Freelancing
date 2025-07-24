@@ -62,6 +62,14 @@ module.exports =  (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
+      User.hasMany(models.notificationTokens, {
+        foreignKey: "user_id",
+        as: "notificationTokens",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
       User.hasMany(models.appointments, {
         foreignKey: "user_id",
         as: "appointments",
