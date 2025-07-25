@@ -133,7 +133,7 @@ module.exports =  (sequelize, DataTypes) => {
         allowNull: true,
       },
       role: {
-        type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation"),
+        type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation" , "manager"),
         allowNull: false,
       },
       is_email_verified:{

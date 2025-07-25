@@ -14,6 +14,7 @@ const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
 const verificationRoutes = require('./src/routes/verificationRoutes.js');
 const hospitalAdminRoutes = require("./src/routes/hospitalAdminRoutes.js")
 const documentRoutes = require("./src/routes/documentRoutes.js")
+const surgeryRoutes = require("./src/routes/surgeryRoutes.js");
 
 dotenv.config();
 
@@ -70,7 +71,7 @@ app.use("/api/call/", callerRoutes)
 app.use("/api/verify", verificationRoutes)
 app.use("/api/hospital", hospitalAdminRoutes)
 app.use("/api/documents", documentRoutes)
-
+app.use("/api/surgeries", surgeryRoutes);
 //admin routes
 app.use("/api/admin", adminAuthRoutes);
 // Error handling middleware
