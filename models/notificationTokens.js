@@ -33,11 +33,11 @@ module.exports =  (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       },
       token: {
-        type: DataTypes.String,
+        type: DataTypes.STRING,
         allowNull: false,
       },
       platform: {
-        type: DataTypes.String,
+        type: DataTypes.STRING,
         allowNull: false
       },
       created_at: {

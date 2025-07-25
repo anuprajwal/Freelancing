@@ -19,7 +19,7 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
     return res.status(404).json({ error: "Appointment not found or not deletable." });
   }
 
-  const { doctor_id, user_id, appointment_date, appointment_start_time, appointment_end_time } = appt;
+  let { doctor_id, appointment_date, appointment_start_time, appointment_end_time } = appt;
 
   const doctor_profile_data = await doctorProfile.findOne({
     where:{
@@ -45,6 +45,7 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
     if (dateIndex !== -1) {
       const daySlots = updatedSlots[dateIndex].slots || [];
 
+
       // Prevent duplicate slot
       const isAlreadyThere = daySlots.some(slot =>
         slot.start === appointment_start_time && slot.end === appointment_end_time
@@ -54,9 +55,14 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
       console.log(daySlots)
 
       if (!isAlreadyThere) {
+        const [startHours, startMinutes] = appointment_start_time.split(":");
+        const formattedAppointmmentStartTime = `${startHours}:${startMinutes}`;
+        const [endHours, endMinutes] = appointment_end_time.split(":");
+        const formattedAppointmmentEndTime = `${endHours}:${endMinutes}`;
+        
         daySlots.push({
-          start: appointment_start_time,
-          end: appointment_end_time
+          start: formattedAppointmmentStartTime,
+          end: formattedAppointmmentEndTime
         });
 
         // Sort slots again in time order
