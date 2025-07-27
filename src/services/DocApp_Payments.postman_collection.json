@@ -1,0 +1,69 @@
+{
+  "info": {
+    "_postman_id": "4a109ecd-17f1-4c4d-86f9-e8c63b739f3a",
+    "name": "DocApp Payments (Final)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Razorpay Order",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"user_id\": 1,\n  \"amount\": 999,\n  \"appointmentId\": 101,\n  \"patientName\": \"John Doe\",\n  \"patientEmail\": \"john@example.com\",\n  \"patientPhone\": \"9999999999\",\n  \"doctorName\": \"Dr. Strange\",\n  \"appointmentDate\": \"2025-08-01\",\n  \"appointmentTime\": \"11:00 AM\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/payment/create-order",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "payment", "create-order"]
+        }
+      }
+    },
+    {
+      "name": "Verify Razorpay Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"razorpay_order_id\": \"order_ABC123\",\n  \"razorpay_payment_id\": \"pay_DEF456\",\n  \"razorpay_signature\": \"signature_value_here\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/payment/verify",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "payment", "verify"]
+        }
+      }
+    },
+    {
+      "name": "Get Payment Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:5000/api/payment/status/order_ABC123",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "payment", "status", "order_ABC123"]
+        }
+      }
+    }
+  ]
+    }
+  
