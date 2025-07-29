@@ -9,6 +9,7 @@ const {
 } = require("../controllers/admin/adminPanelstats.js");
 const sendEmails = require("../controllers/admin/sendEmails.js")
 const verifyAdminAuth = require("../middlewares/verifyAdminAuth.js");
+const addPackage = require("../controllers/admin/addPackage.js");
 
 router.post("/login", loginAdmin);
 
@@ -18,7 +19,7 @@ router.get("/stats/patients", verifyAdminAuth, getPatientCount);
 router.get("/stats/hospitals", verifyAdminAuth, getHospitalCount);
 router.get("/stats/appointments", verifyAdminAuth, getAppointmentCount);
 router.post("/send-email", verifyAdminAuth, sendEmails)
-
+router.post("/add-package" , verifyAdminAuth , addPackage);
 
 
 module.exports = router;
