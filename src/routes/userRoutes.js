@@ -12,8 +12,8 @@ const getUserDetails = require("../controllers/registration/getUserData.js")
 const showSlots = require("../controllers/slots/showSlots.js")
 const uploadProfilePic = require("../controllers/registration/changeProfilePic.js")
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
-
-
+const completeManagerProfile = require("../controllers/registration/completeManagerProfile.js");
+const addAgent = require("../controllers/registration/addAgent.js");
 const router = express.Router();
 
 // Step 1: Register Basic User (Common Schema)
@@ -24,7 +24,8 @@ router.put("/profile/complete/general_user", protect, completePatientProfile);
 router.put("/profile/complete/doctor", protect, completeDoctorProfile);
 router.put("/profile/complete/extra-doc-info", protect, updateExtraDocInfo)
 router.put("/profile/complete/hospital_organisation", protect, completeOrganisationProfile);
-
+router.put("/profile/complete/manager", protect, completeManagerProfile);
+router.post("/profile/complete/agent", protect, addAgent);
 
 router.get('/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }),
