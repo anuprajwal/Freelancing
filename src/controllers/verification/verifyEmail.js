@@ -1,8 +1,12 @@
 const { User, otpStorage } = require("../../../models");
 
 const verifyEmail = async (req, res) => {
-  const { email, userOtp } = req.body;
-  const { id } = req.user;
+  const { userOtp } = req.body;
+  const { id } = req.user.payload;
+
+  const {email} = await User.findByPk(id)
+
+  console.log(email)
 
   if (!email || !userOtp) {
     return res.status(400).json({ message: "Email and OTP are required" });

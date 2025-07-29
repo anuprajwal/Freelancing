@@ -14,6 +14,7 @@ const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
 const verificationRoutes = require('./src/routes/verificationRoutes.js');
 const hospitalAdminRoutes = require("./src/routes/hospitalAdminRoutes.js")
 const documentRoutes = require("./src/routes/documentRoutes.js")
+const notificationRoutes = require("./src/routes/notificationRoutes.js")
 
 dotenv.config();
 
@@ -65,11 +66,12 @@ app.use('/api/auth', userRoutes);
 app.use('/api/appointment', appointmentRoutes);
 app.use('/api/filter', filterRoutes);
 app.use("/api/address", addressRoutes)
-app.use("/api/payment",paymentRoutes)
-app.use("/api/call/", callerRoutes)
+app.use("/api",paymentRoutes)
+app.use("/api/call", callerRoutes)
 app.use("/api/verify", verificationRoutes)
 app.use("/api/hospital", hospitalAdminRoutes)
 app.use("/api/documents", documentRoutes)
+app.use("/api/notifications",notificationRoutes)
 
 //admin routes
 app.use("/api/admin", adminAuthRoutes);

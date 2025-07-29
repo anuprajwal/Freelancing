@@ -14,7 +14,7 @@ const createOrder = async (req, res) => {
       appointmentTime,
     } = req.body;
 
-    const user_id = req.user?.payload?.id;
+    const user_id = req.user.payload.id;
     if (!user_id || !amount || !appointmentId) {
       return res.status(400).json({ error: "Missing required data" });
     }

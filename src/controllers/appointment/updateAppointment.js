@@ -2,7 +2,7 @@ const { appointments, doctorSlots } = require("../../../models");
 const checkSlotAvailability = require("../slots/checkSlots");
 
 const reschedulePendingAppointment = async (req, res) => {
-  const { appointment_id, newDate, newStart, newEnd } = req.body;
+  const { appointment_id, newDate, newStart, newEnd, appointment_type } = req.body;
 
   // Step 1: Find the original appointment
   const oldAppointment = await appointments.findOne({
@@ -16,7 +16,7 @@ const reschedulePendingAppointment = async (req, res) => {
     return res.status(404).json({ error: "Pending appointment not found." });
   }
 
-  const {
+  let {
     doctor_id,
     appointment_date,
     appointment_start_time,
@@ -24,7 +24,7 @@ const reschedulePendingAppointment = async (req, res) => {
   } = oldAppointment;
 
   // Step 2: Check new slot availability
-  const isSlotAvailable = await checkSlotAvailability(doctor_id, newStart, newEnd, newDate);
+  const isSlotAvailable = await checkSlotAvailability(doctor_id, newStart, newEnd, newDate, appointment_type);
   if (!isSlotAvailable) {
     return res.status(400).json({ error: "The new slot is not available." });
   }
@@ -38,21 +38,29 @@ const reschedulePendingAppointment = async (req, res) => {
 
   const updatedSlots = [...slotRecord.slots];
 
+  const converted_date = appointment_date.toISOString().split('T')[0];
+  let formattedAppointmmentStartTime, formattedAppointmmentEndTime
+
   // Step 3.1: Restore old slot
-  const oldDateIndex = updatedSlots.findIndex(s => s.date === appointment_date);
+  const oldDateIndex = updatedSlots.findIndex(s => s.date === converted_date);
   if (oldDateIndex !== -1) {
     if (!Array.isArray(updatedSlots[oldDateIndex].slots)) {
       updatedSlots[oldDateIndex].slots = [];
     }
 
+    const [startHours, startMinutes] = appointment_start_time.split(":");
+    formattedAppointmmentStartTime = `${startHours}:${startMinutes}`;
+    const [endHours, endMinutes] = appointment_end_time.split(":");
+    formattedAppointmmentEndTime = `${endHours}:${endMinutes}`;
+
     const slotExists = updatedSlots[oldDateIndex].slots.some(
-      slot => slot.start === appointment_start_time && slot.end === appointment_end_time
+      slot => slot.start === formattedAppointmmentStartTime && slot.end === formattedAppointmmentEndTime
     );
 
     if (!slotExists) {
       updatedSlots[oldDateIndex].slots.push({
-        start: appointment_start_time,
-        end: appointment_end_time
+        start: formattedAppointmmentStartTime,
+        end: formattedAppointmmentEndTime
       });
 
       // Optional: sort by time
@@ -61,11 +69,11 @@ const reschedulePendingAppointment = async (req, res) => {
   } else {
     // If no entry for old date, add a new one
     updatedSlots.push({
-      date: appointment_date,
+      date: converted_date,
       slots: [
         {
-          start: appointment_start_time,
-          end: appointment_end_time
+          start: formattedAppointmmentStartTime,
+          end: formattedAppointmmentEndTime
         }
       ]
     });

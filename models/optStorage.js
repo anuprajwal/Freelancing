@@ -29,9 +29,10 @@ module.exports = (sequelize, DataTypes) => {
           key: 'id'
         }
       },
-      opt:{
+      otp:{
         type: DataTypes.STRING,
         allowNull: false,
+        defaultValue: "000000"
       },
       phone_number:{
         type: DataTypes.STRING,
