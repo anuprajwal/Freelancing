@@ -1,7 +1,8 @@
-const admin = require('./firebaseDbConnect')
+const {admin, emulatorApp} = require('./firebaseDbConnect')
 const {User} = require('../../../models')
 const { merge } = require('../../routes/userRoutes')
 // const { logger } = require('../../../logger')
+
 
 
 const initialiseCall = async (req, res)=>{
@@ -11,6 +12,8 @@ const initialiseCall = async (req, res)=>{
         // logger.info(`request to start a call from the user: ${id} is recieved`)
         const {call_to_user = null, offer = null} = req.body
         const firebase_db = admin.firestore()
+        const emulatorDb = emulatorApp.firestore();
+
 
         if (!call_to_user || !offer){
             // logger.warning(`the request from the user: ${id} has no proper fields`)
@@ -54,11 +57,11 @@ const initialiseCall = async (req, res)=>{
         await callerDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge: true})
         await caleeDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge:true})
 
-        await firestore.collection('campaigns').add({
-            title: 'Offer Alert!',
-            message: '50% off on all items today only!',
-            targetFcmToken: 'dcxfHBkQOLf32k3_NkaDRL:APA91bHnvzm14dwKu2P9KmhOqr0vswyp2yWFIpCze23kiMErjCAWBuRKkdp91GdcI-qu_ar_8OzImmIwNBHEmh8TkaUy1xadKgJFolnkkN2sp5OXOhWoWW8'
-          });
+        await emulatorDb.collection('campaigns').add({
+          title: 'Emulator Notification',
+          message: 'This is just a test via emulator',
+          targetFcmToken: 'dcxfHBkQOLf32k3_NkaDRL:APA91bHnvzm14dwKu2P9KmhOqr0vswyp2yWFIpCze23kiMErjCAWBuRKkdp91GdcI-qu_ar_8OzImmIwNBHEmh8TkaUy1xadKgJFolnkkN2sp5OXOhWoWW8'
+        });
           
 
         // logger.info(`the request to make the call by user: ${id} is done`)
