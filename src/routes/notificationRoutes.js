@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const saveUserToken = require("../controllers/notifications/save-user-token")
 // const deleteUserToken = require('../controllers/notifications/delete-user-token')
-require("../controllers/notifications/create-notification")
+// require("../controllers/notifications/create-notification")
 // const sendNotification = require("../controllers/notifications/send-notification")
 
 //protected routes
