@@ -1,6 +1,5 @@
 const admin = require('./firebaseDbConnect')
-const {User} = require('../../../models')
-const { merge } = require('../../routes/userRoutes')
+const {User, notificationTokens} = require('../../../models')
 // const { logger } = require('../../../logger')
 
 
@@ -55,11 +54,21 @@ const initialiseCall = async (req, res)=>{
         await callerDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge: true})
         await caleeDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge:true})
 
-        await firebase_db.collection('campaigns').add({
-            title: 'Offer Alert!',
-            message: '50% off on all items today only!',
-            targetFcmToken: 'dcxfHBkQOLf32k3_NkaDRL:APA91bHnvzm14dwKu2P9KmhOqr0vswyp2yWFIpCze23kiMErjCAWBuRKkdp91GdcI-qu_ar_8OzImmIwNBHEmh8TkaUy1xadKgJFolnkkN2sp5OXOhWoWW8'
-          });
+        const allRelatedTokens = await notificationTokens.findAll({where:{user_id : call_to_user}})
+
+        const allTokens = allRelatedTokens.map(each=>{
+            return each.token
+        })
+
+        admin.messaging().send({
+            token: allTokens,
+            notification: {
+              title: `Incoming Call`,
+              body: `Call from ${caleeObj.username}`,
+              call_details:callRequest,
+              call_id : callHistoryDoc.id
+            }
+        });
           
 
         // logger.info(`the request to make the call by user: ${id} is done`)
