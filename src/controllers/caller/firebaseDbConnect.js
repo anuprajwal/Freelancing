@@ -9,10 +9,10 @@ if (!admin.apps.length) {
 }
 
 
-process.env.FIRESTORE_EMULATOR_HOST = '13.200.105.135:8080';
+// process.env.FIRESTORE_EMULATOR_HOST = '13.200.105.135:8080';
 
-const emulatorApp = !admin.apps.find(app => app.name === 'emulatorApp')
-  ? admin.initializeApp({}, 'emulatorApp')
-  : admin.app('emulatorApp');
+// const emulatorApp = !admin.apps.find(app => app.name === 'emulatorApp')
+//   ? admin.initializeApp({}, 'emulatorApp')
+//   : admin.app('emulatorApp');
 
-module.exports = {admin, emulatorApp};
+module.exports = admin;
