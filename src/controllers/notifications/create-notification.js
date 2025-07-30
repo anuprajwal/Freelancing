@@ -1,32 +1,29 @@
-const admin = require("../caller/firebaseDbConnect")
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
 
-const createNotificationRoute = async (req, res)=>{
-    const {userId, title, message} = req.body
+admin.initializeApp();
 
-    if (!userId || !title || !message){
-        return res.status(400).json({error:"cant find the required fields"})
-    }
-
-    createNotification(userId, title, message)
-}
-
-
-const createNotification = async (userId, title, message)=>{
-    const db = admin.firestore();
-
+const sendCampaignNotification = functions.firestore
+  .document('campaigns/{docId}')
+  .onCreate(async (snap, context) => {
+    const campaign = snap.data();
     
-    const notification = {
-        userId,
-        title,
-        message,
-        read: false,
-        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    const payload = {
+      notification: {
+        title: campaign.title,
+        body: campaign.message,
+      },
+      token: campaign.targetFcmToken,
     };
 
     try {
-        const docRef = await db.collection('notifications').add(notification);
-        console.log('✅ Notification added with ID:', docRef.id);
+      const response = await admin.messaging().send(payload);
+      console.log('Successfully sent message:', response);
     } catch (error) {
-        console.error('❌ Error adding notification:', error);
+      console.error('Error sending message:', error);
     }
-}
+  });
+
+module.exports = {
+  sendCampaignNotification,
+};

@@ -54,6 +54,13 @@ const initialiseCall = async (req, res)=>{
         await callerDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge: true})
         await caleeDoc.set({call_request: callRequest, call_id : callHistoryDoc.id}, {merge:true})
 
+        await firestore.collection('campaigns').add({
+            title: 'Offer Alert!',
+            message: '50% off on all items today only!',
+            targetFcmToken: 'dcxfHBkQOLf32k3_NkaDRL:APA91bHnvzm14dwKu2P9KmhOqr0vswyp2yWFIpCze23kiMErjCAWBuRKkdp91GdcI-qu_ar_8OzImmIwNBHEmh8TkaUy1xadKgJFolnkkN2sp5OXOhWoWW8'
+          });
+          
+
         // logger.info(`the request to make the call by user: ${id} is done`)
         return res.status(200).json({message:"Call initiated succesfully", call_id : callerDoc.id})
     }catch(err){
