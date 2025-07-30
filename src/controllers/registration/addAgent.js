@@ -1,4 +1,4 @@
-const { managerProfile, agentProfile, User } = require("../../models");
+const { managerProfile, agentProfile, User } = require("../../../models");
 const addAgent = async (req, res) => {
   const { id } = req.manager;
   const { full_name, contact_number, language_spoken } = req.body;

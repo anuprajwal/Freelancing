@@ -1,4 +1,4 @@
-const { surgeryRequest, organisationProfile } = require("../../models");
+const { surgeryRequest, organisationProfile } = require("../../../models");
 
 const createSurgeryRequest = async (req, res) => {
   try {
@@ -66,3 +66,6 @@ await sendEmail(
 
   
 };
+
+
+module.exports = {createSurgeryRequest}

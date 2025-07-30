@@ -1,4 +1,4 @@
-const { managerProfile, agentProfile, User } = require("../../models");
+const { managerProfile, agentProfile, User } = require("../../../models");
 
 const completeManagerProfile = async (req, res) => {
   const { id } = req.manager;

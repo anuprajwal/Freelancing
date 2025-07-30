@@ -1,5 +1,5 @@
 // this lists all the hospitals that offer surgeries searched by the user
-const { organisationProfile } = require("../../models");
+const { organisationProfile } = require("../../../models");
 
 const searchHospitalsBySurgery = async (req, res) => {
   try {
@@ -40,4 +40,4 @@ const searchHospitalsBySurgery = async (req, res) => {
   }
 };
 
-module.exports = searchHospitalsBySurgery
+module.exports = {searchHospitalsBySurgery}
