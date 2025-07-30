@@ -5,16 +5,8 @@ const { Op, literal, Sequelize } = require('sequelize');
 // api to filter list of doctors based on the location using the pincode, ratings.
 //this is less dynamic, it must be modified to much dynamic version on resuming the project.
 const filterDoctor = async (req, res) => {
-    const { id } = req.user.payload;
-    const userId = id
 
-    const userAddress = await address.findOne({where: {user_id: userId}});
-    if (!userAddress) {
-        return res.status(404).json({ error: "No active address found" });
-    }
-
-    let userPincode = userAddress.pincode;
-  const { specialization, pincode = userPincode.substring(0, 3) } = req.query;
+  const { specialization } = req.query;
   try {
     const doctors = await doctorProfile.findAll({
       where: specialization ? { specialization } : {},

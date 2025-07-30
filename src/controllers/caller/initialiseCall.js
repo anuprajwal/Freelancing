@@ -57,19 +57,19 @@ const initialiseCall = async (req, res)=>{
         const allRelatedTokens = await notificationTokens.findAll({where:{user_id : call_to_user}})
 
         const allTokens = allRelatedTokens.map(each=>{
-            return each.token
-        })
-
-        admin.messaging().send({
-            token: allTokens,
+            admin.messaging().send({
+            token: each.token,
             notification: {
               title: `Incoming Call`,
               body: `Call from ${caleeObj.username}`,
-              call_details:callRequest,
+              call_details:JSON.stringify(callRequest),
               call_id : callHistoryDoc.id
             }
         });
-          
+        })
+
+
+        
 
         // logger.info(`the request to make the call by user: ${id} is done`)
         return res.status(200).json({message:"Call initiated succesfully", call_id : callerDoc.id})
