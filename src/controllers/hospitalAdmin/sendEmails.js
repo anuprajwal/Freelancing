@@ -1,4 +1,4 @@
-const {User, doctorProfile} = require("../../../models")
+const {User} = require("../../../models")
 const sendEmails =  async (req, res) => {
   try {
     const { subject, body, emails } = req.body;

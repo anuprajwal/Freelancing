@@ -14,6 +14,9 @@ const uploadProfilePic = require("../controllers/registration/changeProfilePic.j
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 const completeManagerProfile = require("../controllers/registration/completeManagerProfile.js");
 const addAgent = require("../controllers/registration/addAgent.js");
+const forgotPassword = require("../controllers/registration/forgotPassword.js")
+const changePassword = require("../controllers/registration/changePassword.js")
+const changeForgottenPassword = require("../controllers/registration/changeForgotedPassword.js")
 const router = express.Router();
 
 // Step 1: Register Basic User (Common Schema)
@@ -53,6 +56,11 @@ router.get('/google/callback',
 router.route("/login")
     .post(loginUser);
 
+router.post('/forgot-password', forgotPassword)
+
+router.put("/change-password", protect, changePassword)
+
+router.put("/change-forgoten-password/:password_hash/:id", changeForgottenPassword)
 
 router.post("/login/doctor")
 

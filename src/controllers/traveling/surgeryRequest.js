@@ -42,20 +42,19 @@ const createSurgeryRequest = async (req, res) => {
     });
 
 // fetch user and hospital info
-const user = req.user.payload;
-const hospitalInfo = `
-  Hospital: ${hospital.organisation_name}
-  Contact: ${hospital.contact_number}
-  Email: ${hospital.contact_email}
-  Website: ${hospital.website_url || "N/A"}
-`;
+// const user = req.user.payload;
+// const hospitalInfo = `
+//   Hospital: ${hospital.organisation_name}
+//   Contact: ${hospital.contact_number}
+//   Email: ${hospital.contact_email}
+//   Website: ${hospital.website_url || "N/A"}
+// `;
 
-// send email to user
-await sendEmail(
-  user.email,
-  `Surgery Request Received: ${surgery_name}`,
-  `Dear ${user.username},\n\nYour request for "${surgery_name}" at ${hospital.organisation_name} has been received and is under process.\n\n${hospitalInfo}\n\nWe’ll notify you once it is accepted or rejected.\n\nThank you,\nDoc App`
-);
+// await sendEmail(
+//   user.email,
+//   `Surgery Request Received: ${surgery_name}`,
+//   `Dear ${user.username},\n\nYour request for "${surgery_name}" at ${hospital.organisation_name} has been received and is under process.\n\n${hospitalInfo}\n\nWe’ll notify you once it is accepted or rejected.\n\nThank you,\nDoc App`
+// );
 
 
     return res.status(201).json({ message: "Surgery request submitted", request: newRequest });

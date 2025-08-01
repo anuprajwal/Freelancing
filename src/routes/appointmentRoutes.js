@@ -6,6 +6,10 @@ const  showAllAppointments  = require("../controllers/appointment/showAllAppoint
 const  protect  = require("../middlewares/authMiddleware.js");
 const appointmentUpdateByDoctor = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
+const getHospitalSlots = require("../controllers/appointment/getHospitalSlots.js")
+
+
+
 
 const router = express.Router();
 
@@ -14,7 +18,8 @@ router.delete("/delete-appointment", protect, deleteAppointment);
 router.put("/update-appointment", protect, updateAppointment);
 router.get("/list-appointments", protect, showAllAppointments);
 router.put("/doctor-update-appointment", protect, appointmentUpdateByDoctor)
-router.post("/schedule-ceckup-appointment", protect, scheduleCheckup)
+router.post("/schedule-checkup-appointment", protect, scheduleCheckup)
+router.get("/get-hospital-slots/:hospitalId", getHospitalSlots)
 
 
 module.exports = router;

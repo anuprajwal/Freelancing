@@ -1,7 +1,11 @@
 "use strict";
 module.exports = (sequelize, DataTypes) => {
   const surgeryRequest = sequelize.define("surgeryRequest", {
-    id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+    id: {
+      type: DataTypes.INTEGER, 
+      primaryKey: true, 
+      autoIncrement: true 
+    },
 
     user_id: {
       type: DataTypes.INTEGER,
@@ -17,11 +21,23 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "CASCADE"
     },
 
-    surgery_name: { type: DataTypes.STRING, allowNull: false },
-    date: { type: DataTypes.DATEONLY, allowNull: false },
-    time_slot: { type: DataTypes.STRING, allowNull: false },
+    surgery_name: { 
+      type: DataTypes.STRING, 
+      allowNull: false 
+    },
+    date: { 
+      type: DataTypes.DATEONLY, 
+      allowNull: false 
+    },
+    time_slot: { 
+      type: DataTypes.STRING, 
+      allowNull: false 
+    },
 
-    patient_name: { type: DataTypes.STRING, allowNull: false },
+    patient_name: { 
+      type: DataTypes.STRING, 
+      allowNull: false 
+    },
     patient_age: { type: DataTypes.INTEGER, allowNull: false },
     gender: { type: DataTypes.ENUM("Male", "Female", "Other"), allowNull: false },
     contact_number: { type: DataTypes.STRING(10), allowNull: false },

@@ -20,3 +20,4 @@ const getHospitalRequests = async (req, res) => {
   }
 };
 
+module.exports = getHospitalRequests

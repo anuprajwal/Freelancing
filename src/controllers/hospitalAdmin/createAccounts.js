@@ -37,7 +37,7 @@ const createAccounts = async (req, res)=>{
         createDoctorProfile(user.id, org_id)
         createdAccounts.push({createdEmail:i})
     }
-    return res.status(200).json({message:"profiles are created in this way", createdAccounts, refusedAccounts})
+    return res.status(200).json({message:"profiles are created in the following way", createdAccounts, refusedAccounts})
 }
 
 

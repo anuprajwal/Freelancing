@@ -6,12 +6,16 @@ const createAccounts = require("../controllers/hospitalAdmin/createAccounts.js")
 const allAppointments = require("../controllers/hospitalAdmin/getAllAppointments.js")
 const getAllDoctors = require("../controllers/hospitalAdmin/getAllDoctors.js")
 const sendEmails = require("../controllers/hospitalAdmin/sendEmails.js")
+const removeHospitalStaff = require("../controllers/hospitalAdmin/removeStaff.js")
+const getHospitalRequests = require("../controllers/hospitalAdmin/getSurgeryRequests.js")
 
 //protected routes
 router.post("/create-accounts", protect, hospitalAdminAuth, createAccounts);
 router.get("/get-appointments", protect, hospitalAdminAuth, allAppointments);
 router.get("/get-doctors", protect, hospitalAdminAuth, getAllDoctors);
 router.post("/send-emails", protect, hospitalAdminAuth, sendEmails);
+router.delete("/remove-staff", protect, hospitalAdminAuth,removeHospitalStaff)
+router.get('/get-hospital-surgeries', protect, hospitalAdminAuth,getHospitalRequests)
 
 
 
