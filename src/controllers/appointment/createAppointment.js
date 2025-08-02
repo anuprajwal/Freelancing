@@ -6,7 +6,7 @@ const checkAnotherAppointment = require("../slots/checkAppointmentAvailability")
 
 const scheduleAppointment = async (req, res) => {
   try{
-    const { doctor_id, date, start, end, type } = req.body
+    const { doctor_id, date, start, end, type, payment_mode } = req.body
 
   const doctorObj = await doctorProfile.findOne({where:{user_id:doctor_id}})
 
@@ -14,10 +14,12 @@ const scheduleAppointment = async (req, res) => {
     return res.status(404).json({error:"cant find the doctor, user wants to find"})
   }
 
-  const validType = ['online_video','online_audio','offline']
-
-  if (!validType.includes(type)){
+  if (!['online_video','online_audio','offline'].includes(type)){
     return res.status(400).json({error:"appointment type is not valid"})
+  }
+
+  if (!['online', 'offline'].includes(payment_mode)){
+    return res.status(400).json({error:"cant find relevant value in payment mode"})
   }
 
   // Step 1: Check if the slot is in the doctor's available slots
@@ -33,13 +35,14 @@ const scheduleAppointment = async (req, res) => {
   }
 
   // Step 3: Proceed to confirm the appointment
-  await appointments.create({
+  const createdAppointment = await appointments.create({
     user_id: req.user.payload.id,
     doctor_id : doctorObj.id,
     appointment_date: date,
     appointment_start_time:start,
     appointment_end_time:end,
-    status: "pending"
+    status: "pending",
+    payment_mode
   });
 
   // Step 4: Remove the booked slot from doctorSlots
@@ -71,7 +74,7 @@ const scheduleAppointment = async (req, res) => {
   }
 
 
-  return res.status(200).json({message:"appointment scheduled"})
+  return res.status(200).json({message:"appointment scheduled", createdAppointment})
   }catch(Error){
     return res.status(400).json({error:Error.message})
   }

@@ -1,4 +1,4 @@
-const { surgeryRequest, organisationProfile } = require("../../models");
+const { surgeryRequest, organisationProfile } = require("../../../models");
 const getHospitalRequests = async (req, res) => {
   try {
     const admin_id = req.user.payload.id;

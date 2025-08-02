@@ -109,6 +109,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
       },
+      payment_mode:{
+        type: DataTypes.ENUM("online", "offline"),
+        allowNull: false,
+        defaultValue: 'online'
+      },
       prescription: {
         type: DataTypes.TEXT,
         allowNull: true,
