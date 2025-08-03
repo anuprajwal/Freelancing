@@ -14,6 +14,10 @@ const scheduleAppointment = async (req, res) => {
     return res.status(404).json({error:"cant find the doctor, user wants to find"})
   }
 
+  if (payment_mode === "offline" && type.includes("online")){
+    return res.status(400).json({error:"online appointment cant have offline payment"})
+  }
+
   if (!['online_video','online_audio','offline'].includes(type)){
     return res.status(400).json({error:"appointment type is not valid"})
   }

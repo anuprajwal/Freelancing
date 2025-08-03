@@ -79,6 +79,15 @@ app.use("/api/admin", adminAuthRoutes);
 // Error handling middleware
 app.use(handleError);
 
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),           // how long server has been up
+    timestamp: Date.now(),              // current time
+  });
+});
+
+
 
 // Start the server
 const PORT = process.env.PORT || 5000;
