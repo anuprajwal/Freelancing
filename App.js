@@ -88,15 +88,6 @@ app.get('/health', (req, res) => {
 });
 
 
-
-
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url} from ${req.ip}`);
-  next();
-});
-
-
-
 // Start the server
 const PORT = process.env.PORT || 5000;
 
