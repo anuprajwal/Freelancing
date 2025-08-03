@@ -30,9 +30,6 @@ const filterDoctor = async (req, res) => {
       ]
       });
       
-
-    console.log("filtered doctors", doctors);
-
     return res.status(200).json({ doctors });
   } catch (error) {
     console.log(`error fount: ${error}`)

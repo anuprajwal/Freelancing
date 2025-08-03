@@ -70,6 +70,8 @@ const scheduleAppointment = async (req, res) => {
 
       updatedSlots[dateIndex].slots = filteredDaySlots;
 
+      console.log("updated data:", updatedSlots)
+
       await doctorSlots.update(
         { slots: updatedSlots },
         { where: { doctor_id } }
