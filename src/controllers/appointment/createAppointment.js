@@ -50,7 +50,16 @@ const scheduleAppointment = async (req, res) => {
   });
 
   // Step 4: Remove the booked slot from doctorSlots
-  const slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
+  let slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
+
+  if (slotRecord && !Array.isArray(slotRecord.slots)){
+    try {
+      slotRecord.slots = JSON.parse(slotRecord.slots);
+    } catch (err) {
+      console.error("Invalid slots JSON string:", err);
+      slotRecord.slots = []; // Fallback
+    }
+  }
 
   if (slotRecord && Array.isArray(slotRecord.slots)) {
     let slots;
@@ -61,22 +70,22 @@ const scheduleAppointment = async (req, res) => {
     }
     const updatedSlots = [...slots]; // deep copy
 
-    const converted_date = date.toISOString().split('T')[0];
+    // const converted_date = date.toISOString().split('T')[0];
 
-    console.log(converted_date)
-    const dateIndex = updatedSlots.findIndex(s => s.date === converted_date);
+    // console.log(converted_date)
+    const dateIndex = updatedSlots.findIndex(s => s.date === date);
 
     if (dateIndex !== -1) {
-      const [startHours, startMinutes] = appointment_start_time.split(":");
-      const formattedAppointmmentStartTime = `${startHours}:${startMinutes}`;
-      const [endHours, endMinutes] = appointment_end_time.split(":");
-      const formattedAppointmmentEndTime = `${endHours}:${endMinutes}`;
+      // const [startHours, startMinutes] = appointment_start_time.split(":");
+      // const formattedAppointmmentStartTime = `${startHours}:${startMinutes}`;
+      // const [endHours, endMinutes] = appointment_end_time.split(":");
+      // const formattedAppointmmentEndTime = `${endHours}:${endMinutes}`;
 
 
       const daySlots = updatedSlots[dateIndex].slots || [];
 
       // Remove the slot that matches {start, end}
-      const filteredDaySlots = daySlots.filter(slot => !(slot.start === formattedAppointmmentStartTime && slot.end === formattedAppointmmentEndTime));
+      const filteredDaySlots = daySlots.filter(slot => !(slot.start === start && slot.end === end));
 
       updatedSlots[dateIndex].slots = filteredDaySlots;
 
