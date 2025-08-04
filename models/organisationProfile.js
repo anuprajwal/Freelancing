@@ -64,7 +64,6 @@ module.exports = (sequelize, DataTypes) => {
       regestration_number: {
         type: DataTypes.STRING(10),
         allowNull: false,
-        unique: true,
       },
       establishment_year: {
         type: DataTypes.DATE,

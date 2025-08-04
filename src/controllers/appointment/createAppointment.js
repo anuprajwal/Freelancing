@@ -70,18 +70,9 @@ const scheduleAppointment = async (req, res) => {
     }
     const updatedSlots = [...slots]; // deep copy
 
-    // const converted_date = date.toISOString().split('T')[0];
-
-    // console.log(converted_date)
     const dateIndex = updatedSlots.findIndex(s => s.date === date);
 
     if (dateIndex !== -1) {
-      // const [startHours, startMinutes] = appointment_start_time.split(":");
-      // const formattedAppointmmentStartTime = `${startHours}:${startMinutes}`;
-      // const [endHours, endMinutes] = appointment_end_time.split(":");
-      // const formattedAppointmmentEndTime = `${endHours}:${endMinutes}`;
-
-
       const daySlots = updatedSlots[dateIndex].slots || [];
 
       // Remove the slot that matches {start, end}
