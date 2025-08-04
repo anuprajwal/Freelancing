@@ -25,14 +25,14 @@ async function startCron() {
               payment_mode: 'online',
               appointment_status : "pending"
             },
-            // include: [{
-            //   model: payments,
-            //   as: 'payments',
-            //   required: true, 
-            // //   where: {
-            // //     payment_status: ['pending', 'failed'],
-            // //   }
-            // }]
+            include: [{
+              model: payments,
+              as: 'payments',
+              required: true, 
+              where: {
+                payment_status: ['pending', 'failed'],
+              }
+            }]
           });
           console.log(allUnpaidAppointments)
         if (allUnpaidAppointments) {
