@@ -60,7 +60,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
-          model: "checkupAppointment",
+          model: "checkup_appointments",
           key: "id",
         },
         onUpdate: "CASCADE",
