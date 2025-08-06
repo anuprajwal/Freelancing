@@ -6,13 +6,15 @@ const checkAnotherAppointment = require("../slots/checkAppointmentAvailability")
 
 const scheduleAppointment = async (req, res) => {
   try{
-    const { doctor_id, date, start, end, type, payment_mode } = req.body
+    const { date, start, end, type, payment_mode } = req.body
 
-  const doctorObj = await doctorProfile.findOne({where:{user_id:doctor_id}})
+  const doctorObj = await doctorProfile.findOne({where:{id:req.body.doctor_id}})
 
   if (!doctorObj){
     return res.status(404).json({error:"cant find the doctor, user wants to find"})
   }
+
+  const doctor_id = doctorObj.user_id
 
   if (payment_mode === "offline" && type.includes("online")){
     return res.status(400).json({error:"online appointment cant have offline payment"})

@@ -14,6 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      payments.belongsTo(models.checkupAppointment, {
+        foreignKey: "checkup_id",
+        targetKey: "id",
+        as: "checkupAppointment",
+        onDelete: "CASCADE",
+      });
+
       payments.belongsTo(models.User, {
         foreignKey: "user_id",
         targetKey: "id",
@@ -41,9 +48,19 @@ module.exports = (sequelize, DataTypes) => {
       },
       appointment_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
+        allowNull: true,
         references: {
           model: "appointments",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      checkup_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "checkupAppointment",
           key: "id",
         },
         onUpdate: "CASCADE",

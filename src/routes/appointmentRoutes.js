@@ -7,6 +7,7 @@ const  protect  = require("../middlewares/authMiddleware.js");
 const appointmentUpdateByDoctor = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
 const getHospitalSlots = require("../controllers/appointment/getHospitalSlots.js")
+const { verifyPaymentAndAppointment, verifyPaymentAndCheckup } = require("../controllers/appointment/confirmPaymentAndAppointment.js")
 
 
 
@@ -20,6 +21,9 @@ router.get("/list-appointments", protect, showAllAppointments);
 router.put("/doctor-update-appointment", protect, appointmentUpdateByDoctor)
 router.post("/schedule-checkup-appointment", protect, scheduleCheckup)
 router.get("/get-hospital-slots/:hospitalId", getHospitalSlots)
+router.put("/confirm-appointment", protect, verifyPaymentAndAppointment)
+router.put("/confirm-checkup", protect, verifyPaymentAndCheckup)
+
 
 
 module.exports = router;

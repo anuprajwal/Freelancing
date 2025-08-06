@@ -20,9 +20,7 @@ const appointmentUpdateByDoctor = async (req, res)=>{
         return res.status(400).json({error:"couldnot find the appointment which user is trying to update"})
     }
 
-    const validStatus = ['pending','confirmed','cancelled','closed']
-
-    if (!validStatus.includes(appointment_status)){
+    if (appointment_status !== "closed"){
         return req.status(400).json({error:'Appointment Status is not accepted'})
     }
 
