@@ -46,14 +46,7 @@ module.exports = (sequelize, DataTypes) => {
         as: "checkupAppointment",
         sourceKey: "id",
         onDelete: "CASCADE",
-      });
-
-      appointments.hasMany(models.followUp, {
-        foreignKey: 'appointmentId',
-        as: 'followUp',
-        onDelete: 'CASCADE',
-      });
-      
+      });     
     }
   }
   appointments.init(
