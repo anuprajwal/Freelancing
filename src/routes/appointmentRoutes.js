@@ -6,7 +6,7 @@ const  showAllAppointments  = require("../controllers/appointment/showAllAppoint
 const  protect  = require("../middlewares/authMiddleware.js");
 const appointmentUpdateByDoctor = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
-const getHospitalSlots = require("../controllers/appointment/getHospitalSlots.js")
+const getHospitalSlots = require("../controllers/appointment/hospital/getHospitalSlots.js")
 const { verifyPaymentAndAppointment, verifyPaymentAndCheckup } = require("../controllers/appointment/confirmPaymentAndAppointment.js")
 
 

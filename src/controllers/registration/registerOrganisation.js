@@ -1,4 +1,4 @@
-const { logger } = require("../../../logger");
+// const { logger } = require("../../../logger");
 const { organisationProfile, User } = require("../../../models");
 const validateUserRole = require("../../utils/validateRole");
 
@@ -7,7 +7,7 @@ const validateUserRole = require("../../utils/validateRole");
 const registerOrganisation = async (req, res)=>{
     const {payload} = req.user
     const {id} = payload
-    logger.info(`request to regester organisation is recieved by user: ${id}`)
+    // logger.info(`request to regester organisation is recieved by user: ${id}`)
 
     const userObj = await User.findByPk(id)
     
@@ -31,12 +31,12 @@ const createOrgProfile = async (req, res)=>{
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
     if (!org_type || !org_name || !org_license){
-       logger.warning(`required fields for regestering the organisation from user: ${id} are not complete`)
+    //    logger.warning(`required fields for regestering the organisation from user: ${id} are not complete`)
        return req.status(400).json({error:"all fields are required"})
     }
 
     if (!valid_type.includes(org_type)){
-        logger.warning(`organisation type: ${org_type} is not valid`)
+        // logger.warning(`organisation type: ${org_type} is not valid`)
         return req.status(400).json({error:"organisation type is not valid"})
     }
 
@@ -57,10 +57,10 @@ const updateOrgProfile = async (req, res)=>{
 
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
-    if (!valid_type.includes(org_type)){
-        logger.warning(`organisation type: ${org_type} is not valid`)
-        return req.status(400).json({error:"organisation type is not valid"})
-    }
+    // if (!valid_type.includes(org_type)){
+        // logger.warning(`organisation type: ${org_type} is not valid`)
+        // return req.status(400).json({error:"organisation type is not valid"})
+    // }
 
     const {
         org_name = org_obj.organisation_name,

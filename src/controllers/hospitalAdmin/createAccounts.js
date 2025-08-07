@@ -1,11 +1,11 @@
-const {oranisationProfile, User} = require('../../../models')
-
+const {organisationProfile, doctorProfile, User} = require('../../../models')
+const bcrypt = require("bcrypt");
 
 
 const createAccounts = async (req, res)=>{
     const {id, org_id} = req.user.payload
     const {email} = req.body
-    const organisationDetails = await oranisationProfile.findOne({where:{user_id:id}})
+    const organisationDetails = await organisationProfile.findOne({where:{user_id:id}})
     let createdAccounts = []
     let refusedAccounts = []
     for (let i of email){
@@ -22,6 +22,8 @@ const createAccounts = async (req, res)=>{
         }
 
         const createdPassword = organisationDetails.organisation_name + '@@' + i
+        
+        // example pasword: example organisation name@@seventhDoc@gmail.com
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(createdPassword, salt);
