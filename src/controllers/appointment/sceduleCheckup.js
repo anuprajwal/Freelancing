@@ -6,6 +6,7 @@ require("dotenv").config();
 
 const scheduleCheckup = async (req, res) => {
   const { appointment_id } = req.body
+  const { date } = req.body
   const appointment_data = await appointments.findByPk(appointment_id)
 
   if (!appointment_data){
@@ -21,8 +22,7 @@ const scheduleCheckup = async (req, res) => {
   }
 
   const converted_date = appointment_data.appointment_date.toISOString().split('T')[0];
-  const today_date = new Date();
-  const formattedToday = today_date.toISOString().split('T')[0];
+  const formattedToday = date.toISOString().split('T')[0];
   console.log("Today's date:", formattedToday);
 
 

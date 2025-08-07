@@ -1,16 +1,16 @@
 
-const { appointments, checkupAppointment, followUp } = require('../../../models');
+const { appointments, checkupAppointment } = require('../../../models');
 
-const getUserAppointmentsWithChildren = async (req, res) => {
+const showAllAppointments = async (req, res) => {
   const userId = req.user.payload.id;
 
   try {
     let userAppointments
 
     if (req.user.payload.scope === "general_user"){
-      userAppointments = patientSideAppointments(userId)
+      userAppointments = await patientSideAppointments(userId)
     }else if (req.user.payload.scope === "doctor"){
-      userAppointments = doctorSideAppointments(userId)
+      userAppointments = await doctorSideAppointments(userId)
     }
 
     return res.status(200).json({ appointments: userAppointments });
@@ -27,10 +27,6 @@ const doctorSideAppointments = async (doctor_id)=>{
         {
           model: checkupAppointment,
           as: 'checkupAppointment'
-        },
-        {
-          model: followUp,
-          as: 'followUp'
         }
       ],
       order: [['appointment_date', 'DESC']]
@@ -45,10 +41,6 @@ const patientSideAppointments = async (userId)=>{
       {
         model: checkupAppointment,
         as: 'checkupAppointment'
-      },
-      {
-        model: followUp,
-        as: 'followUp'
       }
     ],
     order: [['appointment_date', 'DESC']]
@@ -56,4 +48,4 @@ const patientSideAppointments = async (userId)=>{
   return userAppointments
 }
 
-module.exports = getUserAppointmentsWithChildren;
+module.exports = showAllAppointments;
