@@ -12,7 +12,8 @@ const removeHospitalStaff = async (req, res)=>{
 
     const doctorDetails = await doctorProfile.findOne({
         where:{
-            user_id:doctor_id
+            user_id:doctor_id,
+            organisation_id:org_id
         }
     })
 
