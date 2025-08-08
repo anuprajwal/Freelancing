@@ -48,10 +48,11 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: "id",
       });
 
-      doctorProfile.hasMany(models.organisationAdmissionRequest, {
+      doctorProfile.hasMany(models.organisationRequest, {
         foreignKey: "doctor_id",
-        as: "organisationAdmissionRequest",
+        as: "organisationRequest",
         sourceKey: "id",
+        onDelete: "CASCADE",
       });
     }
   }

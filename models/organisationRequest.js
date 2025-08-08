@@ -4,15 +4,15 @@ const {
 } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class organisationAdmissionRequest extends Model {
+  class organisationRequest extends Model {
     static associate(models) {
-        organisationAdmissionRequest.belongsTo(models.User, {
-            foreignKey: "user_id",
+        organisationRequest.belongsTo(models.User, {
+            foreignKey: "doctor_id",
             targetKey: "id",
             as: "user",
             onDelete: "CASCADE",
         });
-        organisationAdmissionRequest.belongsTo(models.organisationProfile, {
+        organisationRequest.belongsTo(models.organisationProfile, {
             foreignKey: "org_id",
             targetKey: "id",
             as: "organisationProfile",
@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
         });
     }
   }
-  organisationAdmissionRequest.init(
+  organisationRequest.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references:{
-            model: "organisation_profile",
+            model: "organisation_profiles",
             key: "id"
         }
       },
@@ -62,9 +62,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "organisationAdmissionRequest",
+      modelName: "organisationRequest",
       underscored: true,
     }
   );
-  return organisationAdmissionRequest;
+  return organisationRequest;
 };

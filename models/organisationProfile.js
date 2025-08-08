@@ -34,9 +34,9 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: "id",
         onDelete: "CASCADE",
       });
-      organisationProfile.hasMany(models.organisationAdmissionRequest, {
+      organisationProfile.hasMany(models.organisationRequest, {
         foreignKey: "org_id",
-        as: "organisationAdmissionRequest",
+        as: "organisationRequest",
         sourceKey: "id",
         onDelete: "CASCADE",
       });
