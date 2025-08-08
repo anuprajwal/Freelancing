@@ -44,7 +44,7 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       request_status: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM("pending", "rejected", "accepted"),
         allowNull: false,
         defaultValue: "pending"
       },

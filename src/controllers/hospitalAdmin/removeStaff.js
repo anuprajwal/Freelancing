@@ -1,4 +1,4 @@
-const {organisationProfile, doctorProfile} = require("../../../models")
+const {doctorProfile} = require("../../../models")
 
 
 const removeHospitalStaff = async (req, res)=>{
