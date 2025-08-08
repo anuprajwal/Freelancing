@@ -8,7 +8,7 @@ const scheduleAppointment = async (req, res) => {
   try{
     const { date, start, end, type, payment_mode } = req.body
 
-  const doctorObj = await doctorProfile.findOne({where:{id:req.body.doctor_id}})
+  const doctorObj = await doctorProfile.findOne({where:{user_id:req.body.doctor_id}})
 
   if (!doctorObj){
     return res.status(404).json({error:"cant find the doctor, user wants to find"})
