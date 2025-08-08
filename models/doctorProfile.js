@@ -47,6 +47,12 @@ module.exports = (sequelize, DataTypes) => {
         as: "favourateDoctors",
         sourceKey: "id",
       });
+
+      doctorProfile.hasMany(models.organisationAdmissionRequest, {
+        foreignKey: "doctor_id",
+        as: "organisationAdmissionRequest",
+        sourceKey: "id",
+      });
     }
   }
   doctorProfile.init(

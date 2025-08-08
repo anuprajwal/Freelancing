@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             onDelete: "CASCADE",
         });
         organisationAdmissionRequest.belongsTo(models.organisationProfile, {
-            foreignKey: "organisation_profile",
+            foreignKey: "org_id",
             targetKey: "id",
             as: "user",
             onDelete: "CASCADE",
@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
         primaryKey: true,
         autoIncrement: true,
       },
-      user_id:{
+      doctor_id:{
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
