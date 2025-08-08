@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         organisationAdmissionRequest.belongsTo(models.organisationProfile, {
             foreignKey: "org_id",
             targetKey: "id",
-            as: "user",
+            as: "organisationProfile",
             onDelete: "CASCADE",
         });
     }
