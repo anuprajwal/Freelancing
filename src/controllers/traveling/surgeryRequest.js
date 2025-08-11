@@ -67,4 +67,4 @@ const createSurgeryRequest = async (req, res) => {
 };
 
 
-module.exports = {createSurgeryRequest}
+module.exports = createSurgeryRequest

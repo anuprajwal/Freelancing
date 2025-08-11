@@ -26,7 +26,7 @@ const registerOrganisation = async (req, res)=>{
 
 
 const createOrgProfile = async (req, res)=>{
-    const {org_type, org_name, org_license} = req.body
+    const {org_type, org_name, org_license, org_establishment, org_url, org_ambulance, org_services} = req.body
 
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
@@ -41,11 +41,15 @@ const createOrgProfile = async (req, res)=>{
     }
 
     await organisationProfile.create({
-        user_id : req.user.payload.id,
-        profile_picture : "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png",
+        user_id:req.user.payload.id,
         organisation_name:org_name,
         organisation_type:org_type,
-        regestration_number: org_license
+        regestration_number:org_license,
+        establishment_year:org_establishment,
+        website_url:org_url,
+        profile_picture: "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png",
+        ambulance_available:org_ambulance,
+        specializations_provided:org_services
     })
 
     return res.status(200).json({message:"organisation profile is created succesfully"})

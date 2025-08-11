@@ -22,7 +22,7 @@ router.post("/send-emails", protect, hospitalAdminAuth, sendEmails);
 router.delete("/remove-staff", protect, hospitalAdminAuth,removeHospitalStaff)
 router.get('/get-hospital-surgeries', protect, hospitalAdminAuth,getHospitalRequests)
 router.get('/get-admission-request', protect, hospitalAdminAuth, getAllRequests)
-router.post('/doctor-request-admission', protect, hospitalAdminAuth, requestAdmissionRequest)
+router.post('/doctor-request-admission', protect, requestAdmissionRequest)
 router.put('/react-to-admission', protect, hospitalAdminAuth, acceptDocRequests)
 
 module.exports = router;

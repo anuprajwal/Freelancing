@@ -13,7 +13,7 @@ const acceptDocRequests = async (req, res)=>{
         return res.status(400).json({error:"cant find the required parameters in the body"})
     }
 
-    if (!["pending", "rejected", "accepted"].includes(request_status)){
+    if (!["rejected", "accepted"].includes(request_status)){
         return res.status(400).json({error:"request status is malformed"})
     }
 
@@ -41,7 +41,7 @@ const acceptDocRequests = async (req, res)=>{
         }
     )
 
-    return res.status(200).json({message:"succesfully fetched all the requests of doctors", requestedDocs})
+    return res.status(200).json({message:`sucessfully ${request_status}`})
 }
 
 

@@ -7,8 +7,19 @@ const requestAdmissionRequest = async (req, res)=>{
     if (!id){
         return res.status(400).json({error:"the user doesnot seem to be logged in"})
     }
-
+    
     const {organisation_id} = req.body
+
+    const existingRequests = await organisationRequest.findOne({
+        where:{
+            doctor_id : id,
+            org_id : organisation_id
+        }
+    })
+
+    if (existingRequests){
+        return res.status(400).json({error:"succesfully requested the organisation"})
+    }
 
     if (!organisation_id){
         return res.status(400).json({error:"cant find the required parameters in the body"})
@@ -19,7 +30,7 @@ const requestAdmissionRequest = async (req, res)=>{
         org_id : organisation_id
     })
 
-    return res.status(200).json({message:"succesfully fetched all the requests of doctors", requestedDocs})
+    return res.status(200).json({message:"succesfully requested the organisation"})
 }
 
 

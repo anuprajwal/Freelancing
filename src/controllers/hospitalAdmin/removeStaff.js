@@ -21,12 +21,14 @@ const removeHospitalStaff = async (req, res)=>{
         return res.status(404).json({error:"cant find any doctor over this id"})
     }
 
-    await doctorProfile.update({
-        organisation_id: null,
-        where:{
-            user_id: doctor_id
+    await doctorProfile.update(
+        {organisation_id: null},
+        {
+            where:{
+                user_id: doctor_id
+            }
         }
-    })
+    )
 
     return res.status(200).json({message:"succesfully removed staff from the organisation"})
 }

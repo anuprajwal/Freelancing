@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { searchHospitalsBySurgery } = require("../controllers/traveling/getAllSurgeriesHospitals");
 const protect = require("../middlewares/authMiddleware");
-const {createSurgeryRequest} = require("../controllers/traveling/surgeryRequest");
+const createSurgeryRequest = require("../controllers/traveling/surgeryRequest");
 const deleteSurgery = require('../controllers/traveling/deleteSurgery')
 const getAllPlans = require("../controllers/traveling/getAllPlans")
 

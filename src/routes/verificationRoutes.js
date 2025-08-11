@@ -8,7 +8,7 @@ const protect = require("../middlewares/authMiddleware.js")
 const router = exppress.Router()
 
 router.post('/sendEmailOtp' , protect , sendEmailOtp)
-router.post('/verifyEmail' , protect , verifyEmail)
+router.put('/verifyEmail' , protect , verifyEmail)
 // router.post('/sendMobileOtp' ,protect , sendMobileOtp)
 // router.post('/verifyMobileOtp' , protect , verifyMobile)
 
