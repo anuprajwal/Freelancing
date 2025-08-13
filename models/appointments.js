@@ -13,12 +13,6 @@ module.exports = (sequelize, DataTypes) => {
         as: "user",
         onDelete: "CASCADE",
       });
-      appointments.belongsTo(models.doctorProfile, {
-        foreignKey: "doctor_id",
-        targetKey: "id",
-        as: "doctor",
-        onDelete: "CASCADE",
-      });
 
       appointments.hasMany(models.payments, {
         foreignKey: "appointment_id",
@@ -63,7 +57,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "doctor_profiles",
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",
