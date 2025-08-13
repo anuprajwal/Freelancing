@@ -14,6 +14,13 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      appointments.belongsTo(models.User, {
+        foreignKey: "doctor_id",
+        targetKey: "id",
+        as: "user",
+        onDelete: "CASCADE",
+      });
+
       appointments.hasMany(models.payments, {
         foreignKey: "appointment_id",
         as: "payments",
