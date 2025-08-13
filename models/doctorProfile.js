@@ -21,13 +21,6 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
-      doctorProfile.hasMany(models.appointments, {
-        foreignKey: "doctor_id",
-        as: "appointments",
-        sourceKey: "id",
-        onDelete: "CASCADE",
-      });
-
       doctorProfile.hasMany(models.reviewRating, {
         foreignKey: "doctor_id",
         as: "reviewRating",
