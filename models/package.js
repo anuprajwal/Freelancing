@@ -41,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "doctorRatings",
+      modelName: "packages",
       underscored: true,
     }
   );
-  return doctorRatings;
+  return packages;
 };
