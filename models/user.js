@@ -144,6 +144,14 @@ module.exports =  (sequelize, DataTypes) => {
         type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation" , "manager"),
         allowNull: false,
       },
+      latitude: {
+         type: DataTypes.DECIMAL(10, 8),
+         allowNull: true
+      },
+      longitude: {
+          type: DataTypes.DECIMAL(11, 8),
+          allowNull: true
+      },
       is_email_verified:{
         type: DataTypes.BOOLEAN,
         allowNull: false,

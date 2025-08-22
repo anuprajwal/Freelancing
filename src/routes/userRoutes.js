@@ -17,6 +17,7 @@ const addAgent = require("../controllers/registration/addAgent.js");
 const forgotPassword = require("../controllers/registration/forgotPassword.js")
 const changePassword = require("../controllers/registration/changePassword.js")
 const changeForgottenPassword = require("../controllers/registration/changeForgotedPassword.js")
+const updateLocation = require("../controllers/address/userLocation.js")
 const router = express.Router();
 
 // Step 1: Register Basic User (Common Schema)
@@ -62,12 +63,14 @@ router.put("/change-password", protect, changePassword)
 
 router.put("/change-forgoten-password/:password_hash/:id", changeForgottenPassword)
 
-router.post("/login/doctor")
+router.post("/login/doctor", loginUser)
 
 router.get("/get-user-data", protect, getUserDetails)
 
 router.get("/show-slots/:doctor_id", protect, showSlots)
 
 router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
+
+router.post("/update-location" , protect , updateLocation)
 
 module.exports = router;
