@@ -1,7 +1,9 @@
+const {User} = require("../../../models")
+
 const updateLocation = async (req, res) => {
   try {
     const userId = req.user.payload.id;
-    const { latitude, longitude} = req.body;
+    const { latitude, longitude } = req.body;
 
     if (!latitude || !longitude) {
       return res.status(400).json({ error: "Latitude, longitude are required" });

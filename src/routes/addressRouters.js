@@ -5,6 +5,7 @@ const removeAddress=require("../controllers/address/removeAddress")
 const updateAddress=require("../controllers/address/updateAddress")
 const getActiveAddress=require("../controllers/address/ShowAddress")
 const sendAddresses=require("../controllers/address/ShowAddress");
+const updateLocation = require("../controllers/address/userLocation")
 const protect = require("../middlewares/authMiddleware");
 
 const router = express.Router()
@@ -14,5 +15,6 @@ router.get("/getActiveAddress", protect, getActiveAddress)
 router.get("/getAllAddress", protect,sendAddresses)
 router.put("/updateAddress", protect, updateAddress)
 router.delete("/deleteAddress", protect,removeAddress)
+router.post("/update-location", protect, updateLocation)
 
 module.exports =router

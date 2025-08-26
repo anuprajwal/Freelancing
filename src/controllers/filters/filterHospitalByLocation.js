@@ -3,10 +3,10 @@ const {User, organisationProfile} = require("../../../models")
 
 const filterHospitalsByLocation = async (req, res)=>{
     const userLatitude = parseFloat(req.query.userLatitude) || null
-    const userLonitude = parseFloat(req.query.userLonitude) || null
+    const userLongitude = parseFloat(req.query.userLongitude) || null
 
-    if (!userLatitude || !userLonitude){
-        return res.status(200).json({error:"cant find the user location"})
+    if (!userLatitude || !userLongitude){
+        return res.status(400).json({error:"cant find the user location"})
     }
 
     const filterInMeters = parseInt(req.query.filterInMeters) || 5000
@@ -15,7 +15,13 @@ const filterHospitalsByLocation = async (req, res)=>{
         attributes: {
             include: [
                 [
-                    literal(`ST_DistanceSphere(geom, ST_MakePoint(${userLonitude}, ${userLatitude}))`), "distance"
+                    literal(`
+                        ST_DistanceSphere(
+                            ST_MakePoint(longitude, latitude),
+                            ST_MakePoint(${userLongitude}, ${userLatitude})
+                        )
+                    `),
+                    "distance"
                 ]
             ]
         },
@@ -23,25 +29,30 @@ const filterHospitalsByLocation = async (req, res)=>{
             {
                 model: organisationProfile,
                 as: "organisationProfile",
-                attributes: ["organisation_type", "organisation_name", "establishment_year", "specializations_provided", "ambulance_available", "website_url", "profile_picture"],
-                where:{
+                attributes: ["gender", "experience_years", "consultation_fee", "specialization", "profile_picture", "appointment_time"],
+                where: {
                     verified_status: "approved"
                 }
             }
         ],
         where: {
-            role: "hospital_organisation",
+            role: "doctor",
             [literal(`
                 ST_DWithin(
-                    geom, 
-                    ST_MakePoint(${userLonitude}, ${userLatitude})
-                ), ${filterInMeters}
+                    ST_MakePoint(longitude, latitude)::geography,
+                    ST_MakePoint(${userLongitude}, ${userLatitude})::geography,
+                    ${filterInMeters}
+                )
             `)]: true
         },
         order: literal(`
-                ST_DistanceSphere(geom, ST_MakePoint(${userLonitude}, ${userLatitude}))
+            ST_DistanceSphere(
+                ST_MakePoint(longitude, latitude),
+                ST_MakePoint(${userLongitude}, ${userLatitude})
+            )
         `),
-    })
+    });
+    
 
     print(hospitals)
 

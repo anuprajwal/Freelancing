@@ -1,8 +1,6 @@
 const {appointments, doctorProfiles} = require('../../../models')
 
 
-//api to update appointment status by doctor
-
 const appointmentUpdateByDoctor = async (req, res)=>{
     const {id} = req.user.payload
 
@@ -22,10 +20,6 @@ const appointmentUpdateByDoctor = async (req, res)=>{
 
     if (appointment_status !== "closed"){
         return req.status(400).json({error:'Appointment Status is not accepted'})
-    }
-
-    if (appointment_status==='closed' && prescription === null){
-        return req.status(400).json({error:'Doctor needs to give prescription when the appointment is closed'})
     }
 
     await appointments.update({appointment_status, prescription}, {where:{id:appointment_id, doctor_id:id}})
