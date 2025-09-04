@@ -27,7 +27,7 @@ const getUserDetails = async (req, res)=>{
           const includes = [];
 
 
-          if (user.role === "generalUser") {
+          if (user.role === "general_user") {
             includes.push({
               model: generalUser,
               as: "generalUser",
@@ -55,7 +55,7 @@ const getUserDetails = async (req, res)=>{
             });
           }
       
-          if (user.role === "organisation") {
+          if (user.role === "hospital_organisation") {
             includes.push({
               model: organisationProfile,
               as: "organisationProfile"
