@@ -69,7 +69,6 @@ const filterDoctorByLocation = async (req, res)=>{
       
 
     const plainDocs = docs.map(doc => doc.get({ plain: true }));
-    console.log(plainDocs);
 
     return res.status(200).json({message:"filtered doctors successfully", doctorDetails: plainDocs})
 }
