@@ -11,7 +11,7 @@ const protect = require("../middlewares/authMiddleware");
 const router = express.Router()
 
 router.post("/addAddress",protect, addAddress)
-router.get("/getActiveAddress", protect, getActiveAddress)
+// router.get("/getActiveAddress", protect, getActiveAddress)
 router.get("/getAllAddress", protect,sendAddresses)
 router.put("/updateAddress", protect, updateAddress)
 router.delete("/deleteAddress", protect,removeAddress)
