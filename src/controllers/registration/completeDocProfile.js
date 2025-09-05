@@ -20,18 +20,12 @@ const completeDoctorProfile = async (req, res) => {
 
 
     const doctorObj = await doctorProfile.findOne({where:{user_id:id}})
-    if (!doctorObj){
-      createDoctorProfile(req, res)
-    }else{
-      updateDoctorProfile(req, res, doctorObj)
-    }
-
-    let doctorExists  = doctorObj !== undefined ? true : false
-
-    // Mark doctor profile as completed
     await user.update({ is_active: true });
-
-    return res.status(200).json({ message: "Profile updated successfully", doctorExists });
+    if (!doctorObj){
+      return createDoctorProfile(req, res)
+    }else{
+      return updateDoctorProfile(req, res, doctorObj)
+    }
   } catch (error) {
     console.error("Doctor profile update error:", error);
     return res.status(500).json({ error: "Internal server error." });
@@ -76,7 +70,7 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     organisation_id : updatedDoctor.organisation_id,
     license_number : updatedDoctor.license_number
   }, {where:{user_id:req.user.payload.id}})
-
+  return res.status(200).json({ message: "Profile updated successfully" });
 }
 
 
@@ -102,6 +96,8 @@ const createDoctorProfile = async (req, res)=>{
     organisation_id,
     license_number
   })
+
+  return res.status(200).json({ message: "Profile updated successfully" });
 
 }
 
