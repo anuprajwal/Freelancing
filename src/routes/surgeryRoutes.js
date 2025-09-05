@@ -10,9 +10,9 @@ const getAllPlans = require("../controllers/traveling/getAllPlans")
 router.get("/search/hospitals", searchHospitalsBySurgery);
 
 // User sends surgery request
-router.post("/surgeries/request", protect, createSurgeryRequest);
+router.post("/request", protect, createSurgeryRequest);
 
-router.delete("/surgeries/delete/:surgeryId", protect,deleteSurgery)
+router.delete("/delete/:surgeryId", protect,deleteSurgery)
 
 router.get('/get-plans', getAllPlans)
 

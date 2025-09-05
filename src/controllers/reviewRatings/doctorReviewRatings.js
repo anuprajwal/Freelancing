@@ -1,4 +1,4 @@
-const { doctorProfile, reviewRating, appointments } = require("../../../models");
+const { doctorProfile, reviewRating, appointments, User } = require("../../../models");
 const checkSimilarUser = require("../../utils/checkSimilarUser");
 
 // API to ive ratings to the doctor based on each appointment

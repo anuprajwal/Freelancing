@@ -16,6 +16,7 @@ const hospitalAdminRoutes = require("./src/routes/hospitalAdminRoutes.js")
 const documentRoutes = require("./src/routes/documentRoutes.js")
 const notificationRoutes = require("./src/routes/notificationRoutes.js")
 const surgeryRoutes = require("./src/routes/surgeryRoutes.js");
+const ratingRoutes = require("./src/routes/reviewRatingsRoutes.js")
 
 dotenv.config();
 
@@ -74,6 +75,7 @@ app.use("/api/hospital", hospitalAdminRoutes)
 app.use("/api/documents", documentRoutes)
 app.use("/api/notifications",notificationRoutes)
 app.use("/api/surgeries", surgeryRoutes);
+app.use("/api/ratings", ratingRoutes);
 //admin routes
 app.use("/api/admin", adminAuthRoutes);
 // Error handling middleware

@@ -63,14 +63,10 @@ router.put("/change-password", protect, changePassword)
 
 router.put("/change-forgoten-password/:password_hash/:id", changeForgottenPassword)
 
-router.post("/login/doctor", loginUser)
-
 router.get("/get-user-data", protect, getUserDetails)
 
 router.get("/show-slots/:doctor_id", protect, showSlots)
 
 router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
-
-router.post("/update-location" , protect , updateLocation)
 
 module.exports = router;
