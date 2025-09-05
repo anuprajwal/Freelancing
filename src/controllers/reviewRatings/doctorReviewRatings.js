@@ -55,4 +55,4 @@ const createDoctorReviewRating = async (req, res) => {
   }
 };
 
-module.exports = { createDoctorReviewRating };
+module.exports = createDoctorReviewRating;
