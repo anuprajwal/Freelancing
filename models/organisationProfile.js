@@ -93,6 +93,11 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "pending",
         allowNull: false,
       },
+      description: {
+        type: DataTypes.TEXT, 
+        defaultValue: "",
+        allowNull: true,
+      },
       profile_picture: {
         type: DataTypes.TEXT,
         allowNull: true,

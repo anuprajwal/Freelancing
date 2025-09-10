@@ -121,6 +121,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue: 45
       },
+      description: {
+        type: DataTypes.TEXT, 
+        defaultValue: "",
+        allowNull: true,
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
