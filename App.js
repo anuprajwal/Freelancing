@@ -30,7 +30,7 @@ const allowedOrigins = [
   "https://docapp.co.in",
   "http://localhost:8000",
   "https://docwebsite-ecru.vercel.app",
-  "https://wonderful-tartufo-5f805e.netlify.app/"
+  "https://wonderful-tartufo-5f805e.netlify.app"
 ];
 
 // CORS middleware
