@@ -1,19 +1,9 @@
 const cron = require('node-cron');
 const { appointments, payments, doctorProfile, doctorSlots } = require('../../models');
-const { Sequelize, Op } = require('sequelize');
 require('dotenv').config();
 
 async function startCron() {
   try {
-    const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
-      host: process.env.DB_HOST,
-      dialect: process.env.DB_DIALECT || 'mysql',
-      logging: false,
-    });
-
-    await sequelize.authenticate();
-    console.log('[CronJob] Database connected.');
-
     // Schedule the cron to run every 10 minutes
     cron.schedule('* * * * *', async () => {
       console.log('[CronJob] Checking for pending online appointments older than 10 minutes...');
