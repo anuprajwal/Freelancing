@@ -106,4 +106,4 @@ async function startCron() {
   }
 }
 
-export default startCron
+module.exports = startCron;
