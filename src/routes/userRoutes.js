@@ -65,7 +65,7 @@ router.put("/change-forgoten-password/:password_hash/:id", changeForgottenPasswo
 
 router.get("/get-user-data", protect, getUserDetails)
 
-router.get("/show-slots/:doctor_id", protect, showSlots)
+router.get("/show-slots/:doctor_id", showSlots)
 
 router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
 
