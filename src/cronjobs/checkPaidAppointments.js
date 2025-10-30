@@ -7,12 +7,12 @@ const { Op } = require('sequelize');
 async function startCron() {
   try {
     // Schedule the cron to run every 10 minutes
-    cron.schedule('* * * * *', async () => {
+    cron.schedule('*/10 * * * *', async () => {
       console.log('[CronJob] Tick:', new Date().toISOString());
       console.log('[CronJob] Checking for pending online appointments older than 10 minutes...');
 
       try {
-        const tenMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
 
         console.log(tenMinutesAgo)
         const isParanoid = !!(appointments && appointments.options && appointments.options.paranoid);
@@ -43,12 +43,12 @@ async function startCron() {
 
         for (const eachAppointment of pendingAppointments) {
           console.log(`[CronJob] Deleting appointment ID: ${eachAppointment.id}...`);
-          console.log("eachAppointment:", eachAppointment)
 
           const { doctor_id, appointment_date, appointment_start_time, appointment_end_time } = eachAppointment;
-
+		console.log("doc id is:", doctor_id)
+		console.log("date is:", appointment_date, appointment_start_time, appointment_end_time)
           // Find doctor details
-          const doctor_profile_data = await doctorProfile.findOne({ where: { id: doctor_id } });
+          const doctor_profile_data = await doctorProfile.findOne({ where: { user_id: doctor_id } });
           if (!doctor_profile_data) continue;
 
           // Fetch slot record
@@ -58,11 +58,37 @@ async function startCron() {
 
           if (!slotRecord) continue;
 
-          let slotsData = typeof slotRecord.slots === 'string' ? JSON.parse(slotRecord.slots) : slotRecord.slots;
-          const convertedDate = appointment_date.toISOString().split('T')[0];
+          let slotsData;
 
-          const dateIndex = slotsData.findIndex((s) => s.date === convertedDate);
-          if (dateIndex !== -1) {
+try {
+  if (!slotRecord.slots) {
+    slotsData = [];
+  } else if (Buffer.isBuffer(slotRecord.slots)) {
+    slotsData = JSON.parse(slotRecord.slots.toString());
+  } else if (typeof slotRecord.slots === 'string') {
+    slotsData = JSON.parse(slotRecord.slots);
+  } else if (Array.isArray(slotRecord.slots)) {
+    slotsData = slotRecord.slots;
+  } else {
+    // handle double-encoded JSON or bad type
+    slotsData = JSON.parse(JSON.stringify(slotRecord.slots));
+  }
+} catch (err) {
+  console.error('[CronJob] Failed to parse slotsData:', err);
+  slotsData = [];
+}
+
+if (!Array.isArray(slotsData)) {
+  console.error('[CronJob] Invalid slotsData type, resetting to []');
+  slotsData = [];
+}
+
+const convertedDate = appointment_date.toISOString().split('T')[0];
+const dateIndex = slotsData.findIndex((s) => s.date === convertedDate);
+
+	  
+
+		if (dateIndex !== -1) {
             const daySlots = slotsData[dateIndex].slots || [];
 
             // Restore slot (if not already there)
