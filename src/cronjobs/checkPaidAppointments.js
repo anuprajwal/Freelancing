@@ -15,7 +15,7 @@ async function startCron() {
     console.log('[CronJob] Database connected.');
 
     // Schedule the cron to run every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('* * * * *', async () => {
       console.log('[CronJob] Checking for pending online appointments older than 10 minutes...');
 
       try {
@@ -106,4 +106,4 @@ async function startCron() {
   }
 }
 
-startCron();
+export default startCron

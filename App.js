@@ -18,6 +18,11 @@ const notificationRoutes = require("./src/routes/notificationRoutes.js")
 const surgeryRoutes = require("./src/routes/surgeryRoutes.js");
 const ratingRoutes = require("./src/routes/reviewRatingsRoutes.js")
 
+
+const startCron = require("./src/cronjobs/checkPaidAppointments")
+
+startCron()
+
 dotenv.config();
 
 const app = express();
