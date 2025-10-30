@@ -1,6 +1,8 @@
 const cron = require('node-cron');
 const { appointments, payments, doctorProfile, doctorSlots } = require('../../models');
 require('dotenv').config();
+const { Op } = require('sequelize');
+
 
 async function startCron() {
   try {
