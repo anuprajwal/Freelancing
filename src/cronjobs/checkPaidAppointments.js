@@ -8,10 +8,15 @@ async function startCron() {
   try {
     // Schedule the cron to run every 10 minutes
     cron.schedule('* * * * *', async () => {
+      console.log('[CronJob] Tick:', new Date().toISOString());
       console.log('[CronJob] Checking for pending online appointments older than 10 minutes...');
 
       try {
-        const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+        const tenMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+
+        console.log(tenMinutesAgo)
+        const isParanoid = !!(appointments && appointments.options && appointments.options.paranoid);
+  console.log('[CronJob] appointments model paranoid:', isParanoid);
 
         // Find appointments older than 10 minutes and still pending
         const pendingAppointments = await appointments.findAll({
@@ -29,6 +34,7 @@ async function startCron() {
             },
           ],
         });
+        
 
         if (!pendingAppointments.length) {
           console.log('[CronJob] No pending appointments found to delete.');
@@ -37,6 +43,7 @@ async function startCron() {
 
         for (const eachAppointment of pendingAppointments) {
           console.log(`[CronJob] Deleting appointment ID: ${eachAppointment.id}...`);
+          console.log("eachAppointment:", eachAppointment)
 
           const { doctor_id, appointment_date, appointment_start_time, appointment_end_time } = eachAppointment;
 
