@@ -1,5 +1,4 @@
 const { appointments, doctorProfile, doctorSlots } = require("../../../models");
-const { Op } = require("sequelize");
 const logger = require("../../../logger");
 const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
@@ -58,7 +57,7 @@ const scheduleAppointment = async (req, res) => {
     try {
       slotRecord.slots = JSON.parse(slotRecord.slots);
     } catch (err) {
-      console.error("Invalid slots JSON string:", err);
+      console.log("Invalid slots JSON string:", err);
       slotRecord.slots = []; // Fallback
     }
   }
@@ -81,8 +80,6 @@ const scheduleAppointment = async (req, res) => {
       const filteredDaySlots = daySlots.filter(slot => !(slot.start === start && slot.end === end));
 
       updatedSlots[dateIndex].slots = filteredDaySlots;
-
-      console.log("updated data:", updatedSlots)
 
       await doctorSlots.update(
         { slots: updatedSlots },

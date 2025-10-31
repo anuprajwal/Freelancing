@@ -7,7 +7,7 @@ const { Op } = require('sequelize');
 async function startCron() {
   try {
     // Schedule the cron to run every 10 minutes
-    cron.schedule('*/10 * * * *', async () => {
+    cron.schedule('*/7 * * * *', async () => {
       console.log('[CronJob] Tick:', new Date().toISOString());
       console.log('[CronJob] Checking for pending online appointments older than 10 minutes...');
 
