@@ -91,16 +91,44 @@ const dateIndex = slotsData.findIndex((s) => s.date === convertedDate);
 		if (dateIndex !== -1) {
             const daySlots = slotsData[dateIndex].slots || [];
 
+			// Convert to "HH:MM" format (strip seconds)
+const formatTime = (timeVal) => {
+	console.log(typeof timeVal)
+	console.log(timeVal)
+  if (!timeVal) return '';
+
+  // Handle if it's a Date object (some MySQL drivers return Time as Date)
+  if (timeVal instanceof Date) {
+	  cosnole.log("it is instance of date")
+    return timeVal.toTimeString().slice(0, 5); // "HH:MM"
+  }
+
+  // Handle if it's a Buffer (rare, but possible)
+  if (Buffer.isBuffer(timeVal)) {
+	  console.log("it is buffer")
+    return timeVal.toString().slice(0, 5);
+  }
+
+  // Handle plain string
+  const str = String(timeVal);
+  if (str.includes(':')) return str.slice(0, 5);
+
+  return str;
+};
+const startTime = formatTime(appointment_start_time);
+const endTime = formatTime(appointment_end_time);
+console.log("processed values:", startTime, endTime)
+
             // Restore slot (if not already there)
             const isAlreadyThere = daySlots.some(
               (slot) =>
-                slot.start === appointment_start_time && slot.end === appointment_end_time
+                slot.start === startTime && slot.end === endTime
             );
 
             if (!isAlreadyThere) {
               daySlots.push({
-                start: appointment_start_time,
-                end: appointment_end_time,
+                start: startTime,
+                end: endTime,
               });
 
               // Sort slots by start time
