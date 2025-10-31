@@ -52,17 +52,43 @@ const scheduleAppointment = async (req, res) => {
   });
 
   // Step 4: Remove the booked slot from doctorSlots
+	  console.log("constinueing.........")
   let slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
-
+	console.log("slotRecord && !Array.isArray(slotRecord.slots):", slotRecord && !Array.isArray(slotRecord.slots))
+	  console.log(!Array.isArray(slotRecord.slots))
   if (slotRecord && !Array.isArray(slotRecord.slots)){
-    try {
-      slotRecord.slots = JSON.parse(slotRecord.slots);
-    } catch (err) {
-      console.error("Invalid slots JSON string:", err);
-      slotRecord.slots = []; // Fallback
-    }
+    let slotsData = [];
+
+try {
+  let raw = slotRecord.slots;
+
+  // Handle Sequelize returning Buffer for TEXT fields in some setups
+  if (Buffer.isBuffer(raw)) {
+    raw = raw.toString();
   }
 
+  // If it's a string (most common case), parse it
+  if (typeof raw === "string") {
+    slotsData = JSON.parse(raw);
+
+    // Handle rare double-encoded JSON
+    if (typeof slotsData === "string") {
+      slotsData = JSON.parse(slotsData);
+    }
+  } else if (Array.isArray(raw)) {
+    // Already parsed
+    slotsData = raw;
+  } else {
+    slotsData = [];
+  }
+	slotRecord.slots = slotsData
+} catch (err) {
+  console.error("[Error] Failed to parse slots JSON:", err);
+  slotsData = [];
+}
+
+console.log("✅ slotsData is array:", Array.isArray(slotsData));
+  }
   if (slotRecord && Array.isArray(slotRecord.slots)) {
     let slots;
     if (typeof slotRecord.slots === "string"){
@@ -71,15 +97,17 @@ const scheduleAppointment = async (req, res) => {
       slots = slotRecord.slots
     }
     const updatedSlots = [...slots]; // deep copy
-
-    const dateIndex = updatedSlots.findIndex(s => s.date === date);
-
+	console.log("updates slots:", updatedSlots)
+    const dateIndex = updatedSlots.findIndex(s =>{
+		console.log("matches:", s.date, date)
+	    return s.date === date});
+	console.log("dateIndex:", dateIndex)
     if (dateIndex !== -1) {
       const daySlots = updatedSlots[dateIndex].slots || [];
-
+	console.log("dayslots after index present:", daySlots)
       // Remove the slot that matches {start, end}
       const filteredDaySlots = daySlots.filter(slot => !(slot.start === start && slot.end === end));
-
+	console.log("filtered slots:", filteredDaySlots)
       updatedSlots[dateIndex].slots = filteredDaySlots;
 
       console.log("updated data:", updatedSlots)
