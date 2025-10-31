@@ -10,21 +10,38 @@ const checkSlotAvailability = async (doctor_id, start, end, date, mode) => {
   }else if (mode.includes("offline")){
     mode = 'offline'
   }
-  let slots;
-  if (typeof slotRecord.slots === "string") {
-    try {
-      slots = JSON.parse(slotRecord.slots);
-    } catch (e) {
-      slots = []; // fallback if parsing fails
-    }
-  }else{
-    slots = slotRecord.slots
-  }
-  
+  let slotsRaw = slotRecord.slots;
+let slots;
 
-  // Find slots for the given date
-  const dayEntry = slots.find(entry => entry.date === date);
-  
+try {
+  if (Buffer.isBuffer(slotsRaw)) {
+    slotsRaw = slotsRaw.toString();
+  }
+
+  if (typeof slotsRaw === "string") {
+    slots = JSON.parse(slotsRaw);
+
+    // Handle double-parsed JSON
+    if (typeof slots === "string") {
+      slots = JSON.parse(slots);
+    }
+  } else if (Array.isArray(slotsRaw)) {
+    slots = slotsRaw;
+  } else {
+    slots = [];
+  }
+} catch (err) {
+  console.error("[Error] Failed to parse slots:", err);
+  slots = [];
+}
+
+if (!Array.isArray(slots)) {
+  console.error("[Error] slots is not an array even after parsing:", slots);
+  slots = [];
+}
+
+const dayEntry = slots.find(entry => entry.date === date);
+ 
   if (!dayEntry || !dayEntry.slots) return false;
 
   if (!((dayEntry.mode === "online" || dayEntry.mode === "hybrid") && mode === 'online') && !((dayEntry.mode === "offline" || dayEntry.mode === "hybrid") && mode === 'offline')){
