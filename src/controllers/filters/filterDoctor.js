@@ -1,5 +1,4 @@
 const { doctorProfile, address, doctorSlots, User } = require("../../../models");
-const { Op, literal, Sequelize } = require('sequelize');
 
 
 // api to filter list of doctors based on the location using the pincode, ratings.
@@ -9,7 +8,10 @@ const filterDoctor = async (req, res) => {
   const { specialization } = req.query;
   try {
     const doctors = await doctorProfile.findAll({
-      where: specialization ? { specialization } : {},
+      where: {
+        ...(specialization ? { specialization } : {}),
+        verified_status: true
+      },      
       attributes: ["id", "user_id", "date_of_birth", "gender", "specialization", "experience_years", "consultation_fee", "organisation_id", "verified_status", "profile_picture", "appointment_time"],
       include: [
         {

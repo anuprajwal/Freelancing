@@ -28,8 +28,11 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
   })
 
   // Step 2: Delete the appointment
-  await appointments.destroy({ where: { id: appointment_id } });
-
+  await appointments.update(
+    { appointment_status: "cancelled" },
+    { where: { id: appointment_id } }
+  );
+  
   // Step 3: Add the slot back to doctorSlots
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id : doctor_profile_data.user_id } });
 

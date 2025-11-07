@@ -1,5 +1,5 @@
 const { organisationProfile, address, organisationRatings } = require("../../../models");
-const { Op, literal } = require('sequelize');
+const { Op } = require('sequelize');
 
 
 // the api to filter out the good rated hospitals or organisations and also based on the pincode.
@@ -11,7 +11,8 @@ const filterHospitals = async (req, res) => {
 
     const organisations = await organisationProfile.findAll({
         where: {
-            organisation_type: {[Op.contains]: type},
+            ...(type ? { organisation_type: { [Op.contains]: type } } : {}),
+            verified_status: true
         },
         include: [{
             model: address,
