@@ -70,6 +70,8 @@ router.get("/show-slots/:doctor_id", showSlots)
 
 router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
 
-router.put("/approve-doctor", protect, )
+router.put("/approve-doctor", protect, approveDoctors)
+
+router.put("/approve-hospital", protect, approveHospitals)
 
 module.exports = router;
