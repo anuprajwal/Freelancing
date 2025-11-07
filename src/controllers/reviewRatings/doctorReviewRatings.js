@@ -11,9 +11,12 @@ const createDoctorReviewRating = async (req, res) => {
   if (rating < 1 || rating > 5) {
     return res.status(400).json({ error: "Rating must be between 1 and 5" });
   }
-  const { userId } = req.user;
+  const userId = req.user.payload.id;
 
   const user = await User.findByPk(userId);
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
   if (user.role !== "general_user") {
     return res.status(404).json({ error: "User is not a general user" });
   }
