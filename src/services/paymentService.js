@@ -22,11 +22,13 @@ const updatePaymentSuccess = async (order_id, payment_id) => {
       payment_date: new Date(),
     });
 
-    const appt = await appointments.findByPk(record.appointment_id);
-    if (appt) {
-      await appt.update({ status: "confirmed", paymentStatus: "paid" });
+    const AppointmentRecord = await appointments.findOne({ where: { id: record.appointment_id } });
+    if (!AppointmentRecord) {
+      return res.status(400).json({ error: "Appointment not found" });
     }
+    await AppointmentRecord.update({ appointment_status: "confirmed" });
   }
 };
+
 
 module.exports = { createPaymentRecord, updatePaymentSuccess };
