@@ -52,6 +52,7 @@ module.exports = (sequelize, DataTypes) => {
       organisation_type: {
         type: DataTypes.ENUM("hospital", "clinic", "pharmacy", "laboratory"),
         allowNull: false,
+        defaultValue: "hospital",
       },
       user_id: {
         type: DataTypes.INTEGER,
@@ -65,11 +66,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       organisation_name: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       regestration_number: {
         type: DataTypes.STRING(10),
-        allowNull: false,
+        allowNull: true,
       },
       establishment_year: {
         type: DataTypes.DATE,
@@ -89,8 +90,8 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       verified_status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected"), 
-        defaultValue: "pending",
+        type: DataTypes.BOOLEAN, 
+        defaultValue: false,
         allowNull: false,
       },
       description: {

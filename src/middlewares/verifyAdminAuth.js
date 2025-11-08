@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 
 const verifyAdminAuth = (req, res, next) => {
-  const authHeader = req.cookies.token;
+  const authHeader = req.cookies.AdminToken;
 
   if (!authHeader) {
     return res.status(401).json({ error: "Missing or malformed token" });
@@ -21,7 +21,7 @@ const verifyAdminAuth = (req, res, next) => {
 
 const decodeToken = (token) => {
   try {
-      return {payload: jwt.verify(token, process.env.JWT_SECRET), error: null};
+      return {payload: jwt.verify(token, process.env.ADMIN_JWT_SECRET), error: null};
   } catch (error) {
       return {payload: null, error: error.message};
   }

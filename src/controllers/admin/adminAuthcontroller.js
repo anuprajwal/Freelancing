@@ -28,11 +28,18 @@ const loginAdmin = async (req, res) => {
         email: existingAdmin.email,
         scope: "admin",
       },
-      process.env.JWT_SECRET,
+      process.env.ADMIN_JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.status(200).json({ message: "Login successful", token });
+    res.cookie("AdminToken", token, {
+      httpOnly: true,  
+      secure: true,   
+      sameSite: "None",
+      maxAge: parseInt("3600000",10), 
+  });
+
+    res.status(200).json({ message: "Login successful" });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
