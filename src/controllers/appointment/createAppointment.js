@@ -1,4 +1,4 @@
-const { appointments, doctorProfile, doctorSlots } = require("../../../models");
+const { appointments, doctorProfile, doctorSlots, payments, User } = require("../../../models");
 const logger = require("../../../logger");
 const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
@@ -39,21 +39,55 @@ const scheduleAppointment = async (req, res) => {
     throw new Error("Doctor already has an appointment at this slot.");
   }
 
-  // Step 3: Proceed to confirm the appointment
-  const createdAppointment = await appointments.create({
-    user_id: req.user.payload.id,
-    doctor_id : req.body.doctor_id,
-    appointment_date: date,
-    appointment_start_time:start,
-    appointment_end_time:end,
-    status: "pending",
-    payment_mode
-  });
+  let createdAppointment;
+  let createPayment;
+
+  if (payment_mode == "online"){
+    // Step 3: Proceed to confirm the appointment
+    createdAppointment = await appointments.create({
+      user_id: req.user.payload.id,
+      doctor_id : req.body.doctor_id,
+      appointment_date: date,
+      appointment_start_time:start,
+      appointment_end_time:end,
+      status: "pending",
+      payment_mode
+    });
+  }else if (payment_mode == "offline"){
+    createdAppointment = await appointments.create({
+      user_id: req.user.payload.id,
+      doctor_id : req.body.doctor_id,
+      appointment_date: date,
+      appointment_start_time:start,
+      appointment_end_time:end,
+      status: "confirmed",
+      payment_mode
+    });
+
+    const doctorUserObj = await User.findByPk(doctorObj.user_id)
+    const userObj = await User.findByPk(req.user.payload.id)
+
+    createPayment = await payments.create({
+      user_id: req.user.payload.id,
+      appointment_id: createdAppointment.id,
+      checkup_id: null,
+      payment_status: "pending",
+      payment_date : new Date(),
+      payment_amount : doctorObj.consultation_fee,
+      payment_method : "cash",
+      payment_notes : JSON.stringify({
+        patientName: userObj.userName,
+        patientEmail: userObj.email,
+        doctorName: doctorUserObj.userName,
+        appointmentDate: createdAppointment.appointment_date,
+        appointmentTime: `${createdAppointment.appointment_start_time}-${createdAppointment.appointment_end_time}`,
+        appointmentId: createdAppointment.id,
+      })
+    })
+  }
 
   // Step 4: Remove the booked slot from doctorSlots
-	  console.log("constinueing.........")
   let slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
-	console.log("slotRecord && !Array.isArray(slotRecord.slots):", slotRecord && !Array.isArray(slotRecord.slots))
 	  console.log(!Array.isArray(slotRecord.slots))
   if (slotRecord && !Array.isArray(slotRecord.slots)){
     let slotsData = [];

@@ -9,6 +9,8 @@ const showSlots = async (req, res)=>{
 
     const allSlots = await doctorSlots.findAll({where:{doctor_id}})
 
+    console.log(allSlots)
+
     if (!allSlots){
         return res.status(404).json({error:"Cant find the slots for the doctor. Check filling out the extra doctor information"})
     }
