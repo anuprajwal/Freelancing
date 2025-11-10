@@ -9,14 +9,16 @@ const showSlots = async (req, res)=>{
 
     const allSlots = await doctorSlots.findAll({where:{doctor_id}})
 
-    console.log(allSlots)
-
     if (!allSlots){
         return res.status(404).json({error:"Cant find the slots for the doctor. Check filling out the extra doctor information"})
     }
 
 
-    return res.status(200).json({message:"Succesfully fetched all the slots for the doctor", slots:allSlots})
+    return res.status(200).json({
+  message: "Succesfully fetched all the slots for the doctor",
+  slots: allSlots.map(s => s.toJSON())
+});
+
 }
 
 module.exports = showSlots
