@@ -73,8 +73,6 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
 
         updatedSlots[dateIndex].slots = daySlots;
 
-        console.log(updatedSlots)
-
         await doctorSlots.update(
           { slots: updatedSlots },
           { where: { doctor_id } }

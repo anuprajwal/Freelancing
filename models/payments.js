@@ -27,6 +27,13 @@ module.exports = (sequelize, DataTypes) => {
         as: "user",
         onDelete: "CASCADE",
       });
+
+      appointments.belongsTo(models.organisationProfile, {
+        foreignKey: "organisation_id",
+        targetKey: "id",
+        as: "organisation",
+        onDelete: "CASCADE",
+      });
     }
   }
   payments.init(
@@ -61,6 +68,17 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         references: {
           model: "checkup_appointments",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      organisation_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        references: {
+          model: "organisation_profiles",
           key: "id",
         },
         onUpdate: "CASCADE",

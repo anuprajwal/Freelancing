@@ -28,6 +28,20 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      organisationProfile.hasMany(models.appointments, {
+        foreignKey: "organisation_id",
+        as: "appointments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+      
+      organisationProfile.hasMany(models.payments, {
+        foreignKey: "organisation_id",
+        as: "payments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+
       organisationProfile.hasOne(models.organisationRatings, {
         foreignKey: "organisation_id",
         as: "organisationRatings",

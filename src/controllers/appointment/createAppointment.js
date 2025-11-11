@@ -44,6 +44,7 @@ const scheduleAppointment = async (req, res) => {
 
   if (payment_mode == "online"){
     // Step 3: Proceed to confirm the appointment
+
     createdAppointment = await appointments.create({
       user_id: req.user.payload.id,
       doctor_id : req.body.doctor_id,
@@ -51,7 +52,9 @@ const scheduleAppointment = async (req, res) => {
       appointment_start_time:start,
       appointment_end_time:end,
       status: "pending",
-      payment_mode
+      payment_mode,
+      belongs_to_hospital: doctorObj.organisation_id !== null,
+      hospital_id: doctorObj.organisation_id
     });
   }else if (payment_mode == "offline"){
     createdAppointment = await appointments.create({
@@ -61,7 +64,9 @@ const scheduleAppointment = async (req, res) => {
       appointment_start_time:start,
       appointment_end_time:end,
       status: "confirmed",
-      payment_mode
+      payment_mode,
+      belongs_to_hospital: doctorObj.organisation_id !== null,
+      hospital_id: doctorObj.organisation_id
     });
 
     const doctorUserObj = await User.findByPk(doctorObj.user_id)
@@ -75,6 +80,7 @@ const scheduleAppointment = async (req, res) => {
       payment_date : new Date(),
       payment_amount : doctorObj.consultation_fee,
       payment_method : "cash",
+      organisation_id : doctorObj.organisation_id,
       payment_notes : JSON.stringify({
         patientName: userObj.userName,
         patientEmail: userObj.email,
@@ -88,7 +94,6 @@ const scheduleAppointment = async (req, res) => {
 
   // Step 4: Remove the booked slot from doctorSlots
   let slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
-	  console.log(!Array.isArray(slotRecord.slots))
   if (slotRecord && !Array.isArray(slotRecord.slots)){
     let slotsData = [];
 
@@ -120,7 +125,6 @@ try {
   slotsData = [];
 }
 
-console.log("✅ slotsData is array:", Array.isArray(slotsData));
   }
   if (slotRecord && Array.isArray(slotRecord.slots)) {
     let slots;
@@ -130,17 +134,12 @@ console.log("✅ slotsData is array:", Array.isArray(slotsData));
       slots = slotRecord.slots
     }
     const updatedSlots = [...slots]; // deep copy
-	console.log("updates slots:", updatedSlots)
     const dateIndex = updatedSlots.findIndex(s =>{
-		console.log("matches:", s.date, date)
 	    return s.date === date});
-	console.log("dateIndex:", dateIndex)
     if (dateIndex !== -1) {
       const daySlots = updatedSlots[dateIndex].slots || [];
-	console.log("dayslots after index present:", daySlots)
       // Remove the slot that matches {start, end}
       const filteredDaySlots = daySlots.filter(slot => !(slot.start === start && slot.end === end));
-	console.log("filtered slots:", filteredDaySlots)
       updatedSlots[dateIndex].slots = filteredDaySlots;
 
       await doctorSlots.update(

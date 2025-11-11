@@ -41,6 +41,21 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: "id",
         onDelete: "CASCADE",
       });     
+
+      appointments.hasMany(models.appointmentDocuments, {
+        foreignKey: 'appointment_id',
+        as: 'appointmentDocuments',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+
+      appointments.belongsTo(models.organisationProfile, {
+        foreignKey: "organisation_id",
+        targetKey: "id",
+        as: "organisation",
+        onDelete: "CASCADE",
+      });
+      
     }
   }
   appointments.init(
@@ -104,6 +119,22 @@ module.exports = (sequelize, DataTypes) => {
       prescription: {
         type: DataTypes.TEXT,
         allowNull: true,
+      },
+      belongs_to_hospital: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+      },
+      organisation_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        references: {
+          model: "organisation_profiles",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       created_at: {
         type: DataTypes.DATE,
