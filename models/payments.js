@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
-      appointments.belongsTo(models.organisationProfile, {
+      payments.belongsTo(models.organisationProfile, {
         foreignKey: "organisation_id",
         targetKey: "id",
         as: "organisation",
