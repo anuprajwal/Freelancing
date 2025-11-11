@@ -96,7 +96,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       consultation_fee: {
         type: DataTypes.DECIMAL(10, 2), 
-        allowNull: true
+        allowNull: false,
+        defaultValue: 500,
       },
       availability_schedule:{
         type: DataTypes.JSON,

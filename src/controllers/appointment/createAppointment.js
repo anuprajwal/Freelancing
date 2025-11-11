@@ -2,6 +2,7 @@ const { appointments, doctorProfile, doctorSlots, payments, User } = require("..
 const logger = require("../../../logger");
 const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
+const razorpay = require("../../utils/razorpay");
 
 const scheduleAppointment = async (req, res) => {
   try{
@@ -41,6 +42,7 @@ const scheduleAppointment = async (req, res) => {
 
   let createdAppointment;
   let createPayment;
+  let order;
 
   if (payment_mode == "online"){
     // Step 3: Proceed to confirm the appointment
@@ -72,6 +74,24 @@ const scheduleAppointment = async (req, res) => {
     const doctorUserObj = await User.findByPk(doctorObj.user_id)
     const userObj = await User.findByPk(req.user.payload.id)
 
+    const notes = {
+      patientName: userObj.userName,
+      patientEmail: userObj.email,
+      doctorName: doctorUserObj.userName,
+      appointmentDate: createdAppointment.appointment_date,
+      appointmentTime: `${createdAppointment.appointment_start_time}-${createdAppointment.appointment_end_time}`,
+      appointmentId: createdAppointment.id,
+    }
+    const options = {
+      amount: Math.round(doctorObj.consultation_fee * 100),
+      currency: "INR",
+      receipt: `rcpt_${createdAppointment.id}`,
+      notes,
+    };
+
+    order = await razorpay.orders.create(options);
+
+
     createPayment = await payments.create({
       user_id: req.user.payload.id,
       appointment_id: createdAppointment.id,
@@ -81,14 +101,7 @@ const scheduleAppointment = async (req, res) => {
       payment_amount : doctorObj.consultation_fee,
       payment_method : "cash",
       organisation_id : doctorObj.organisation_id,
-      payment_notes : JSON.stringify({
-        patientName: userObj.userName,
-        patientEmail: userObj.email,
-        doctorName: doctorUserObj.userName,
-        appointmentDate: createdAppointment.appointment_date,
-        appointmentTime: `${createdAppointment.appointment_start_time}-${createdAppointment.appointment_end_time}`,
-        appointmentId: createdAppointment.id,
-      })
+      payment_notes : JSON.stringify(notes)
     })
   }
 
@@ -150,7 +163,17 @@ try {
   }
 
 
-  return res.status(200).json({message:"appointment scheduled", createdAppointment})
+  return res.status(200).json({
+    message:"appointment scheduled", 
+    createdAppointment, 
+    success: true,
+    order: {
+      id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      key: process.env.RAZORPAY_KEY_ID,
+    }
+  })
   }catch(Error){
     return res.status(400).json({error:Error.message})
   }
