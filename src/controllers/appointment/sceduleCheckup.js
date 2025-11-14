@@ -17,9 +17,6 @@ const scheduleCheckup = async (req, res) => {
     return res.status(400).json({error:"the specified appointment is not yet complete"})
   }
 
-  if (!appointment_data.checkup_time){
-    return res.status(400).json({error:"this appointment has no checkup call from doctor"})
-  }
 
   const converted_date = appointment_data.appointment_date.toISOString().split('T')[0];
   const formattedToday = date.toISOString().split('T')[0];

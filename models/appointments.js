@@ -107,14 +107,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "offline",
       },
-      checkup_time:{
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
       payment_mode:{
-        type: DataTypes.ENUM("online", "offline"),
+        type: DataTypes.ENUM("cash", "card", "bank_transfer", "mobile_banking"),
         allowNull: false,
-        defaultValue: 'online'
+        defaultValue: 'mobile_banking'
       },
       prescription: {
         type: DataTypes.TEXT,

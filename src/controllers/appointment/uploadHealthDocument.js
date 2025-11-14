@@ -7,7 +7,15 @@ const uploadDocument = async (req, res) => {
   const { appointment_id } = req.body;
   const { id: user_id } = req.user.payload;
 
+  console.log(appointment_id)
+
   if (!req.file) return res.status(400).send("No file uploaded");
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    return res.status(400).json({ error: "Invalid file type. Only images allowed." });
+  }
+
   if (!appointment_id) return res.status(400).send("Appointment ID is required");
 
   try {
@@ -17,7 +25,7 @@ const uploadDocument = async (req, res) => {
     const appointmentData = await appointments.findByPk(appointment_id);
     if (!appointmentData) return res.status(404).send("Appointment not found");
 
-    const emailUnique = userData.email.split("@")[0];
+    const emailUnique = userData.email.split("@");
     const mainFolder = `${userData.role}_${emailUnique}_${userData.phone_number}_main_folder`;
 
     const file = req.file;
@@ -76,14 +84,16 @@ const getDocumentById = async (req, res) => {
   const { id } = req.params;
   try {
     const doc = await appointmentDocuments.findOne({
-      where: { id, user_id },
+      where: { id, user_id: req.user.payload.id },
     });
     if (!doc) return res.status(404).send("Document not found");
     const appointment = await appointments.findOne({
       where: {id : doc.appointment_id}
     })
     const doctorObj = await User.findByPk(appointment.doctor_id)
-    if (doc.user_id !== req.user.payload.id || doctorObj.id !== req.user.payload.id) return res.status(401).json({error:"unauthorised"})
+    console.log(doc.user_id, req.user.payload.id)
+    console.log(doctorObj.id, req.user.payload.id)
+    if (doc.user_id !== req.user.payload.id && doctorObj.id !== req.user.payload.id) return res.status(401).json({error:"unauthorised"})
     res.json(doc);
   } catch (error) {
     console.error(error);
@@ -96,6 +106,13 @@ const updateDocument = async (req, res) => {
   const { id } = req.params;
   const { appointment_id } = req.body;
   const { id: user_id } = req.user.payload;
+
+  const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+  if (!allowedMimeTypes.includes(req.file.mimetype)) {
+    return res.status(400).json({ error: "Invalid file type. Only images allowed." });
+  }
+
 
   if (!req.file) return res.status(400).send("No file uploaded");
 

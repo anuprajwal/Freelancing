@@ -2,47 +2,47 @@ const razorpay = require("../../utils/razorpay");
 const verifyRazorpaySignature = require("../../utils/verifySignature");
 const { createPaymentRecord, updatePaymentSuccess } = require("../../services/paymentService");
 
-// const createOrder = async (req, res) => {
-//   try {
-//     const {
-//       amount,
-//       appointmentId,
-//       patientName,
-//       patientEmail,
-//       doctorName,
-//       appointmentDate,
-//       appointmentTime,
-//     } = req.body;
+const createOrder = async (req, res) => {
+  try {
+    const {
+      amount,
+      appointmentId,
+      patientName,
+      patientEmail,
+      doctorName,
+      appointmentDate,
+      appointmentTime,
+    } = req.body;
 
-//     const user_id = req.user.payload.id;
-//     if (!user_id || !amount || !appointmentId) {
-//       return res.status(400).json({ error: "Missing required data" });
-//     }
+    const user_id = req.user.payload.id;
+    if (!user_id || !amount || !appointmentId) {
+      return res.status(400).json({ error: "Missing required data" });
+    }
 
-//     const notes = { patientName, patientEmail, doctorName, appointmentDate, appointmentTime, appointmentId };
-//     const options = {
-//       amount: Math.round(amount * 100),
-//       currency: "INR",
-//       receipt: `rcpt_${appointmentId}`,
-//       notes,
-//     };
+    const notes = { patientName, patientEmail, doctorName, appointmentDate, appointmentTime, appointmentId };
+    const options = {
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: `rcpt_${appointmentId}`,
+      notes,
+    };
 
-//     const order = await razorpay.orders.create(options);
+    const order = await razorpay.orders.create(options);
 
-//     return res.status(200).json({
-//       success: true,
-//       order: {
-//         id: order.id,
-//         amount: order.amount,
-//         currency: order.currency,
-//         key: process.env.RAZORPAY_KEY_ID,
-//       },
-//     });
-//   } catch (err) {
-//     console.error("Error in createOrder:", err);
-//     return res.status(500).json({ error: "Order creation failed" });
-//   }
-// };
+    return res.status(200).json({
+      success: true,
+      order: {
+        id: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        key: process.env.RAZORPAY_KEY_ID,
+      },
+    });
+  } catch (err) {
+    console.error("Error in createOrder:", err);
+    return res.status(500).json({ error: "Order creation failed" });
+  }
+};
 
 const verifyPayment = async (req, res) => {
   try {

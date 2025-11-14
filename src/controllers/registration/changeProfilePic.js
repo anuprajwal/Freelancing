@@ -7,6 +7,13 @@ const uploadProfilePic = async (req, res) => {
     const {id} = req.user.payload
     if (!req.file) return res.status(400).send('No file uploaded');
 
+    const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+
+    if (!allowedMimeTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ error: "Invalid file type. Only images allowed." });
+    }
+
+
     const userData = await User.findByPk(id)
   
     const file = req.file;

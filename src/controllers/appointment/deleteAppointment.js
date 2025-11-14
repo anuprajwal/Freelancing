@@ -1,4 +1,4 @@
-const { appointments, requestAppointments, doctorSlots, doctorProfile } = require("../../../models");
+const { appointments, doctorSlots, doctorProfile } = require("../../../models");
 
 const deleteAppointmentRestoreSlot = async (req, res) => {
   const { appointment_id } = req.query;
