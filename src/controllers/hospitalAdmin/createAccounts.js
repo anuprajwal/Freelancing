@@ -8,6 +8,12 @@ const createAccounts = async (req, res)=>{
     const organisationDetails = await organisationProfile.findOne({where:{user_id:id}})
     let createdAccounts = []
     let refusedAccounts = []
+    if (!Array.isArray(email)) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid datatype: 'email' must be an array"
+        });
+    }
     for (let i of email){
         const userExists = await User.findOne({where:{
             email : i,
