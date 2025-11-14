@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { createOrder, verifyPayment, handleWebhook , getPaymentStatus } = require("../controllers/payment/paymentController");
+const { verifyPayment, handleWebhook , getPaymentStatus } = require("../controllers/payment/paymentController");
 const bodyParser = require("body-parser");
 const protect = require("../middlewares/authMiddleware")
 
-router.post("/payment/create-order", protect, createOrder);
 router.post("/payment/verify", verifyPayment);
 
 router.post(

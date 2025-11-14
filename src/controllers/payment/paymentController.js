@@ -149,4 +149,4 @@ const getPaymentStatus = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, verifyPayment, handleWebhook, getPaymentStatus };
+module.exports = { verifyPayment, handleWebhook, getPaymentStatus };
