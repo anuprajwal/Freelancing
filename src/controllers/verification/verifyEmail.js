@@ -1,4 +1,4 @@
-const { User, otpStorage } = require("../../models");
+const { User, otpStorage } = require("../../../models");
 
 const verifyOtp = async (req, res) => {
   try {
