@@ -1,6 +1,7 @@
 const express = require("express");
 const initialiseCall = require("../controllers/caller/initialiseCall")
 const recieveCall = require('../controllers/caller/recieveCall')
+const rejectCall = require('../controllers/caller/rejectCall')
 const changeCallStatus = require('../controllers/caller/changeCallStatus')
 const addOfferCandidates = require('../controllers/caller/addOfferCandidates')
 const addAnswerCandidates = require('../controllers/caller/addAnswerCandidate');
@@ -13,6 +14,8 @@ router.post("/initialise-call", protect, initialiseCall);
 
 // api url endpoint for answering or recieving call which is already initialised
 router.put("/recieve-call", protect, recieveCall);
+
+router.put("/reject-call", protect, rejectCall)
 
 // api url endpoint for changing call statuses like rejecting/holding/completing call
 router.put("/change-call-status", protect, changeCallStatus);

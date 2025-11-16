@@ -104,7 +104,6 @@ const getDocumentById = async (req, res) => {
 // Update document (replace)
 const updateDocument = async (req, res) => {
   const { id } = req.params;
-  const { appointment_id } = req.body;
   const { id: user_id } = req.user.payload;
 
   const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];

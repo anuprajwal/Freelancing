@@ -152,6 +152,11 @@ module.exports =  (sequelize, DataTypes) => {
         type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation" , "manager"),
         allowNull: false,
       },
+      account_status:{
+        type: DataTypes.ENUM("holded", "deleted", "active"),
+        allowNull: false,
+        defaultValue: "active"
+      },
       latitude: {
          type: DataTypes.DECIMAL(10, 8),
          allowNull: true

@@ -118,6 +118,20 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png"
       },
+      account_number: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+      },
+
+      beneficiary_name: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+
+      ifsc_code: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,

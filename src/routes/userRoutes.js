@@ -17,7 +17,10 @@ const addAgent = require("../controllers/registration/addAgent.js");
 const forgotPassword = require("../controllers/registration/forgotPassword.js")
 const changePassword = require("../controllers/registration/changePassword.js")
 const changeForgottenPassword = require("../controllers/registration/changeForgotedPassword.js")
-const updateLocation = require("../controllers/address/userLocation.js")
+// const updateLocation = require("../controllers/address/userLocation.js")
+const addMobileNumber = require("../controllers/registration/addMobileNumber.js")
+const deleteProfilePic = require("../controllers/registration/deleteProfilePic.js")
+const uploadBankDetails = require("../controllers/registration/uploadBankDetails.js")
 const router = express.Router();
 
 // Step 1: Register Basic User (Common Schema)
@@ -30,6 +33,8 @@ router.put("/profile/complete/extra-doc-info", protect, updateExtraDocInfo)
 router.put("/profile/complete/hospital_organisation", protect, completeOrganisationProfile);
 router.put("/profile/complete/manager", protect, completeManagerProfile);
 router.post("/profile/complete/agent", protect, addAgent);
+
+router.post("/upload/bank-details", protect, uploadBankDetails)
 
 router.get('/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }),
@@ -68,5 +73,9 @@ router.get("/get-user-data", protect, getUserDetails)
 router.get("/show-slots/:doctor_id", showSlots)
 
 router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
+
+router.delete("/delete-profile-pic", protect, deleteProfilePic)
+
+router.post("/add-mobile-no", protect, addMobileNumber)
 
 module.exports = router;

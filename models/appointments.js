@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       appointments.hasMany(models.checkupAppointment, { 
-        foreignKey: 'appointmentId',
+        foreignKey: 'appointment_id',
         as: "checkupAppointment",
         sourceKey: "id",
         onDelete: "CASCADE",

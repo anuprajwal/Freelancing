@@ -61,14 +61,6 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull : true
       },
-      delivery_name:{
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      delivery_pno:{
-        type: DataTypes.STRING,
-        allowNull: false
-      },
       active: {
         type: DataTypes.BOOLEAN,
         allowNull: false,

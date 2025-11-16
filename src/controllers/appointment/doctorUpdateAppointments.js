@@ -69,13 +69,32 @@ const appointmentUpdateByDoctor = async (req, res) => {
   
       // Validate that doctor owns this appointment
       const appointment = await appointments.findOne({
-        where: { id: appointment_id, doctor_id: id },
+        where: { id: appointment_id },
       });
-  
+
       if (!appointment) {
-        return res.status(404).json({
-          error: "Appointment not found or not assigned to this doctor",
-        });
+        return res.status(404).json({ error: "Appointment not found" });
+      }
+
+      const { id: userId, scope } = req.user.payload;
+
+      // Access logic
+      let allowed = false;
+
+      if (scope === "doctor") {
+        if (appointment.doctor_id === userId) {
+          allowed = true;
+        }
+      }
+
+      if (scope === "general_user") {
+        if (appointment.user_id === userId) {
+          allowed = true;
+        }
+      }
+
+      if (!allowed) {
+        return res.status(403).json({ error: "You are not allowed to view this appointment/prescription" });
       }
   
       // Convert TEXT → JSON

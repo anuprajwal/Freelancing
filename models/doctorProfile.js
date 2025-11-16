@@ -127,6 +127,20 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "",
         allowNull: true,
       },
+      account_number: {
+        type: DataTypes.STRING(30),   // account numbers can be long, avoid INT
+        allowNull: true,
+      },
+
+      beneficiary_name: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+
+      ifsc_code: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
