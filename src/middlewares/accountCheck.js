@@ -4,7 +4,7 @@ const { User } = require("../../models");
 
 const checkAccountStatus = async (req, res, next) => {
   try {
-    const userId = req.user?.id; // assuming JWT middleware sets req.user
+    const userId = req.user.payload?.id; // assuming JWT middleware sets req.user
 
     if (!userId) {
       return res.status(401).json({ message: "User not authenticated" });
