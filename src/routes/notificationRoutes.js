@@ -8,7 +8,7 @@ const  protect  = require("../middlewares/authMiddleware.js");
 // const sendNotification = require("../controllers/notifications/send-notification")
 
 //protected routes
-router.post("/save-token", checkAccountStatus, protect, saveUserToken);
+router.post("/save-token", protect, checkAccountStatus, saveUserToken);
 // router.get("/create-notification", createNotification);
 // router.get("/get-doctors", getAllDoctors);
 // router.post("/send-emails", sendEmails);

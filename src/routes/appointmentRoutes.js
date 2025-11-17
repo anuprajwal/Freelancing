@@ -14,22 +14,22 @@ const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 
 const router = express.Router();
 
-router.post("/create-appointment", checkAccountStatus, protect, scheduleAppointment);
-router.delete("/delete-appointment", checkAccountStatus, protect, deleteAppointment);
-router.get("/list-appointments", checkAccountStatus, protect, showAllAppointments);
+router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointment);
+router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
+router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
 
-router.put("/doctor-update-appointment", checkAccountStatus, protect, appointmentUpdateByDoctor)
-router.get("/get-prescription-for/:appointment_id", checkAccountStatus, protect, getPrescription)
+router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
+router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
 
-router.post("/schedule-checkup-appointment", checkAccountStatus, protect, scheduleCheckup)
-router.put("/confirm-appointment", checkAccountStatus, protect, verifyPaymentAndAppointment)
-router.put("/confirm-checkup", checkAccountStatus, protect, verifyPaymentAndCheckup)
+router.post("/schedule-checkup-appointment", protect, checkAccountStatus, scheduleCheckup)
+router.put("/confirm-appointment", protect, checkAccountStatus, verifyPaymentAndAppointment)
+router.put("/confirm-checkup", protect, checkAccountStatus, verifyPaymentAndCheckup)
 
-router.post("/upload-appointment-document", checkAccountStatus, protect, upload.single("document"), uploadDocument)
-router.get("/get-document-for/:appointment_id", checkAccountStatus, protect, getDocumentsByAppointment);
-router.get("/get-document/:id", checkAccountStatus, protect, getDocumentById);
-router.put("/replace-document/:id", checkAccountStatus, protect, upload.single("document"), updateDocument);
-router.delete("/delete-document/:id", checkAccountStatus, protect, deleteDocument);
+router.post("/upload-appointment-document", protect, checkAccountStatus, upload.single("document"), uploadDocument)
+router.get("/get-document-for/:appointment_id", protect, checkAccountStatus, getDocumentsByAppointment);
+router.get("/get-document/:id", protect, checkAccountStatus, getDocumentById);
+router.put("/replace-document/:id", protect, checkAccountStatus, upload.single("document"), updateDocument);
+router.delete("/delete-document/:id", protect, checkAccountStatus, deleteDocument);
 
 
 module.exports = router;

@@ -5,12 +5,11 @@ const bodyParser = require("body-parser");
 const protect = require("../middlewares/authMiddleware")
 const checkAccountStatus = require("../middlewares/accountCheck.js")
 
-router.post("/payment/verify", checkAccountStatus, protect, verifyPayment);
+router.post("/payment/verify", protect, checkAccountStatus, verifyPayment);
 
 router.post(
   "/payment/webhook",
-  checkAccountStatus, protect,
-  bodyParser.raw({ type: "application/json" }),
+ protect,  checkAccountStatus,   bodyParser.raw({ type: "application/json" }),
   (req, res, next) => {
     try {
       req.body = JSON.parse(req.body.toString("utf8"));
@@ -22,6 +21,6 @@ router.post(
   handleWebhook
 );
 
-router.get("/payment/status/:orderId", checkAccountStatus, protect, getPaymentStatus);
+router.get("/payment/status/:orderId", protect, checkAccountStatus, getPaymentStatus);
 module.exports = router;
 

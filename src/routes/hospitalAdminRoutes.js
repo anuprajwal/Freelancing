@@ -16,14 +16,14 @@ const acceptDocRequests = require('../controllers/hospitalAdmin/acceptDocRequest
 
 
 //protected routes
-router.post("/create-accounts", checkAccountStatus, protect, hospitalAdminAuth, createAccounts);
-router.get("/get-appointments", checkAccountStatus, protect, hospitalAdminAuth, allAppointments);
-router.get("/get-doctors", checkAccountStatus, protect, hospitalAdminAuth, getAllDoctors);
-// router.post("/send-emails", checkAccountStatus, protect, hospitalAdminAuth, sendEmails);
-router.delete("/remove-staff", checkAccountStatus, protect, hospitalAdminAuth,removeHospitalStaff)
-// router.get('/get-hospital-surgeries', checkAccountStatus, protect, hospitalAdminAuth,getHospitalRequests)
-router.get('/get-admission-request', checkAccountStatus, protect, hospitalAdminAuth, getAllRequests)
-router.post('/doctor-request-admission', checkAccountStatus, protect, requestAdmissionRequest)
-router.put('/react-to-admission', checkAccountStatus, protect, hospitalAdminAuth, acceptDocRequests)
+router.post("/create-accounts", protect, checkAccountStatus, hospitalAdminAuth, createAccounts);
+router.get("/get-appointments", protect, checkAccountStatus, hospitalAdminAuth, allAppointments);
+router.get("/get-doctors", protect, checkAccountStatus, hospitalAdminAuth, getAllDoctors);
+// router.post("/send-emails", protect, checkAccountStatus, hospitalAdminAuth, sendEmails);
+router.delete("/remove-staff", protect, checkAccountStatus, hospitalAdminAuth,removeHospitalStaff)
+// router.get('/get-hospital-surgeries', protect, checkAccountStatus, hospitalAdminAuth,getHospitalRequests)
+router.get('/get-admission-request', protect, checkAccountStatus, hospitalAdminAuth, getAllRequests)
+router.post('/doctor-request-admission', protect, checkAccountStatus, requestAdmissionRequest)
+router.put('/react-to-admission', protect, checkAccountStatus, hospitalAdminAuth, acceptDocRequests)
 
 module.exports = router;

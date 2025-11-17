@@ -7,8 +7,8 @@ const checkAccountStatus = require("../middlewares/accountCheck.js")
 
 const router = exppress.Router()
 
-router.post('/sendEmailOtp' , checkAccountStatus, protect , sendEmailOtp)
-router.put('/verifyEmailMobile' , checkAccountStatus, protect , verifyOtp)
-router.post('/sendMobileOtp', checkAccountStatus ,protect , sendMobileOtp)
+router.post('/sendEmailOtp' , protect, checkAccountStatus,  sendEmailOtp)
+router.put('/verifyEmailMobile' , protect, checkAccountStatus,  verifyOtp)
+router.post('/sendMobileOtp', protect, checkAccountStatus , sendMobileOtp)
 
 module.exports = router;

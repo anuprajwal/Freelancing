@@ -8,8 +8,8 @@ const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 
 
 //protected routes
-router.post("/upload-document", checkAccountStatus, protect, upload.single('document'), uploadDocuments);
-router.get("/get-documents", checkAccountStatus, protect, getDocuments);
+router.post("/upload-document", protect, checkAccountStatus, upload.single('document'), uploadDocuments);
+router.get("/get-documents", protect, checkAccountStatus, getDocuments);
 
 
 

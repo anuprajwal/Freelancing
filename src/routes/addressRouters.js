@@ -10,10 +10,10 @@ const checkAccountStatus = require("../middlewares/accountCheck")
 
 const router = express.Router()
 
-router.post("/addAddress", checkAccountStatus,protect, addAddress)
-router.get("/getAllAddress", checkAccountStatus, protect,sendAddresses)
-router.put("/updateAddress", checkAccountStatus, protect, updateAddress)
-router.delete("/deleteAddress", checkAccountStatus, protect,removeAddress)
-router.post("/update-location", checkAccountStatus, protect, updateLocation)
+router.post("/addAddress", protect, checkAccountStatus,  addAddress)
+router.get("/getAllAddress", protect, checkAccountStatus, sendAddresses)
+router.put("/updateAddress", protect, checkAccountStatus,  updateAddress)
+router.delete("/deleteAddress", protect, checkAccountStatus, removeAddress)
+router.post("/update-location", protect, checkAccountStatus,  updateLocation)
 
 module.exports =router
