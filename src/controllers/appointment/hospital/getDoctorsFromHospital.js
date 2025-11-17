@@ -15,7 +15,7 @@ const getDoctorsByOrganisation = async (req, res) => {
     }
 
     // Verify organisation exists
-    const organisation = await organisationProfile.findByPk(organisation_id);
+    const organisation = await organisationProfile.findOne({where:{user_id:organisation_id}});
     if (!organisation || !organisation.verified_status) {
     //   logger.warn(`Organisation with id ${organisation_id} not found`);
       return res.status(404).json({ error: "Organisation not found" });
@@ -24,7 +24,7 @@ const getDoctorsByOrganisation = async (req, res) => {
     // Fetch doctors linked to the organisation
     const doctors = await doctorProfile.findAll({
       where: { 
-        organisation_id,
+        organisation_id : organisation.id,
         verified_status: true, // ✅ only verified doctors
       },      
       include: [
