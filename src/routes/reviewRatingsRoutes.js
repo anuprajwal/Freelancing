@@ -4,11 +4,12 @@ const getReviewsByAppointment = require("../controllers/reviewRatings/getReviewB
 const getReviewsByDoctor = require("../controllers/reviewRatings/getReviewByDoctor.js")
 
 const  protect  = require("../middlewares/authMiddleware.js");
+const checkAccountStatus = require("../middlewares/accountCheck.js")
 
 const router = express.Router();
 
-router.post("/doctor-review-ratings", protect, doctorReviewRatings);
-router.get("/get-appointment-rating/:appointment_id", protect, getReviewsByAppointment)
+router.post("/doctor-review-ratings", checkAccountStatus, protect, doctorReviewRatings);
+router.get("/get-appointment-rating/:appointment_id", checkAccountStatus, protect, getReviewsByAppointment)
 router.get("/get-doctor-rating/:doctor_id", getReviewsByDoctor)
 
 module.exports = router;

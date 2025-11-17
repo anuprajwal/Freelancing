@@ -6,6 +6,7 @@ const {completeDoctorProfile} = require("../controllers/registration/completeDoc
 const completeOrganisationProfile = require("../controllers/registration/registerOrganisation.js");
 require("../controllers/registration/googleOAuth.js");
 const  protect  = require("../middlewares/authMiddleware.js");
+const checkAccountStatus = require("../middlewares/accountCheck.js")
 const passport = require("passport");
 const updateExtraDocInfo = require("../controllers/registration/extraDocInfo.js");
 const getUserDetails = require("../controllers/registration/getUserData.js")
@@ -27,14 +28,14 @@ const router = express.Router();
 router.post("/register", registerUser);
 
 // Step 2: Complete Profile (Role-Based)
-router.put("/profile/complete/general_user", protect, completePatientProfile);
-router.put("/profile/complete/doctor", protect, completeDoctorProfile);
-router.put("/profile/complete/extra-doc-info", protect, updateExtraDocInfo)
-router.put("/profile/complete/hospital_organisation", protect, completeOrganisationProfile);
-router.put("/profile/complete/manager", protect, completeManagerProfile);
-router.post("/profile/complete/agent", protect, addAgent);
+router.put("/profile/complete/general_user", checkAccountStatus, protect, completePatientProfile);
+router.put("/profile/complete/doctor", checkAccountStatus, protect, completeDoctorProfile);
+router.put("/profile/complete/extra-doc-info", checkAccountStatus, protect, updateExtraDocInfo)
+router.put("/profile/complete/hospital_organisation", checkAccountStatus, protect, completeOrganisationProfile);
+router.put("/profile/complete/manager", checkAccountStatus, protect, completeManagerProfile);
+router.post("/profile/complete/agent", checkAccountStatus, protect, addAgent);
 
-router.post("/upload/bank-details", protect, uploadBankDetails)
+router.post("/upload/bank-details", checkAccountStatus, protect, uploadBankDetails)
 
 router.get('/google',
     passport.authenticate('google', { scope: ['profile', 'email'] }),
@@ -64,18 +65,18 @@ router.route("/login")
 
 router.post('/forgot-password', forgotPassword)
 
-router.put("/change-password", protect, changePassword)
+router.put("/change-password", checkAccountStatus, protect, changePassword)
 
 router.put("/change-forgoten-password/:password_hash/:id", changeForgottenPassword)
 
-router.get("/get-user-data", protect, getUserDetails)
+router.get("/get-user-data", checkAccountStatus, protect, getUserDetails)
 
 router.get("/show-slots/:doctor_id", showSlots)
 
-router.post("/upload-photo", protect, upload.single('image'), uploadProfilePic)
+router.post("/upload-photo", checkAccountStatus, protect, upload.single('image'), uploadProfilePic)
 
-router.delete("/delete-profile-pic", protect, deleteProfilePic)
+router.delete("/delete-profile-pic", checkAccountStatus, protect, deleteProfilePic)
 
-router.post("/add-mobile-no", protect, addMobileNumber)
+router.post("/add-mobile-no", checkAccountStatus, protect, addMobileNumber)
 
 module.exports = router;
