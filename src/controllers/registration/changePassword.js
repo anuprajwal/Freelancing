@@ -2,7 +2,7 @@ const {User} = require("../../../models")
 const bcrypt = require("bcrypt");
 
 const changePassword = async (req, res)=>{
-    const {user_id} = req.user.payload
+    const {id} = req.user.payload
     const {newPassword} = req.body
 
     const userData = await User.findByPk(id)
@@ -19,11 +19,12 @@ const changePassword = async (req, res)=>{
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     await User.update({
-        password_hash: hashedPassword,
+        password_hash: hashedPassword},{
         where:{
-            id: user_id
+            id
         }
-    })
+    }
+    )
 
     return res.status(200).json({message:"password changed succesfully"})
 }
