@@ -1,4 +1,5 @@
 const {User} = require("../../../models")
+const bcrypt = require("bcrypt");
 
 const changePassword = async (req, res)=>{
     const {id} = req.user.payload

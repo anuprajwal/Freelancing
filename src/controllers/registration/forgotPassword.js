@@ -1,5 +1,5 @@
 const {User} = require("../../../models")
-
+const axios = require("axios")
 const forgotPassword = async (req, res)=>{
     const {email, role} = req.body
 
