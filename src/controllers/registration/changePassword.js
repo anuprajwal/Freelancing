@@ -2,7 +2,7 @@ const {User} = require("../../../models")
 const bcrypt = require("bcrypt");
 
 const changePassword = async (req, res)=>{
-    const {id} = req.user.payload
+    const {user_id} = req.user.payload
     const {newPassword} = req.body
 
     const userData = await User.findByPk(id)
@@ -21,7 +21,7 @@ const changePassword = async (req, res)=>{
     await User.update({
         password_hash: hashedPassword,
         where:{
-            id
+            id: user_id
         }
     })
 
