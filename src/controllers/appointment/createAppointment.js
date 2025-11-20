@@ -39,22 +39,18 @@ const scheduleAppointment = async (req, res) => {
     throw new Error("Doctor already has an appointment at this slot.");
   }
 
-  let createdAppointment;
-  let createPayment;
   
   const doctorUserObj = await User.findByPk(doctorObj.user_id)
   const userObj = await User.findByPk(req.user.payload.id)
 
-  if (payment_mode == "online"){
-    // Step 3: Proceed to confirm the appointment
 
-    createdAppointment = await appointments.create({
+    const createdAppointment = await appointments.create({
       user_id: req.user.payload.id,
       doctor_id : req.body.doctor_id,
       appointment_date: date,
       appointment_start_time:start,
       appointment_end_time:end,
-      status: "pending",
+      status: payment_mode === "online" ? "pending" : "confirmed",
       payment_mode,
       belongs_to_hospital: doctorObj.organisation_id !== null,
       hospital_id: doctorObj.organisation_id
@@ -69,7 +65,7 @@ const scheduleAppointment = async (req, res) => {
       appointmentId: createdAppointment.id,
     }
 
-    createPayment = await payments.create({
+    const createPayment = await payments.create({
       user_id: req.user.payload.id,
       appointment_id: createdAppointment.id,
       checkup_id: null,
@@ -80,48 +76,14 @@ const scheduleAppointment = async (req, res) => {
       organisation_id : doctorObj.organisation_id,
       payment_notes : JSON.stringify(notes)
     })
-
-    
-  }else if (payment_mode == "offline"){
-    createdAppointment = await appointments.create({
-      user_id: req.user.payload.id,
-      doctor_id : req.body.doctor_id,
-      appointment_date: date,
-      appointment_start_time:start,
-      appointment_end_time:end,
-      status: "confirmed",
-      payment_mode,
-      belongs_to_hospital: doctorObj.organisation_id !== null,
-      hospital_id: doctorObj.organisation_id
-    });
-
-
-    const notes = {
-      patientName: userObj.userName,
-      patientEmail: userObj.email,
-      doctorName: doctorUserObj.userName,
-      appointmentDate: createdAppointment.appointment_date,
-      appointmentTime: `${createdAppointment.appointment_start_time}-${createdAppointment.appointment_end_time}`,
-      appointmentId: createdAppointment.id,
-    }
-
-    createPayment = await payments.create({
-      user_id: req.user.payload.id,
-      appointment_id: createdAppointment.id,
-      checkup_id: null,
-      payment_status: "pending",
-      payment_date : new Date(),
-      payment_amount : doctorObj.consultation_fee,
-      payment_method : payment_mode,
-      organisation_id : doctorObj.organisation_id,
-      payment_notes : JSON.stringify(notes)
-    })
-  }
 
   // Step 4: Remove the booked slot from doctorSlots
   let slotRecord = await doctorSlots.findOne({ where: { doctor_id } });
   if (slotRecord && !Array.isArray(slotRecord.slots)){
     let slotsData = [];
+
+	  console.log(createdAppointment)
+	  console.log(createPayment)
 
 try {
   let raw = slotRecord.slots;

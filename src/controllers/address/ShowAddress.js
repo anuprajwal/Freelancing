@@ -14,7 +14,8 @@ const sendAddresses = async(req, res)=>{
     const {id} = payload
 
     // logger.info(`request to show all addresses of the user made by: ${id}`)
-    const addresses = showAddresses(id)
+    const addresses = await showAddresses(id)
+	console.log(addresses)
 
 //    logger.info(`the request to show all address of user: ${id}, is complete succesfully`)
     return res.status(200).json({addresses})

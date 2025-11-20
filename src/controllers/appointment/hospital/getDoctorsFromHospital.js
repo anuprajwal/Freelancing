@@ -1,6 +1,6 @@
 const { doctorProfile, organisationProfile, doctorSlots, User } = require("../../../../models");
 // const logger = require("../../../logger");
-
+// wkufbc
 const getDoctorsByOrganisation = async (req, res) => {
   const { organisation_id } = req.params;
   const { limit = 10, offset = 0 } = req.query;
