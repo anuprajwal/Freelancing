@@ -1,4 +1,6 @@
 const { appointments, doctorSlots, doctorProfile } = require("../../../models");
+const { Op } = require("sequelize");
+
 
 const deleteAppointmentRestoreSlot = async (req, res) => {
   const { appointment_id } = req.query;
@@ -8,22 +10,22 @@ const deleteAppointmentRestoreSlot = async (req, res) => {
   }
 
   // Step 1: Find the appointment
-  const appt = await appointments.findOne({
-    where: {
-      id: appointment_id,
-      appointment_status: ['pending', 'confirmed']
+const appt = await appointments.findOne({
+  where: {
+    id: appointment_id,
+    appointment_status: {
+      [Op.in]: ['pending', 'confirmed']
     }
-  });
-
+  }
+});
   if (!appt) {
     return res.status(404).json({ error: "Appointment not found or not deletable." });
   }
 
   let { doctor_id, appointment_date, appointment_start_time, appointment_end_time } = appt;
-
   const doctor_profile_data = await doctorProfile.findOne({
     where:{
-      id : doctor_id
+      user_id : doctor_id
     }
   })
 
