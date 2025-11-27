@@ -14,6 +14,7 @@ const {
   resumeAccount,
   getHoldedAccounts
 } = require("../controllers/admin/accountManagement.js")
+const searchAccounts = require("../controllers/filters/searchAccounts.js")
 
 
 router.post("/login", loginAdmin);
@@ -30,6 +31,7 @@ router.get("/get-holded-accounts", verifyAdminAuth, getHoldedAccounts)
 router.put("/approve-doctor", verifyAdminAuth, approveDoctors)
 router.put("/approve-hospital", verifyAdminAuth, approveHospitals)
 router.get("/get-unverified-acc", verifyAdminAuth, getUnverifiedAccounts)
+router.get("/search-accounts", verifyAdminAuth, searchAccounts)
 
 
 module.exports = router;

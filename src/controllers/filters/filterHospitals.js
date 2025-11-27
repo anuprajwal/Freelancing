@@ -1,4 +1,4 @@
-const { organisationProfile, address, organisationRatings } = require("../../../models");
+const { organisationProfile, address } = require("../../../models");
 const { Op, Sequelize } = require('sequelize');
 
 
