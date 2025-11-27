@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       appointments.belongsTo(models.User, {
         foreignKey: "user_id",
         targetKey: "id",
-        as: "user",
+        as: "patient",
         onDelete: "CASCADE",
       });
 

@@ -9,24 +9,22 @@ const allAppointments = async (req, res)=>{
     }
 
     const allAppointmentsInOrganisation = await doctorProfile.findAll(
-        {
-            where:{organisation_id:org_id}, 
+      {
+        where:{organisation_id:org_id}, 
+        include: [
+          {
+            model: User,
+            as: "user",
             include: [
-                {
-                  model: User,
-                  as: 'user',
-                  attributes: ['email', 'username'],
-                  include: [
-                    {
-                      model: appointments,
-                      as: 'appointments',
-                      required: true,
-                      attributes: ['id', 'appointment_date', 'appointment_status'], 
-                    }
-                  ]
-                }
-              ],
-        }
+              {
+                model: appointments,
+                as: "doctorAppointments",
+                required: true,
+              },
+            ],
+          },
+        ],
+      }
     )
 
     if (allAppointmentsInOrganisation.length === 0){
