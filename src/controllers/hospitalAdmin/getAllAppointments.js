@@ -21,7 +21,7 @@ const allAppointments = async (req, res)=>{
                       model: appointments,
                       as: 'appointments',
                       required: true,
-                      attributes: ['id', 'date', 'status'], 
+                      attributes: ['id', 'appointment_date', 'appointment_status'], 
                     }
                   ]
                 }
