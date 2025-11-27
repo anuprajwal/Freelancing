@@ -8,7 +8,7 @@ const searchAccounts = async (req, res) => {
     let results;
 
     if (search && search.trim() !== "") {
-      results = await accounts.findAll({
+      results = await User.findAll({
         where: {
           [Op.or]: [
             { email: { [Op.like]: `%${search}%` } },
