@@ -14,7 +14,7 @@ const allAppointments = async (req, res)=>{
             include: [
                 {
                   model: User,
-                  as: 'users',
+                  as: 'user',
                   attributes: ['email', 'username'],
                   include: [
                     {
