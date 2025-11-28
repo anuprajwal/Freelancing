@@ -9,6 +9,7 @@ const appointmentRoutes = require('./src/routes/appointmentRoutes.js');
 const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
+const doctorKycRoutes = require('./src/routes/doctorKycRoutes.js'); 
 const callerRoutes = require('./src/routes/userCallRoutes.js')
 // const verificationRoutes = require('./src/routes/verificationRoutes.js')
 
@@ -26,6 +27,8 @@ app.use('/api/appointment', appointmentRoutes);
 app.use('/api/filter', filterRoutes);
 app.use("/api/address", addressRoutes)
 app.use("/api/payment",paymentRoutes)
+//create api like you want to ths is for kyc procees of doctor 
+app.use('/api/', doctorKycRoutes);
 app.use("/api/call/", callerRoutes)
 // app.use("/api/verify", verificationRoutes)
 

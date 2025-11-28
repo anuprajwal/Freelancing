@@ -1,12 +1,9 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class payments extends Model {
     static associate(models) {
-      // One appointment or any delevery has each payment and this is yet to be modified on researching over payment gateways
       payments.belongsTo(models.appointments, {
         foreignKey: "appointment_id",
         targetKey: "id",
@@ -22,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
+
   payments.init(
     {
       id: {
@@ -32,20 +30,14 @@ module.exports = (sequelize, DataTypes) => {
       user_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
+        references: { model: "users", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
       appointment_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        references: {
-          model: "appointments",
-          key: "id",
-        },
+        references: { model: "appointments", key: "id" },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
@@ -62,6 +54,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
       },
+      doctor_amount: {              // New field for Razorpay transfer to doctor
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
+      company_amount: {             // New field for Razorpay transfer to company
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
+      },
       payment_method: {
         type: DataTypes.ENUM("cash", "card", "bank_transfer"),
         allowNull: false,
@@ -73,6 +73,10 @@ module.exports = (sequelize, DataTypes) => {
       transaction_id: {
         type: DataTypes.STRING,
         allowNull: true,
+      },
+      rzp_transfer_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
       },
       created_at: {
         type: DataTypes.DATE,
@@ -86,5 +90,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
+
   return payments;
 };

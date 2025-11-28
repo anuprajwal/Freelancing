@@ -1,7 +1,5 @@
 'use strict';
-const {
-  Model
-} = require('sequelize');
+const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
   class doctorProfile extends Model {
@@ -49,6 +47,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
+
   doctorProfile.init(
     {
       id: {
@@ -60,7 +59,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "users", 
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -94,10 +93,10 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       },
       consultation_fee: {
-        type: DataTypes.DECIMAL(10, 2), 
-        allowNull: true
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: true,
       },
-      availability_schedule:{
+      availability_schedule: {
         type: DataTypes.JSON,
         allowNull: true,
       },
@@ -106,20 +105,42 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       verified_status: {
-        type: DataTypes.BOOLEAN, 
+        type: DataTypes.BOOLEAN,
         defaultValue: false,
         allowNull: false,
       },
       profile_picture: {
         type: DataTypes.TEXT,
         allowNull: true,
-        defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png"
+        defaultValue:
+          "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png",
       },
-      appointment_time:{
-        type : DataTypes.INTEGER,
+      appointment_time: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        defaultValue: 45
+        defaultValue: 45,
       },
+
+      
+      //  RAZORPAY ROUTE FIELDS
+    
+
+      rzp_account_id: {
+        type: DataTypes.STRING,
+        allowNull: true, // created after doctor registers
+      },
+
+      joined_at: {
+        type: DataTypes.DATE,
+        allowNull: true, // set when rzp account is created
+      },
+
+      kyc_status: {
+        type: DataTypes.ENUM("pending", "verified", "failed"),
+        defaultValue: "pending",
+      },
+
+      
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
@@ -129,8 +150,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
-        onUpdate: DataTypes.NOW
-      }
+        onUpdate: DataTypes.NOW,
+      },
     },
     {
       sequelize,
@@ -138,5 +159,6 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
+
   return doctorProfile;
 };
