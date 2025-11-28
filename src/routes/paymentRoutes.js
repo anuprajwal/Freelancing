@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyPayment, handleWebhook , getPaymentStatus, createOrder } = require("../controllers/payment/paymentController");
+const { verifyPayment, handleWebhook , getPaymentStatus, createOrder, getPaymentDetails, refundPayment } = require("../controllers/payment/paymentController");
 const bodyParser = require("body-parser");
 const protect = require("../middlewares/authMiddleware")
 const checkAccountStatus = require("../middlewares/accountCheck.js")
