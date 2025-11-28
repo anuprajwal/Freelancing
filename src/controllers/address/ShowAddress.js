@@ -1,6 +1,5 @@
-const { where } = require("sequelize");
 const { address } = require("../../../models");
-const logger = require('../../../logger')
+// const logger = require('../../../logger')
 
 
 const showAddresses = async (userId)=>{
@@ -14,20 +13,12 @@ const sendAddresses = async(req, res)=>{
     const {payload} = req.user
     const {id} = payload
 
-    logger.info(`request to show all addresses of the user made by: ${id}`)
-    const addresses = showAddresses(userId)
+    // logger.info(`request to show all addresses of the user made by: ${id}`)
+    const addresses = await showAddresses(id)
+	console.log(addresses)
 
-    logger.info(`the request to show all address of user: ${id}, is complete succesfully`)
+//    logger.info(`the request to show all address of user: ${id}, is complete succesfully`)
     return res.status(200).json({addresses})
 }
 
-const getActiveAddress = async (req, res)=>{
-    const {payload}= req.user
-    const {id} = payload
-    logger.info(`request to show all addresses of the user made by: ${id}`)
-    const activeAddress = showAddresses(userId).filter(active)
-    logger.info(`the request to show all address of user: ${id}, is complete succesfully`)
-    return res.status(200).json({activeAddress})
-}
-
-module.exports = sendAddresses, getActiveAddress
+module.exports = sendAddresses

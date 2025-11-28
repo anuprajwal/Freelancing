@@ -11,10 +11,24 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      payments.belongsTo(models.checkupAppointment, {
+        foreignKey: "checkup_id",
+        targetKey: "id",
+        as: "checkupAppointment",
+        onDelete: "CASCADE",
+      });
+
       payments.belongsTo(models.User, {
         foreignKey: "user_id",
         targetKey: "id",
         as: "user",
+        onDelete: "CASCADE",
+      });
+
+      payments.belongsTo(models.organisationProfile, {
+        foreignKey: "organisation_id",
+        targetKey: "id",
+        as: "organisation",
         onDelete: "CASCADE",
       });
     }
@@ -36,8 +50,32 @@ module.exports = (sequelize, DataTypes) => {
       },
       appointment_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: { model: "appointments", key: "id" },
+        allowNull: true,
+        references: {
+          model: "appointments",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      checkup_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: "checkup_appointments",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+      },
+      organisation_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        references: {
+          model: "organisation_profiles",
+          key: "id",
+        },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
@@ -63,7 +101,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       payment_method: {
-        type: DataTypes.ENUM("cash", "card", "bank_transfer"),
+        type: DataTypes.ENUM("cash", "card", "bank_transfer", "mobile_banking"),
         allowNull: false,
       },
       payment_notes: {

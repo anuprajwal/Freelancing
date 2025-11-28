@@ -19,13 +19,6 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
-      doctorProfile.hasMany(models.appointments, {
-        foreignKey: "doctor_id",
-        as: "appointments",
-        sourceKey: "id",
-        onDelete: "CASCADE",
-      });
-
       doctorProfile.hasMany(models.reviewRating, {
         foreignKey: "doctor_id",
         as: "reviewRating",
@@ -44,6 +37,14 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "doctor_id",
         as: "favourateDoctors",
         sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+
+      doctorProfile.hasMany(models.organisationRequest, {
+        foreignKey: "doctor_id",
+        as: "organisationRequest",
+        sourceKey: "id",
+        onDelete: "CASCADE",
       });
     }
   }
@@ -93,8 +94,9 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       },
       consultation_fee: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: true,
+        type: DataTypes.DECIMAL(10, 2), 
+        allowNull: false,
+        defaultValue: 500,
       },
       availability_schedule: {
         type: DataTypes.JSON,
@@ -139,8 +141,25 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.ENUM("pending", "verified", "failed"),
         defaultValue: "pending",
       },
+      description: {
+        type: DataTypes.TEXT, 
+        defaultValue: "",
+        allowNull: true,
+      },
+      account_number: {
+        type: DataTypes.STRING(30),   // account numbers can be long, avoid INT
+        allowNull: true,
+      },
 
-      
+      beneficiary_name: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+
+      ifsc_code: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
+      },
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,

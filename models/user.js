@@ -7,10 +7,10 @@ module.exports =  (sequelize, DataTypes) => {
     // user is the base table for all the other relational tables
     static associate(models) {
       User.hasOne(models.generalUser, {
-        foreignKey: "user_id", // Foreign key in the Cart table
+        foreignKey: "user_id",
         as: "generalUser",
         sourceKey: "id",
-        onDelete: "CASCADE", // If a user is deleted, delete the cart too
+        onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
 
@@ -54,13 +54,45 @@ module.exports =  (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
-      User.hasMany(models.appointments, {
+      User.hasMany(models.address, {
         foreignKey: "user_id",
-        as: "appointments",
+        as: "address",
         sourceKey: "id",
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
       });
+
+      User.hasMany(models.notificationTokens, {
+        foreignKey: "user_id",
+        as: "notificationTokens",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
+      User.hasMany(models.appointments, {
+        foreignKey: "user_id",
+        as: "patientAppointments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
+      User.hasMany(models.appointments, {
+        foreignKey: "doctor_id",
+        as: "doctorAppointments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+      });
+
+      User.hasMany(models.appointmentDocuments, {
+        foreignKey: 'user_id',
+        as: 'appointmentDocuments',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      });
+      
 
       User.hasMany(models.chatHistory, {
         foreignKey: "user_id",
@@ -125,8 +157,21 @@ module.exports =  (sequelize, DataTypes) => {
         allowNull: true,
       },
       role: {
-        type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation"),
+        type: DataTypes.ENUM("doctor", "general_user", "hospital_organisation" , "manager"),
         allowNull: false,
+      },
+      account_status:{
+        type: DataTypes.ENUM("holded", "deleted", "active"),
+        allowNull: false,
+        defaultValue: "active"
+      },
+      latitude: {
+         type: DataTypes.DECIMAL(10, 8),
+         allowNull: true
+      },
+      longitude: {
+          type: DataTypes.DECIMAL(11, 8),
+          allowNull: true
       },
       is_email_verified:{
         type: DataTypes.BOOLEAN,

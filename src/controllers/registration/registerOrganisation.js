@@ -1,4 +1,4 @@
-const { logger } = require("../../../logger");
+// const { logger } = require("../../../logger");
 const { organisationProfile, User } = require("../../../models");
 const validateUserRole = require("../../utils/validateRole");
 
@@ -7,7 +7,7 @@ const validateUserRole = require("../../utils/validateRole");
 const registerOrganisation = async (req, res)=>{
     const {payload} = req.user
     const {id} = payload
-    logger.info(`request to regester organisation is recieved by user: ${id}`)
+    // logger.info(`request to regester organisation is recieved by user: ${id}`)
 
     const userObj = await User.findByPk(id)
     
@@ -26,26 +26,30 @@ const registerOrganisation = async (req, res)=>{
 
 
 const createOrgProfile = async (req, res)=>{
-    const {org_type, org_name, org_license} = req.body
+    const {org_type, org_name, org_license, org_establishment, org_url, org_ambulance, org_services} = req.body
 
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
     if (!org_type || !org_name || !org_license){
-       logger.warning(`required fields for regestering the organisation from user: ${id} are not complete`)
+    //    logger.warning(`required fields for regestering the organisation from user: ${id} are not complete`)
        return req.status(400).json({error:"all fields are required"})
     }
 
     if (!valid_type.includes(org_type)){
-        logger.warning(`organisation type: ${org_type} is not valid`)
+        // logger.warning(`organisation type: ${org_type} is not valid`)
         return req.status(400).json({error:"organisation type is not valid"})
     }
 
     await organisationProfile.create({
-        user_id : req.user.payload.id,
-        profile_picture : "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png",
+        user_id:req.user.payload.id,
         organisation_name:org_name,
         organisation_type:org_type,
-        regestration_number: org_license
+        regestration_number:org_license,
+        establishment_year:org_establishment,
+        website_url:org_url,
+        profile_picture: "https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png",
+        ambulance_available:org_ambulance,
+        specializations_provided:org_services
     })
 
     return res.status(200).json({message:"organisation profile is created succesfully"})
@@ -57,10 +61,10 @@ const updateOrgProfile = async (req, res)=>{
 
     const valid_type = ['hospital','clinic','pharmacy','laboratory']
 
-    if (!valid_type.includes(org_type)){
-        logger.warning(`organisation type: ${org_type} is not valid`)
-        return req.status(400).json({error:"organisation type is not valid"})
-    }
+    // if (!valid_type.includes(org_type)){
+        // logger.warning(`organisation type: ${org_type} is not valid`)
+        // return req.status(400).json({error:"organisation type is not valid"})
+    // }
 
     const {
         org_name = org_obj.organisation_name,
@@ -88,4 +92,4 @@ const updateOrgProfile = async (req, res)=>{
     return res.status(200).json({message:"organisation profile is updated succesfully"})
 }
 
-module.exports = {registerOrganisation}
+module.exports = registerOrganisation

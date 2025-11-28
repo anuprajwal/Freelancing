@@ -7,6 +7,8 @@ const completeDoctorProfile = async (req, res) => {
   try {
     const { payload } = req.user; 
     const { id } = payload;
+
+    console.log("id:  ",id)
     
     const user = await validateUserRole(id, "doctor");
     if (!user){
@@ -18,18 +20,12 @@ const completeDoctorProfile = async (req, res) => {
 
 
     const doctorObj = await doctorProfile.findOne({where:{user_id:id}})
-    if (!doctorObj){
-      createDoctorProfile(req, res)
-    }else{
-      updateDoctorProfile(req, res, doctorObj)
-    }
-
-    let doctorExists  = doctorObj !== undefined ? true : false
-
-    // Mark doctor profile as completed
     await user.update({ is_active: true });
-
-    return res.status(200).json({ message: "Profile updated successfully", doctorExists });
+    if (!doctorObj){
+      return createDoctorProfile(req, res)
+    }else{
+      return updateDoctorProfile(req, res, doctorObj)
+    }
   } catch (error) {
     console.error("Doctor profile update error:", error);
     return res.status(500).json({ error: "Internal server error." });
@@ -43,8 +39,8 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     gender,
     profile_picture,
     specialization,
-    organisation_id,
-    license_number
+    license_number,
+    experience_years
   } = req.body;
 
   
@@ -62,8 +58,8 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     gender: gender ?? doctorObj.gender,
     profile_picture: profile_picture ?? doctorObj.profile_picture,
     specialization: specialization ?? doctorObj.specialization,
-    organisation_id: organisation_id ?? doctorObj.organisation_id,
-    license_number: license_number ?? doctorObj.license_number
+    license_number: license_number ?? doctorObj.license_number,
+    experience_years: experience_years ?? doctorObj.experience_years
   };
 
   await doctorProfile.update({
@@ -71,15 +67,15 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     gender : updatedDoctor.gender,
     profile_picture : updatedDoctor.profile_picture,
     specialization : updatedDoctor.specialization,
-    organisation_id : updatedDoctor.organisation_id,
-    license_number : updatedDoctor.license_number
+    license_number : updatedDoctor.license_number,
+    experience_years : updatedDoctor.experience_years
   }, {where:{user_id:req.user.payload.id}})
-
+  return res.status(200).json({ message: "Profile updated successfully" });
 }
 
 
 const createDoctorProfile = async (req, res)=>{
-  const {date_of_birth, gender, profile_picture="https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png", specialization, organisation_id=null, license_number } = req.body
+  const {date_of_birth, experience_years, gender, profile_picture="https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png", specialization, license_number } = req.body
 
   if (!date_of_birth || !specialization || !license_number){
     return res.status(400).json({error:"couldnot find required fields in the request"})
@@ -97,9 +93,11 @@ const createDoctorProfile = async (req, res)=>{
     gender,
     profile_picture,
     specialization,
-    organisation_id,
-    license_number
+    license_number,
+    experience_years
   })
+
+  return res.status(200).json({ message: "Profile updated successfully" });
 
 }
 

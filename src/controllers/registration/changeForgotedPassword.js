@@ -1,0 +1,36 @@
+const {User} = require("../../../models")
+
+const changeForgottenPassword = async (req, res)=>{
+    const {id, password_hash} = req.params
+    const {newPassword} = req.body
+
+    const userData = await User.findOne({
+        where:{
+            id,
+            password_hash
+        }
+    })
+
+    if (!userData){
+        return res.status(404).json({error:"cant find the user"})
+    }
+
+    if (!newPassword){
+        return res.status(400).json({error: "newPassword cant be null"})
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    await User.update({
+        password_hash: hashedPassword,
+        where:{
+            id
+        }
+    })
+
+    return res.status(200).json({message:"password changed succesfully"})
+}
+
+
+module.exports = changeForgottenPassword

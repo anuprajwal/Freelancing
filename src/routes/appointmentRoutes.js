@@ -1,20 +1,35 @@
 const express = require("express");
 const  scheduleAppointment  = require("../controllers/appointment/createAppointment.js");
 const  deleteAppointment  = require("../controllers/appointment/deleteAppointment.js");
-const  updateAppointment  = require("../controllers/appointment/updateAppointment.js");
 const  showAllAppointments  = require("../controllers/appointment/showAllAppointments.js");
 const  protect  = require("../middlewares/authMiddleware.js");
-const appointmentUpdateByDoctor = require("../controllers/appointment/doctorUpdateAppointments.js");
+const checkAccountStatus = require("../middlewares/accountCheck.js")
+const {appointmentUpdateByDoctor, getPrescription} = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
+const { verifyPaymentAndAppointment, verifyPaymentAndCheckup } = require("../controllers/appointment/confirmPaymentAndAppointment.js")
+const {uploadDocument, getDocumentsByAppointment, getDocumentById, updateDocument, deleteDocument,} = require("../controllers/appointment/uploadHealthDocument.js")
+const upload = require("../controllers/savingSpaces/connectCloudDb.js")
+
+
 
 const router = express.Router();
 
-router.post("/create-appointment", protect, scheduleAppointment);
-router.delete("/delete-appointment", protect, deleteAppointment);
-router.put("/update-appointment", protect, updateAppointment);
-router.get("/list-appointments", protect, showAllAppointments);
-router.put("/doctor-update-appointment", protect, appointmentUpdateByDoctor)
-router.post("/schedule-ceckup-appointment", protect, scheduleCheckup)
+router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointment);
+router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
+router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
+
+router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
+router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
+
+router.post("/schedule-checkup-appointment", protect, checkAccountStatus, scheduleCheckup)
+router.put("/confirm-appointment", protect, checkAccountStatus, verifyPaymentAndAppointment)
+router.put("/confirm-checkup", protect, checkAccountStatus, verifyPaymentAndCheckup)
+
+router.post("/upload-appointment-document", protect, checkAccountStatus, upload.single("document"), uploadDocument)
+router.get("/get-document-for/:appointment_id", protect, checkAccountStatus, getDocumentsByAppointment);
+router.get("/get-document/:id", protect, checkAccountStatus, getDocumentById);
+router.put("/replace-document/:id", protect, checkAccountStatus, upload.single("document"), updateDocument);
+router.delete("/delete-document/:id", protect, checkAccountStatus, deleteDocument);
 
 
 module.exports = router;

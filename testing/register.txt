@@ -1,0 +1,111 @@
+registering general_user : 
+ { "username":"anuprajwal user", "email":"anupuser@gmail.com", "phone_number":"123333", "password":"anuanu", "role":"general_user" }
+api : http://127.0.0.1:3002/api/auth/register POST
+
+
+registering doctor :
+ { "username":"anuprajwal doctor", "email":"anupdoc@gmail.com", "phone_number":"1233", "password":"anuanu", "role":"doctor" }
+ api :  POST  http://127.0.0.1:3002/api/auth/register
+
+
+user log in:
+{
+    "email":"anupdoc@gmail.com",
+    "password":"anuanu",
+    "role":"doctor"
+}
+http://127.0.0.1:3002/api/auth/login/general_user  POST
+//valid for all users be it general_user , doctor , hospital just change the role
+
+
+complete general_user profile :
+{
+    "date_of_birth":"2006-07-25",
+    "gender":"Male",
+    "profile_picture":"https://images.ctfassets.net/h6goo9gw1hh6/2sNZtFAWOdP1lmQ33VwRN3/24e953b920a9cd0ff2e1d587742a2472/1-intro-photo-final.jpg?w=1200&h=992&fl=progressive&q=70&fm=jpg"
+}
+api : http://127.0.0.1:3002/api/auth/profile/complete/general_user PUT
+
+
+complete doctor profile :
+{
+    "date_of_birth":"2006-07-25",
+    "gender":"Male",
+    "specialization":"Cardiologist",
+    "license_number":"dc75dc452"
+}
+http://127.0.0.1:3002/api/auth/profile/complete/doctor  PUT
+
+
+
+extra doc info : 
+{
+    "availability_schedule":[
+        {
+            "day":"monday",
+            "loginTime": "09:00",
+      "logoutTime": "17:00",
+      "breaks": ["12:00-12:30"]
+        },
+        {
+            "day":"tuesday",
+            "loginTime": "10:00",
+      "logoutTime": "16:00",
+      "breaks": ["13:00-13:45"]
+
+        },
+        {
+            "day":"wednesday",
+            "loginTime": "08:30",
+      "logoutTime": "18:00",
+      "breaks": ["12:30-13:00", "15:30-15:45"]
+
+        },
+        {
+            "day":"thursday",
+            "loginTime": "09:00",
+      "logoutTime": "15:00",
+      "breaks": ["11:30-12:00"]
+
+        },
+        {
+            "day":"friday",
+             "loginTime": "10:00",
+      "logoutTime": "14:00",
+      "breaks": ["12:00-12:15"]
+
+        },
+        {
+            "day":"saturday",
+             "loginTime": "11:00",
+      "logoutTime": "13:00",
+      "breaks": []
+
+        },
+        {
+            "day":"sunday"
+        }
+    ], "consultation_fee":540, "experience_years":2, "appointment_slot":30
+}
+http://127.0.0.1:3002/api/auth/profile/complete/extra-doc-info  PUT
+
+
+
+
+create appointment :
+{
+    "doctor_id" : "2",
+    "date":"2025-07-03",
+    "start":"14:00",
+    "end":"14:30",
+    "type":"online_video"
+}
+
+http://127.0.0.1:3002/api/appointment/create-appointment POST 
+
+
+delete appointment : 
+{
+    "appointment_id":"8"
+}
+http://localhost:3002/api/appointment/delete-appointment? DELETE 

@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'appointment_id',
         as: 'appointment'
       });
+      checkupAppointment.hasOne(models.payments, {
+        foreignKey: "checkup_id",
+        as: "payments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
     }
   }
   checkupAppointment.init(
@@ -60,9 +66,18 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
-      checkup_time: {
-        type: DataTypes.INTEGER,
+      checkup_start_time: {
+        type: DataTypes.TIME,
         allowNull: true,
+      },
+      checkup_end_time: {
+        type: DataTypes.TIME,
+        allowNull: true,
+      },
+      is_payment_required: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
       },
       checkup_status: { 
         type: DataTypes.ENUM("pending", "confirmed", "completed", "cancelled"),

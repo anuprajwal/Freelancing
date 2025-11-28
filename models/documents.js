@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
       },
       document_type: {
-        type: DataTypes.ENUM(/* organisation documents */ "registration_certificate", "tax_id", "certificate_of_incorporation", "T_C_Agreement", "blood_bank_license", "drug_license",/* doctor documents */ "medical_license", "degree_certificate",/* pharmacy documents */ "FSSAI_Registration", "NDPS_License"),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       user_id: {

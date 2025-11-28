@@ -10,10 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       appointments.belongsTo(models.User, {
         foreignKey: "user_id",
         targetKey: "id",
-        as: "user",
+        as: "patient",
         onDelete: "CASCADE",
       });
-      appointments.belongsTo(models.doctorProfile, {
+
+      appointments.belongsTo(models.User, {
         foreignKey: "doctor_id",
         targetKey: "id",
         as: "doctor",
@@ -34,12 +35,27 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
-      appointments.hasMany(models.appointmentReschedule, {
-        foreignKey: "appointment_id",
-        as: "reschedule",
+      appointments.hasMany(models.checkupAppointment, { 
+        foreignKey: 'appointment_id',
+        as: "checkupAppointment",
         sourceKey: "id",
         onDelete: "CASCADE",
+      });     
+
+      appointments.hasMany(models.appointmentDocuments, {
+        foreignKey: 'appointment_id',
+        as: 'appointmentDocuments',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       });
+
+      appointments.belongsTo(models.organisationProfile, {
+        foreignKey: "organisation_id",
+        targetKey: "id",
+        as: "organisation",
+        onDelete: "CASCADE",
+      });
+      
     }
   }
   appointments.init(
@@ -63,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-          model: "doctor_profiles",
+          model: "users",
           key: "id",
         },
         onUpdate: "CASCADE",
@@ -82,7 +98,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       appointment_status: {
-        type: DataTypes.ENUM("pending", "confirmed", "cancelled", "closed"),
+        type: DataTypes.ENUM("pending", "confirmed", "cancelled", "closed", "unpaid"),
         allowNull: false,
         defaultValue: "pending",
       },
@@ -91,13 +107,30 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "offline",
       },
-      checkup_time:{
-        type: DataTypes.INTEGER,
-        allowNull: true,
+      payment_mode:{
+        type: DataTypes.ENUM("cash", "card", "bank_transfer", "mobile_banking"),
+        allowNull: false,
+        defaultValue: 'mobile_banking'
       },
       prescription: {
         type: DataTypes.TEXT,
         allowNull: true,
+      },
+      belongs_to_hospital: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+        allowNull: true
+      },
+      organisation_id: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: null,
+        references: {
+          model: "organisation_profiles",
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
       },
       created_at: {
         type: DataTypes.DATE,

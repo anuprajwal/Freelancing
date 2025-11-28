@@ -1,5 +1,5 @@
 const { doctorProfile, doctorSlots } = require("../../../models");
-const generateWeeklySlots = require("../slots/createSlots");
+const createOrMergeDoctorSlots = require("../slots/createSlots");
 
 
 const updateExtraDocInfo = async(req, res)=>{
@@ -27,15 +27,21 @@ const updateExtraDocInfo = async(req, res)=>{
 
     const slotSaved = await createSlot(req, res, availability_schedule, appointment_slot)
 
+    if (!slotSaved){
+        return res.status(400).json({error:"appointment mode is not acceptable, slots not created"})
+    }
+
     if (consultationSaved && experienceSaved && availabilitySaved && slotSaved){
         return res.status(200).json({message:"succesfully completed adding the extra info of doctors"})
     }
 }
 
 const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
-    const slots = await generateWeeklySlots(req.user.payload.id,availability_schedule, appointment_slot);
-    
-    if (slots){
+    const slots = await createOrMergeDoctorSlots(req.user.payload.id,availability_schedule, appointment_slot);
+    console.log("printin slots in main",slots)
+    if (slots.error){
+        return false
+    }else if (slots){
         return true
     }
     
@@ -69,7 +75,8 @@ const addAvailabilitySchedule= async (req, res, availability_schedule)=>{
       availabilityTimeTable[i.day] = {
         start : i.loginTime || null,
         end : i.logoutTime || null,
-        breaks : i.breaks || null
+        breaks : i.breaks || null,
+        appointment_mode : i.mode || null
       }
     }
 

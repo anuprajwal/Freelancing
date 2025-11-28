@@ -49,11 +49,6 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
       },
-      rating: {
-        type: DataTypes.INTEGER,
-        validate: { min: 1, max: 5 },
-        allowNull: false,
-      },
       review_text: {
         type: DataTypes.TEXT,
         allowNull: false,

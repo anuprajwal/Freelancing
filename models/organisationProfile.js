@@ -28,9 +28,29 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: "CASCADE",
       });
 
+      organisationProfile.hasMany(models.appointments, {
+        foreignKey: "organisation_id",
+        as: "appointments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+      
+      organisationProfile.hasMany(models.payments, {
+        foreignKey: "organisation_id",
+        as: "payments",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+
       organisationProfile.hasOne(models.organisationRatings, {
         foreignKey: "organisation_id",
         as: "organisationRatings",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
+      organisationProfile.hasMany(models.organisationRequest, {
+        foreignKey: "org_id",
+        as: "organisationRequest",
         sourceKey: "id",
         onDelete: "CASCADE",
       });
@@ -46,6 +66,7 @@ module.exports = (sequelize, DataTypes) => {
       organisation_type: {
         type: DataTypes.ENUM("hospital", "clinic", "pharmacy", "laboratory"),
         allowNull: false,
+        defaultValue: "hospital",
       },
       user_id: {
         type: DataTypes.INTEGER,
@@ -59,12 +80,11 @@ module.exports = (sequelize, DataTypes) => {
       },
       organisation_name: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       regestration_number: {
         type: DataTypes.STRING(10),
-        allowNull: false,
-        unique: true,
+        allowNull: true,
       },
       establishment_year: {
         type: DataTypes.DATE,
@@ -84,14 +104,33 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       verified_status: {
-        type: DataTypes.ENUM("pending", "approved", "rejected"), 
-        defaultValue: "pending",
+        type: DataTypes.BOOLEAN, 
+        defaultValue: false,
         allowNull: false,
+      },
+      description: {
+        type: DataTypes.TEXT, 
+        defaultValue: "",
+        allowNull: true,
       },
       profile_picture: {
         type: DataTypes.TEXT,
         allowNull: true,
         defaultValue:"https://res.cloudinary.com/dwshjkk42/image/upload/v1751270847/hospital-building_4821512_qr0gvo.png"
+      },
+      account_number: {
+        type: DataTypes.STRING(30),
+        allowNull: true,
+      },
+
+      beneficiary_name: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+      },
+
+      ifsc_code: {
+        type: DataTypes.STRING(20),
+        allowNull: true,
       },
       created_at: {
         type: DataTypes.DATE,
