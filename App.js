@@ -9,6 +9,7 @@ const appointmentRoutes = require('./src/routes/appointmentRoutes.js');
 const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
+const doctorKycRoutes = require('./src/routes/doctorKycRoutes.js'); 
 const callerRoutes = require('./src/routes/userCallRoutes.js')
 const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
 const verificationRoutes = require('./src/routes/verificationRoutes.js');
@@ -77,6 +78,7 @@ app.use("/api/address", addressRoutes)
 app.use("/api",paymentRoutes)
 app.use("/api/call", callerRoutes)
 app.use("/api/verify", verificationRoutes)
+app.use('/api/kyc', doctorKycRoutes);
 app.use("/api/hospital", hospitalAdminRoutes)
 app.use("/api/documents", documentRoutes)
 app.use("/api/notifications",notificationRoutes)
