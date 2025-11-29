@@ -151,7 +151,7 @@ const scheduleCheckup = async (req, res) => {
         payment_status: "pending",
         payment_date: new Date(),
         payment_amount: amount,
-        payment_method: payment_mode || 'online', // prefer incoming payment_mode else default
+        payment_method: payment_mode || 'mobile_banking', // prefer incoming payment_mode else default
         organisation_id: doctorProf.organisation_id || null,
         payment_notes: JSON.stringify({
           note: "Follow-up checkup scheduled beyond free window",
