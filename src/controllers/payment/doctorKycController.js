@@ -5,7 +5,7 @@ const {
   uploadDocument
 } = require("../../services/rzpService.js");
 
-const { doctorProfile, User } = require("../models");
+const { doctorProfile, User } = require("../../../models");
 
 
 exports.createLinkedAccount = async (req, res) => {
