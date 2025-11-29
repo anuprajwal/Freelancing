@@ -15,7 +15,7 @@ router.post('/verify-payment', protect, checkAccountStatus, verifyPayment);
 router.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
-  paymentController.handleWebhook
+  handleWebhook
 );
 
 // Fetch Payment Details

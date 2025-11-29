@@ -14,7 +14,7 @@ function formatTime(minutes) {
 function generateWeeklySlots(weeklySchedule, slotDurationMinutes = 30) {
   const weekSlots = [];
 
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 30; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
 
