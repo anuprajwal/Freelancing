@@ -4,23 +4,21 @@ const router = express.Router();
 const upload = require("../middlewares/fileUpload.js");
 const verifyWebhook = require("../middlewares/verifyRzpWebhook.js");
 
-const {
-  createLinkedAccount,
-  uploadKycDocument,
-  razorpayWebhook,
-} = require("../controllers/payment/doctorKycController.js");
+const doctorKycController = require("../controllers/payment/doctorKycController");
+const { handleWebhook } = require("../controllers/payment/webhookController.js"); // <-- correct name
 
 // Create Linked Account
-router.post("/doctor/:id/create-linked-account", createLinkedAccount);
+router.post("/doctor/:id/create-linked-account", doctorKycController.createLinkedAccount);
 
 // Upload KYC Document
-router.post(
-  "/doctor/:id/upload-kyc",
-  upload.single("document"),
-  uploadKycDocument
-);
+router.post("/doctor/:id/upload-kyc", upload.single("document"), doctorKycController.uploadKycDocument);
 
-// Razorpay KYC Webhook
-router.post("/razorpay/kyc-webhook", verifyWebhook, razorpayWebhook);
+// Razorpay KYC Webhook (public)
+router.post(
+  "/razorpay/kyc-webhook",
+  express.raw({ type: "application/json" }), // required for signature verification
+  verifyWebhook,                             // signature check middleware
+  handleWebhook                               // <-- use the correct exported function
+);
 
 module.exports = router;
