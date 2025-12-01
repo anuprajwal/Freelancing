@@ -1,62 +1,29 @@
+// controllers/payment/paymentController.js
 const crypto = require("crypto");
-const razorpay = require("../../utils/razorpay");
-const { payments, appointments, doctorProfile } = require("../../../models");
+const { createOrderWithTransfers, razorpay } = require("../../services/rzpService");
+const { payments, appointments, doctorProfile } = require("../../models");
 
-
-const createOrder = async (req, res) => {
+/**
+ * POST /payment/create-order
+ * body: { amount, appointmentId, patientName, patientEmail, doctorId, appointmentDate, appointmentTime }
+ */
+exports.createOrder = async (req, res) => {
   try {
-    const {
-      amount,
-      appointmentId,
-      patientName,
-      patientEmail,
-      doctorId,
-      appointmentDate,
-      appointmentTime,
-    } = req.body;
-
-    if (!amount || !appointmentId || !patientEmail || !doctorId) {
-      return res.status(400).json({ success: false, message: "Missing required fields" });
-    }
+    const { amount, appointmentId, patientName, patientEmail, doctorId, appointmentDate, appointmentTime } = req.body;
+    if (!amount || !appointmentId || !patientEmail || !doctorId) return res.status(400).json({ success: false, message: "Missing required fields" });
 
     const doctor = await doctorProfile.findByPk(doctorId);
     if (!doctor) return res.status(404).json({ success: false, message: "Doctor not found" });
-    if (doctor.kyc_status !== "verified") {
-      return res.status(400).json({ success: false, message: "Doctor KYC not verified" });
-    }
+    if (doctor.kyc_status !== "verified") return res.status(400).json({ success: false, message: "Doctor KYC not verified" });
 
-    // Calculate split
-    const joinedAt = doctor.joined_at;
-    const now = new Date();
-    const diffMonths = (now.getFullYear() - joinedAt.getFullYear()) * 12 + (now.getMonth() - joinedAt.getMonth());
-    const companyShare = diffMonths < 2 ? 0.10 : 0.30;
-    const doctorShare = 1 - companyShare;
-    const doctorAmount = Math.round(amount * doctorShare * 100);
-    const companyAmount = Math.round(amount * companyShare * 100);
+    const receipt = `receipt_${appointmentId}_${Date.now()}`;
+    const notes = { appointmentId, patientName, patientEmail, doctorId, appointmentDate, appointmentTime };
 
-    // Create Razorpay order with transfers
-    const order = await razorpay.orders.create({
-      amount: Math.round(amount * 100),
-      currency: "INR",
-      receipt: `receipt_${appointmentId}`,
-      notes: { appointmentId, patientName, patientEmail, doctorId, appointmentDate, appointmentTime },
-      transfers: [
-        {
-          account: doctor.rzp_account_id,
-          amount: doctorAmount,
-          currency: "INR",
-          on_hold: false,
-          fee_bearer: "recipient",
-          notes: { doctorId, appointmentId },
-        },
-        {
-          account: process.env.COMPANY_RZP_ACCOUNT_ID,
-          amount: companyAmount,
-          currency: "INR",
-          on_hold: false,
-          notes: { appointmentId },
-        },
-      ],
+    const { order, doctorPaise, platformPaise } = await createOrderWithTransfers({
+      amount,
+      receipt,
+      notes,
+      doctorProfile: doctor,
     });
 
     // Save payment record
@@ -65,26 +32,29 @@ const createOrder = async (req, res) => {
       appointment_id: appointmentId,
       payment_status: "pending",
       payment_date: new Date(),
-      payment_amount: amount,
-      doctor_amount: doctorAmount / 100,
-      company_amount: companyAmount / 100,
+      payment_amount: Number(amount),
+      doctor_amount: doctorPaise / 100,
+      company_amount: platformPaise / 100,
       payment_method: "card",
       transaction_id: order.id,
-      payment_notes: JSON.stringify({ patientName, patientEmail, doctorId, appointmentDate, appointmentTime }),
+      payment_notes: JSON.stringify(notes),
     });
 
-    res.json({
+    return res.json({
       success: true,
-      order: { id: order.id, amount: order.amount, currency: order.currency, key: process.env.RAZORPAY_KEY_ID },
+      order: { id: order.id, amount: order.amount, currency: order.currency, key: process.env.RZP_KEY_ID },
     });
-  } catch (error) {
-    console.error("Error creating Razorpay order:", error);
-    res.status(500).json({ success: false, message: "Failed to create order" });
+  } catch (err) {
+    console.error("createOrder error:", err.response?.data || err.message || err);
+    return res.status(500).json({ success: false, message: "Failed to create order" });
   }
 };
 
-
-const verifyPayment = async (req, res) => {
+/**
+ * POST /verify-payment
+ * body: { razorpay_order_id, razorpay_payment_id, razorpay_signature }
+ */
+exports.verifyPayment = async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -92,11 +62,7 @@ const verifyPayment = async (req, res) => {
     }
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body.toString())
-      .digest("hex");
-
+    const expectedSignature = crypto.createHmac("sha256", process.env.RZP_KEY_SECRET).update(body.toString()).digest("hex");
     if (expectedSignature !== razorpay_signature) {
       return res.status(400).json({ success: false, message: "Invalid signature" });
     }
@@ -109,71 +75,75 @@ const verifyPayment = async (req, res) => {
     const appointment = await appointments.findByPk(paymentRecord.appointment_id);
     if (appointment) await appointment.update({ status: "confirmed", paymentStatus: "paid" });
 
-    res.json({ success: true, message: "Payment verified successfully", appointmentId: paymentRecord.appointment_id });
+    return res.json({ success: true, message: "Payment verified", appointmentId: paymentRecord.appointment_id });
   } catch (err) {
-    console.error("Error in verifyPayment:", err);
+    console.error("verifyPayment error:", err);
     return res.status(500).json({ success: false, message: "Payment verification failed" });
   }
 };
 
-
-const getPaymentStatus = async (req, res) => {
-  const { orderId } = req.params;
-  if (!orderId) return res.status(400).json({ success: false, message: "Order ID is required" });
-
+/**
+ * GET /status/:orderId
+ */
+exports.getPaymentStatus = async (req, res) => {
   try {
+    const { orderId } = req.params;
+    if (!orderId) return res.status(400).json({ success: false, message: "Order ID required" });
     const order = await razorpay.orders.fetch(orderId);
-    res.json({ success: true, status: order.status, order });
-  } catch (error) {
-    console.error("Error getting payment status:", error);
-    res.status(500).json({ success: false, message: "Failed to get status" });
+    return res.json({ success: true, status: order.status, order });
+  } catch (err) {
+    console.error("getPaymentStatus error:", err);
+    return res.status(500).json({ success: false, message: "Failed to get status" });
   }
 };
 
-
-const getPaymentDetails = async (req, res) => {
+/**
+ * GET /payment/:paymentId
+ */
+exports.getPaymentDetails = async (req, res) => {
   try {
     const { paymentId } = req.params;
     if (!paymentId) return res.status(400).json({ success: false, message: "Payment ID required" });
-
     const payment = await razorpay.payments.fetch(paymentId);
-    res.json({ success: true, payment });
+    return res.json({ success: true, payment });
   } catch (err) {
-    console.error("Error fetching payment details:", err);
-    res.status(500).json({ success: false, message: "Failed to get payment details" });
+    console.error("getPaymentDetails error:", err);
+    return res.status(500).json({ success: false, message: "Failed to fetch payment details" });
   }
 };
 
-
-const refundPayment = async (req, res) => {
+/**
+ * POST /refund
+ * body: { paymentId, amount? }
+ */
+exports.refundPayment = async (req, res) => {
   try {
     const { paymentId, amount } = req.body;
     if (!paymentId) return res.status(400).json({ success: false, message: "Payment ID required" });
-
-    const refund = await razorpay.payments.refund(paymentId, {
-      amount: amount ? Math.round(amount * 100) : undefined,
-    });
-
-    res.json({ success: true, refund });
+    const refund = await razorpay.payments.refund(paymentId, amount ? { amount: Math.round(Number(amount) * 100) } : {});
+    return res.json({ success: true, refund });
   } catch (err) {
-    console.error("Error refunding payment:", err);
-    res.status(500).json({ success: false, message: "Refund failed" });
+    console.error("refundPayment error:", err);
+    return res.status(500).json({ success: false, message: "Refund failed" });
   }
 };
 
-
-const handleWebhook = async (req, res) => {
+/**
+ * POST /webhook  (raw body)
+ * Handles: payment.captured, transfer.processed, transfer.failed, account.kyc.verified/rejected
+ */
+exports.handleWebhook = async (req, res) => {
   try {
-    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     const signature = req.headers["x-razorpay-signature"];
-    const body = req.body;
-
-    const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(JSON.stringify(body)).digest("hex");
-    if (expectedSignature !== signature) {
+    const payloadRaw = req.rawBody || req.body; // ensure raw if middleware provides
+    // Validate signature
+    const expected = crypto.createHmac("sha256", process.env.RZP_WEBHOOK_SECRET || "").update(JSON.stringify(payloadRaw)).digest("hex");
+    if (!signature || expected !== signature) {
+      console.error("Webhook signature mismatch");
       return res.status(400).json({ success: false, message: "Invalid webhook signature" });
     }
 
-    const { event, payload } = body;
+    const { event, payload } = payloadRaw;
 
     switch (event) {
       case "payment.captured": {
@@ -186,37 +156,50 @@ const handleWebhook = async (req, res) => {
             payment_method: entity.method || "card",
             payment_date: new Date(),
           });
-
           const appointment = await appointments.findByPk(paymentRecord.appointment_id);
           if (appointment) await appointment.update({ status: "confirmed", paymentStatus: "paid" });
         }
         break;
       }
-      case "transfer.processed": {
-        const entity = payload.transfer.entity;
-        const paymentRecord = await payments.findOne({ where: { transaction_id: entity.order_id } });
-        if (paymentRecord) await paymentRecord.update({ rzp_transfer_id: entity.id });
+
+      case "transfer.processed":
+      case "transfer.paid": {
+        const t = payload.transfer.entity;
+        // find payments by order_id (transfers created via order include order_id)
+        const paymentRecord = await payments.findOne({ where: { transaction_id: t.order_id } });
+        if (paymentRecord) {
+          await paymentRecord.update({ rzp_transfer_id: t.id, transfer_status: t.status });
+        }
         break;
       }
-      case "transfer.failed":
-        console.log("Transfer failed for order:", payload.transfer.entity.order_id);
+
+      case "transfer.failed": {
+        const t = payload.transfer.entity;
+        const paymentRecord = await payments.findOne({ where: { transaction_id: t.order_id } });
+        if (paymentRecord) await paymentRecord.update({ transfer_status: t.status });
+        console.error("Transfer failed:", t);
         break;
+      }
+
+      case "account.kyc.verified":
+      case "account.kyc.rejected": {
+        const acc = payload.account.entity;
+        const doctor = await doctorProfile.findOne({ where: { rzp_account_id: acc.id } });
+        if (doctor) {
+          doctor.kyc_status = event === "account.kyc.verified" ? "verified" : "rejected";
+          await doctor.save();
+        }
+        break;
+      }
+
       default:
-        console.log("Unhandled Webhook Event:", event);
+        // ignore other events
+        break;
     }
 
-    res.status(200).json({ success: true, message: "Webhook handled" });
-  } catch (error) {
-    console.error("Webhook Error:", error);
-    res.status(500).json({ success: false, message: "Webhook processing failed" });
+    return res.status(200).json({ success: true });
+  } catch (err) {
+    console.error("handleWebhook err:", err.response?.data || err.message || err);
+    return res.status(500).json({ success: false, message: "Webhook processing failed" });
   }
-};
-
-module.exports = {
-  createOrder,
-  verifyPayment,
-  getPaymentStatus,
-  getPaymentDetails,
-  refundPayment,
-  handleWebhook,
 };

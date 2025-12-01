@@ -1,26 +1,24 @@
 const express = require("express");
 const router = express.Router();
-
 const upload = require("../middlewares/fileUpload.js");
 const verifyWebhook = require("../middlewares/verifyRzpWebhook.js");
+const doctorKycController = require("../controllers/payment/doctorKycController");
 
-const {
-  createLinkedAccount,
-  uploadKycDocument,
-  razorpayWebhook,
-} = require("../controllers/payment/doctorKycController.js");
+// Create Linked Account (protected)
+router.post("/doctor/:id/create-linked-account", doctorKycController.createLinkedAccount);
 
-// Create Linked Account
-router.post("/doctor/:id/create-linked-account", createLinkedAccount);
+// Upload KYC document (protected)
+router.post("/doctor/:id/upload-kyc", upload.single("document"), doctorKycController.uploadKycDocument);
 
-// Upload KYC Document
-router.post(
-  "/doctor/:id/upload-kyc",
-  upload.single("document"),
-  uploadKycDocument
-);
-
-// Razorpay KYC Webhook
-router.post("/razorpay/kyc-webhook", verifyWebhook, razorpayWebhook);
+// Razorpay KYC webhook (public endpoint)
+router.post("/razorpay/kyc-webhook", express.raw({ type: "application/json" }), (req, res, next) => {
+  try {
+    req.rawBody = JSON.parse(req.body.toString("utf8"));
+    req.body = req.rawBody;
+    next();
+  } catch (err) {
+    return res.status(400).send("Invalid JSON");
+  }
+}, doctorKycController.razorpayWebhook /* optional: implement same handler inside controller if needed */);
 
 module.exports = router;

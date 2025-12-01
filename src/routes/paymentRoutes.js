@@ -1,47 +1,33 @@
 const express = require("express");
 const router = express.Router();
-const { verifyPayment, handleWebhook , getPaymentStatus, createOrder, getPaymentDetails, refundPayment } = require("../controllers/payment/paymentController");
 const bodyParser = require("body-parser");
-const protect = require("../middlewares/authMiddleware")
-const checkAccountStatus = require("../middlewares/accountCheck.js")
+const protect = require("../middlewares/authMiddleware");
+const checkAccountStatus = require("../middlewares/accountCheck.js");
 
-// Create Razorpay Order (with split logic handled in controller)
-router.post('/payment/create-order', protect, checkAccountStatus, createOrder);
+const paymentController = require("../controllers/payment/paymentController");
 
-// Verify Payment Signature
-router.post('/verify-payment', protect, checkAccountStatus, verifyPayment);
+// Create Razorpay Order (with split logic)
+router.post("/payment/create-order", protect, checkAccountStatus, paymentController.createOrder);
 
-// Razorpay Webhook (raw body required for signature verification)
-router.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  handleWebhook
-);
+// Verify Payment
+router.post("/verify-payment", protect, checkAccountStatus, paymentController.verifyPayment);
 
-// Fetch Payment Details
-router.get('/payment/:paymentId', protect, checkAccountStatus, getPaymentDetails);
+// Get Payment Details
+router.get("/payment/:paymentId", protect, checkAccountStatus, paymentController.getPaymentDetails);
 
 // Refund Payment
-router.post('/refund', protect, checkAccountStatus, refundPayment);
+router.post("/refund", protect, checkAccountStatus, paymentController.refundPayment);
 
-// Fetch Payment Status by Order ID
-router.get('/status/:orderId', protect, checkAccountStatus, getPaymentStatus);
+// Get Order Status
+router.get("/status/:orderId", protect, checkAccountStatus, paymentController.getPaymentStatus);
 
-router.post("/payment/verify", protect, checkAccountStatus, verifyPayment);
+// Webhook: expose raw body route (no protect middleware) — Razorpay calls this publicly
+// Make sure your app registers this route BEFORE any body-parser json middleware that consumes body
+router.post("/webhook", express.raw({ type: "application/json" }), (req, res, next) => {
+  // attach rawBody for handler to verify signature
+  req.rawBody = JSON.parse(req.body.toString("utf8"));
+  req.body = req.rawBody;
+  next();
+}, paymentController.handleWebhook);
 
-router.post(
-  "/payment/webhook",
- protect,  checkAccountStatus,   bodyParser.raw({ type: "application/json" }),
-  (req, res, next) => {
-    try {
-      req.body = JSON.parse(req.body.toString("utf8"));
-      next();
-    } catch (err) {
-      res.status(400).send("Invalid JSON");
-    }
-  },
-  handleWebhook
-);
-
-router.get("/payment/status/:orderId", protect, checkAccountStatus, getPaymentStatus);
 module.exports = router;
