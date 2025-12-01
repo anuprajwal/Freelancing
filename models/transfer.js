@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
       razorpay_transfer_id: { type: DataTypes.STRING, allowNull: true, unique: true },
       order_id: { type: DataTypes.STRING, allowNull: true },
-      payment_id: { type: DataTypes.STRING, allowNull: true },
+      payment_id: { type: DataTypes.INTEGER, allowNull: true },
       appointment_id: { type: DataTypes.INTEGER, allowNull: true },
       doctor_id: { type: DataTypes.INTEGER, allowNull: true },
       amount: { type: DataTypes.INTEGER, allowNull: false }, // amount in paise
