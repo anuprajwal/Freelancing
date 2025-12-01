@@ -50,7 +50,7 @@ const scheduleAppointment = async (req, res) => {
       appointment_date: date,
       appointment_start_time:start,
       appointment_end_time:end,
-      status: payment_mode === "confirmed",
+      status: payment_mode === "pending",
       payment_mode,
       belongs_to_hospital: doctorObj.organisation_id !== null,
       hospital_id: doctorObj.organisation_id
