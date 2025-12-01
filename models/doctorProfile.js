@@ -46,6 +46,13 @@ module.exports = (sequelize, DataTypes) => {
         sourceKey: "id",
         onDelete: "CASCADE",
       });
+
+      doctorProfile.hasMany(models.transfer, {
+        foreignKey: 'doctor_id',
+        as: 'transfers', 
+        sourceKey: 'id', 
+        onDelete: 'CASCADE',
+      });
     }
   }
 
