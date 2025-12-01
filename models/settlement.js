@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
   settlement.init(
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-      transfer_id: { type: DataTypes.STRING, allowNull: true },
+      transfer_id: { type: DataTypes.INTEGER, allowNull: true },
       razorpay_transfer_id: { type: DataTypes.STRING, allowNull: true },
       doctor_id: { type: DataTypes.INTEGER, allowNull: true },
       amount: { type: DataTypes.INTEGER, allowNull: false }, // paise
