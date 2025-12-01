@@ -7,7 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       transfer.belongsTo(models.doctorProfile, {
         foreignKey: 'doctor_id',
         as: 'doctor',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
       });
       transfer.belongsTo(models.payments, {
         foreignKey: 'payment_id',
