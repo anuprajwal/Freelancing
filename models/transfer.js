@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
         as: 'payment',
         onDelete: 'CASCADE',
       });
+      transfer.hasOne(models.settlement, {
+        foreignKey: "transfer_id",
+        as: "settlement",
+        sourceKey: "id",
+        onDelete: "CASCADE",
+      });
     }
   }
 

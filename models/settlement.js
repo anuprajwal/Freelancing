@@ -7,12 +7,12 @@ module.exports = (sequelize, DataTypes) => {
       settlement.belongsTo(models.doctorProfile, {
         foreignKey: 'doctor_id',
         as: 'doctor',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
       });
       settlement.belongsTo(models.transfer, {
         foreignKey: 'transfer_id',
         as: 'transfer',
-        onDelete: 'SET NULL',
+        onDelete: 'CASCADE',
       });
     }
   }
