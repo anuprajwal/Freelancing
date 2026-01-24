@@ -34,11 +34,12 @@ const rejectCall = async (req, res) => {
         const callData = callSnap.data();
 
         // ---------------- Validate State ----------------
-        if ([CALL_STATUS.COMPLETED, CALL_STATUS.IN_PROGRESS].includes(callData.call_status)) {
+        if (callData.call_status !== CALL_STATUS.RINGING) {
             return res.status(400).json({
                 error: "Call cannot be rejected now"
             });
         }
+
 
         // ---------------- Ensure This User Is The Receiver ----------------
         if (callData.call_made_to !== id) {

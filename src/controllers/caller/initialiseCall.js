@@ -192,7 +192,10 @@ const initialiseCall = async (req, res) => {
             // query for active statuses and not expired
             const now = Date.now();
             const snapshot = await userCallsRef
-                .where('call_status', 'in', CALL_STATUS)
+                .where('call_status', 'in', [CALL_STATUS.RINGING,
+                    CALL_STATUS.ANSWERED,
+                    CALL_STATUS.IN_PROGRESS
+                ])
                 .get();
 
             if (snapshot.empty) return false;
@@ -316,7 +319,7 @@ const initialiseCall = async (req, res) => {
                 // await all; if some fail we log but still succeed overall
                 const sendResults = await Promise.allSettled(sendPromises);
                 sendResults.forEach((r, idx) => {
-                    if (r.status === CALL_STATUS.REJECTED) {
+                    if (r.status === "rejected") {
                         console.warn(`Failed to send notification to token ${allRelatedTokens[idx].token}:`, r.reason);
                     }
                 });

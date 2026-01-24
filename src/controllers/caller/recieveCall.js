@@ -40,9 +40,27 @@ const receiveCall = async (req, res) => {
 
         // ---------------- Validation of Call State ----------------
 
-        if ([CALL_STATUS.COMPLETED, CALL_STATUS.REJECTED].includes(callData.call_status)) {
+        let expiresAt;
+
+        if (callData.expires_at != null) {
+            if (typeof callData.expires_at.toMillis === "function") {
+                expiresAt = callData.expires_at.toMillis();
+            } else {
+                expiresAt = undefined;
+            }
+        } else {
+            expiresAt = undefined;
+        }
+        if (expiresAt && expiresAt < Date.now()) {
+            return res.status(410).json({
+                error: "Call has expired"
+            });
+        }
+
+
+        if (callData.call_status !== CALL_STATUS.RINGING) {
             return res.status(400).json({
-                error: "Call is already closed"
+                error: `Cannot answer call in state ${callData.call_status}`
             });
         }
 

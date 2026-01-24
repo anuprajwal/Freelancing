@@ -18,8 +18,6 @@ const changeCallStatus = async (req, res) => {
         }
 
         // ---------------- VALID STATUSES ----------------
-        const VALID_STATUSES = ["Call on hold", "Call Rejected", "Call Complete"];
-
         if (![CALL_STATUS.REJECTED, CALL_STATUS.COMPLETED].includes(call_status)) {
             return res.status(400).json({
                 error: "Invalid call_status value"
@@ -59,14 +57,14 @@ const changeCallStatus = async (req, res) => {
             });
         }
 
-        if (currentStatus === CALL_STATUS.COMPLETED) {
+        if ([CALL_STATUS.REJECTED, CALL_STATUS.COMPLETED].includes(currentStatus)) {
             return res.status(400).json({
-                error: "Call already completed"
+                error: `Call already ${currentStatus.toLowerCase()}`
             });
         }
 
         await callHistoryRef.set({
-            call_status: CALL_STATUS.COMPLETED,
+            call_status,
             ended_by: id,
             ended_at: admin.firestore.Timestamp.now()
         }, {
