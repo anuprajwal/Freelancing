@@ -13,22 +13,21 @@ const {
 const loginUser = async (req, res) => {
     const {
         email,
-        phone_number, // Added phone_number
+        phone_number,
         password,
         role = "general_user"
     } = req.body;
 
+    const clientType = req.headers['x-client-type'] || 'web';
     const user_ip = req.ip;
 
-    // Check if password and role exist, and that AT LEAST one of email or phone_number is present
     if ((!email && !phone_number) || !password || !role) {
-        return res.status(400).json({ // Changed to 400 (Bad Request)
+        return res.status(400).json({
             error: "Please provide email or phone number, and password."
         });
     }
 
     try {
-        // Query logic: (email OR phone_number) AND role
         const user = await User.findOne({
             where: {
                 [Op.or]: [
@@ -38,42 +37,47 @@ const loginUser = async (req, res) => {
                     phone_number ? {
                         phone_number
                     } : null
-                ].filter(Boolean), // Filters out null values if one field is missing
+                ].filter(Boolean),
                 role
             }
         });
 
         if (!user) {
-            return res.status(404).json({ // 404 is more descriptive for 'not found'
+            return res.status(404).json({
                 error: "User not found"
             });
         }
 
         const validPassword = await bcrypt.compare(password, user.password_hash);
         if (!validPassword) {
-            return res.status(401).json({ // 401 is standard for Invalid Credentials
+            return res.status(401).json({
                 error: "Invalid credentials"
             });
         }
 
         const token = generateToken(user, user_ip);
 
-        // Setting the cookie
-        res.cookie(`${role}_token`, token.token, { // Changed space to underscore for better cookie naming
-            httpOnly: true,
-            secure: true,
-            sameSite: "None",
-            domain: ".local.docapp",
-            maxAge: parseInt(token.expiresIn, 10),
-        });
+        // 🌐 Browser → cookie
+        if (clientType === 'web') {
+            res.cookie(`${role}_token`, token.token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: "None",
+                domain: ".local.docapp",
+                maxAge: parseInt(token.expiresIn, 10),
+            });
+        }
 
+        // 📱 Mobile / Postman → token in body
         return res.status(200).json({
             message: "Login Success",
+            token: clientType !== 'web' ? token.token : undefined,
+            expiresIn: token.expiresIn,
             user: {
                 id: user.id,
                 email: user.email,
                 role: user.role
-            } // Optional: return basic user info
+            }
         });
 
     } catch (error) {
@@ -82,7 +86,8 @@ const loginUser = async (req, res) => {
             error: "Internal server error during login"
         });
     }
-}
+};
+
 
 
 const generateToken = (user, user_ip) => {
