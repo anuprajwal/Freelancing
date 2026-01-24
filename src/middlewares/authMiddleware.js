@@ -22,7 +22,6 @@ const protect = (req, res, next) => {
         if (EXCLUDED_ROUTES.includes(req.path)) {
             return next();
         }
-
         // Detect request origin
         let origin = null;
 
@@ -32,42 +31,42 @@ const protect = (req, res, next) => {
             origin = req.headers.referer.replace(/\/$/, '');
         }
 
+        let token = null;
+        let tokenKey = null;
 
-        console.log("Request origin:", origin);
+        // 🌐 Browser
+        if (origin) {
+            tokenKey = DOMAIN_TOKEN_MAP[origin];
 
-        if (!origin) {
-            return res.status(401).json({
-                error: "Request origin not found"
-            });
+            if (!tokenKey) {
+                return res.status(403).json({
+                    error: "Unauthorized domain"
+                });
+            }
+
+            if (req.cookies && req.cookies[tokenKey]) {
+                token = req.cookies[tokenKey];
+            }
         }
-
-        console.log("domain map:", DOMAIN_TOKEN_MAP)
-
-        // Identify token key based on origin
-        const tokenKey = DOMAIN_TOKEN_MAP[origin];
-
-        console.log("token found:", tokenKey)
-
-        if (!tokenKey) {
-            return res.status(403).json({
-                error: "Unauthorized domain"
-            });
+        // 📱 Mobile / Postman
+        else {
+            if (
+                req.headers &&
+                req.headers.authorization &&
+                req.headers.authorization.startsWith('Bearer ')
+            ) {
+                token = req.headers.authorization.split(' ')[1];
+            }
         }
-
-        // Read correct cookie
-        let token = null
-        if (req.cookies && req.cookies[tokenKey]) {
-            token = req.cookies[tokenKey];
-        }
-
-        console.log("Cookies received:", req.cookies);
-        console.log("Using token key:", tokenKey);
 
         if (!token) {
             return res.status(401).json({
                 error: "Auth token not found"
             });
         }
+
+        console.log("Auth source:", origin ? "Browser" : "API Client");
+        console.log("Token key:", tokenKey || "Authorization header");
 
         // Verify JWT
         const decoded = decodeToken(token);

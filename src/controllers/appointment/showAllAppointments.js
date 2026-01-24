@@ -34,28 +34,29 @@ const showAllAppointments = async (req, res) => {
 };
 
 const doctorSideAppointments = async (doctor_id, limit, offset) => {
+    console.log("fetching appointments for:", doctor_id)
     const upcommingAppointments = await appointments.findAll({
         where: {
             doctor_id
         },
         limit: limit, // Added limit
         offset: offset, // Added offset
-        include: [{
-                model: checkupAppointment,
-                as: "checkupAppointment"
-            },
-            {
-                model: User,
-                as: "doctor",
-                required: true,
-                attributes: ["email", "username", "phone_number"],
-                include: [{
-                    model: generalUser,
-                    as: "generalUser",
-                    required: true
-                }]
-            }
-        ],
+        // include: [{
+        //         model: checkupAppointment,
+        //         as: "checkupAppointment"
+        //     },
+        //     {
+        //         model: User,
+        //         as: "doctor",
+        //         required: true,
+        //         attributes: ["email", "username", "phone_number"],
+        //         include: [{
+        //             model: generalUser,
+        //             as: "generalUser",
+        //             required: true
+        //         }]
+        //     }
+        // ],
         order: [
             ["appointment_date", "DESC"]
         ]
