@@ -3,13 +3,13 @@ const logger = require('./logger');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const userRoutes = require('./src/routes/userRoutes.js');
-const handleError  = require('./src/middlewares/errorMiddleware.js');
+const handleError = require('./src/middlewares/errorMiddleware.js');
 const cookieParser = require('cookie-parser');
 const appointmentRoutes = require('./src/routes/appointmentRoutes.js');
 const filterRoutes = require('./src/routes/filterRoutes.js');
 const addressRoutes = require("./src/routes/addressRouters.js")
 const paymentRoutes = require("./src/routes/paymentRoutes.js")
-const doctorKycRoutes = require('./src/routes/doctorKycRoutes.js'); 
+const doctorKycRoutes = require('./src/routes/doctorKycRoutes.js');
 const callerRoutes = require('./src/routes/userCallRoutes.js')
 const adminAuthRoutes = require("./src/routes/adminAuthroutes.js");
 const verificationRoutes = require('./src/routes/verificationRoutes.js');
@@ -18,6 +18,9 @@ const documentRoutes = require("./src/routes/documentRoutes.js")
 const notificationRoutes = require("./src/routes/notificationRoutes.js")
 // const surgeryRoutes = require("./src/routes/surgeryRoutes.js");
 const ratingRoutes = require("./src/routes/reviewRatingsRoutes.js")
+
+const https = require("https")
+const fs = require("fs")
 
 
 const startCron = require("./src/cronjobs/checkPaidAppointments")
@@ -29,44 +32,50 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:3000",
-  "http://localhost:8080",
-  "http://3.108.233.123",
-  "https://3.108.233.123",
-  "https://docapp.co.in",
-  "http://localhost:8000",
-  "https://docwebsite-ecru.vercel.app",
-  "https://wonderful-tartufo-5f805e.netlify.app"
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "http://3.108.233.123",
+    "https://3.108.233.123",
+    "https://docapp.co.in",
+    "http://localhost:5173",
+    "http://localhost:8000",
+    "https://docwebsite-ecru.vercel.app",
+    "https://wonderful-tartufo-5f805e.netlify.app",
+    "https://auth.local.docapp:5100",
+    "https://patient.local.docapp:5200",
+    "https://doctor.local.docapp:5300",
+    "https://hospital.local.docapp:5400",
+    "https://admin.local.docapp:5500",
 ];
 
 // CORS middleware
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
 // Important: Handle preflight requests for all routes
 app.options("*", cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+    origin: function(origin, callback) {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
 }));
-                               
+
 app.use(express.json());
 app.use(cookieParser());
 
@@ -75,13 +84,13 @@ app.use('/api/auth', userRoutes);
 app.use('/api/appointment', appointmentRoutes);
 app.use('/api/filter', filterRoutes);
 app.use("/api/address", addressRoutes)
-app.use("/api",paymentRoutes)
+app.use("/api", paymentRoutes)
 app.use("/api/call", callerRoutes)
 app.use("/api/verify", verificationRoutes)
 app.use('/api/kyc', doctorKycRoutes);
 app.use("/api/hospital", hospitalAdminRoutes)
 app.use("/api/documents", documentRoutes)
-app.use("/api/notifications",notificationRoutes)
+app.use("/api/notifications", notificationRoutes)
 // app.use("/api/surgeries", surgeryRoutes);
 app.use("/api/reviews", ratingRoutes);
 //admin routes
@@ -90,11 +99,11 @@ app.use("/api/admin", adminAuthRoutes);
 app.use(handleError);
 
 app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    uptime: process.uptime(),           // how long server has been up
-    timestamp: Date.now(),              // current time
-  });
+    res.status(200).json({
+        status: 'ok',
+        uptime: process.uptime(), // how long server has been up
+        timestamp: Date.now(), // current time
+    });
 });
 
 
@@ -102,7 +111,7 @@ app.get('/health', (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 // loging all the url endpoints
-app.listen(PORT,'0.0.0.0' , () => logger.info(`Server started to run on port ${PORT}`));
+// app.listen(PORT, '0.0.0.0', () => logger.info(`Server started to run on port ${PORT}`));
 console.log(PORT)
 app._router.stack.forEach((middleware) => {
     if (middleware.route) { // Routes registered directly on the app
@@ -114,4 +123,14 @@ app._router.stack.forEach((middleware) => {
             }
         });
     }
+});
+
+
+https.createServer({
+        key: fs.readFileSync("./_wildcard.local.docapp-key.pem"),
+        cert: fs.readFileSync("./_wildcard.local.docapp.pem"),
+    },
+    app
+).listen(PORT, "0.0.0.0", () => {
+    console.log("Auth backend HTTPS running on https://auth.local.docapp:5000");
 });

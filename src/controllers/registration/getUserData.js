@@ -1,90 +1,105 @@
-const {User, generalUser, doctorProfile, organisationProfile} = require("../../../models");
+const {
+    User,
+    generalUser,
+    doctorProfile,
+    organisationProfile
+} = require("../../../models");
 
-const getUserDetails = async (req, res)=>{
-    try{
-        const {id} = req.user.payload
+const getUserDetails = async (req, res) => {
+    try {
+        console.log(req.user)
+        const {
+            id
+        } = req.user.payload
 
-        if (!id){
-            return res.status(400).json({error:"user doesn't sseem to be logged in"})
+        if (!id) {
+            return res.status(400).json({
+                error: "user doesn't sseem to be logged in"
+            })
         }
 
         const user = await User.findByPk(id, {
             attributes: [
-              'id',
-              'username',
-              'email',
-              'phone_number',
-              'role',
-              'is_email_verified',
-              'is_phone_verified'
+                'id',
+                'username',
+                'email',
+                'phone_number',
+                'role',
+                'is_email_verified',
+                'is_phone_verified'
             ]
-          });
+        });
 
-          if (!user) {
+        if (!user) {
             throw new Error("User not found");
-          }
+        }
 
-          const includes = [];
+        const includes = [];
 
 
-          if (user.role === "general_user") {
+        if (user.role === "general_user") {
             includes.push({
-              model: generalUser,
-              as: "generalUser",
-              attributes: {
-                exclude: [
-                  'user_id',
-                  'created_at',
-                  'updated_at'
-                ]
-              }
+                model: generalUser,
+                as: "generalUser",
+                attributes: {
+                    exclude: [
+                        'user_id',
+                        'created_at',
+                        'updated_at'
+                    ]
+                }
             });
-          }
-      
-          if (user.role === "doctor") {
+        }
+
+        if (user.role === "doctor") {
             includes.push({
-              model: doctorProfile,
-              as: "doctorProfile",
-              attributes: {
-                exclude: [
-                  'user_id',
-                  'created_at',
-                  'updated_at'
-                ]
-              }
+                model: doctorProfile,
+                as: "doctorProfile",
+                attributes: {
+                    exclude: [
+                        'user_id',
+                        'created_at',
+                        'updated_at'
+                    ]
+                }
             });
-          }
-      
-          if (user.role === "hospital_organisation") {
+        }
+
+        if (user.role === "hospital_organisation") {
             includes.push({
-              model: organisationProfile,
-              as: "organisationProfile"
+                model: organisationProfile,
+                as: "organisationProfile"
             });
-          }
-      
+        }
 
 
-          const userDetails = await User.findByPk(id, {
+
+        const userDetails = await User.findByPk(id, {
             attributes: [
-              'id',
-              'username',
-              'email',
-              'phone_number',
-              'role',
-              'is_email_verified',
-              'is_phone_verified'
+                'id',
+                'username',
+                'email',
+                'phone_number',
+                'role',
+                'is_email_verified',
+                'is_phone_verified'
             ],
             include: includes
-          });
+        });
 
-    console.log("userDetails",userDetails);
-    
-    res.status(200).json({message:"succesfully fetched the user details", userData:userDetails})
-    }catch(e){
+        console.log("userDetails", userDetails);
+
+        res.status(200).json({
+            message: "succesfully fetched the user details",
+            userData: userDetails
+        })
+    } catch (e) {
         console.error("Error fetching user details:", e);
-        return res.status(500).json({error:"Unexpected error in the server"})
+        return res.status(500).json({
+            error: "Unexpected error in the server"
+        })
     }
-    
+
 }
 
 module.exports = getUserDetails

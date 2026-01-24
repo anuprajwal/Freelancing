@@ -50,14 +50,21 @@ const admin = require('./firebaseDbConnect');
 
 const addAnswerCandidates = async (req, res) => {
     try {
-        const { call_id, answer_candidate } = req.body;
-        const { id: loggedInUserId } = req.user.payload;
+        const {
+            call_id,
+            answer_candidate
+        } = req.body;
+        const {
+            id: loggedInUserId
+        } = req.user.payload;
 
         const db = admin.firestore();
 
         // Validate call_id
         if (!call_id || typeof call_id !== "string") {
-            return res.status(400).json({ error: "Valid call_id is required" });
+            return res.status(400).json({
+                error: "Valid call_id is required"
+            });
         }
 
         // Validate ICE candidate object
@@ -77,7 +84,9 @@ const addAnswerCandidates = async (req, res) => {
         const callSnap = await callRef.get();
 
         if (!callSnap.exists) {
-            return res.status(404).json({ error: "Call record not found" });
+            return res.status(404).json({
+                error: "Call record not found"
+            });
         }
 
         const callData = callSnap.data();
@@ -90,7 +99,7 @@ const addAnswerCandidates = async (req, res) => {
         }
 
         // Reject if call is closed or rejected
-        const invalidStates = ["Call rejected", "Call Complete"];
+        const invalidStates = ["Call Rejected", "Call Completed"];
         if (invalidStates.includes(callData.call_status)) {
             return res.status(409).json({
                 error: `Cannot add ICE candidates. Call is ${callData.call_status}`
@@ -111,7 +120,9 @@ const addAnswerCandidates = async (req, res) => {
 
     } catch (err) {
         logger.error("Error adding answer candidate:", err);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({
+            error: "Internal server error"
+        });
     }
 };
 

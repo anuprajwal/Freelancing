@@ -1,68 +1,119 @@
 const jwt = require('jsonwebtoken');
-const { loginUserForm } = require('../controllers/login/login');
+const {
+    loginUserForm
+} = require('../controllers/login/login');
 
-
-// middleware to authenticate user baseed on his jwt.
-// token is to be authorised based on the ip of the user. but it is neglected as it is in developement for now.
-const protect = (req, res, next) => {
-// Define the routes to exclude from authentication
-// yahan pe wo saare dalo jisme jwt token nh dena hai
-    const excludedRoutes = '/register';
-    const excludedRoutes1 = '/auth/login';
-    
-    console.log("requested to path: ",req.path);
-    
-    // Check if the current request path is one of the excluded routes
-    if (req.path == excludedRoutes || req.path == excludedRoutes1) {
-        return next(); // Skip authentication and proceed to the next middleware or route handler
-    }
-
-
-    const user_ip = req.ip;
-    let authToken = req.cookies.token;
-    console.log('cookie:',req.cookies)
-    console.log('token:',req.cookies.token)
-    
-    if (!authToken) {
-        return res.status(401).json({error: "token not found"});
-    }
-
-    console.log("token found")
-
-    
-    const decoded = decodeToken(authToken);
-
-    console.log("token decoaded")
-    if (!decoded) {
-        return res.status(403).json({error: decoded.error});
-    }
-
-    console.log("token present")
-    if (decoded.error) {
-        return res.status(403).json({error: decoded.error});
-    }
-    console.log("no errors in token")
-    if (decoded.payload && decoded.payload.ip !== user_ip) {
-        return res.status(403).json({error: "IP changed. Login needed"});
-    }
-
-    console.log("ip is same")
-
-    req.user = decoded;
-    console.log("redirecting from middleware")
-    next();
-    
+const DOMAIN_TOKEN_MAP = {
+    [process.env.PATIENT_APP_URL]: 'general_user_token',
+    [process.env.DOCTOR_APP_URL]: 'doctor_token',
+    [process.env.HOSPITAL_APP_URL]: 'hospital_token'
 };
 
+const EXCLUDED_ROUTES = ['/register', '/auth/login'];
+// middleware to authenticate user baseed on his jwt.
+// token is to be authorised based on the ip of the user. but it is neglected as it is in developement for now.
 
-// function to decode the jwt token
+
+const protect = (req, res, next) => {
+    try {
+        console.log("Requested path:", req.path);
+
+        // Skip auth for excluded routes
+        if (EXCLUDED_ROUTES.includes(req.path)) {
+            return next();
+        }
+
+        // Detect request origin
+        let origin = null;
+
+        if (req.headers && req.headers.origin) {
+            origin = req.headers.origin;
+        } else if (req.headers && req.headers.referer) {
+            origin = req.headers.referer.replace(/\/$/, '');
+        }
+
+
+        console.log("Request origin:", origin);
+
+        if (!origin) {
+            return res.status(401).json({
+                error: "Request origin not found"
+            });
+        }
+
+        console.log("domain map:", DOMAIN_TOKEN_MAP)
+
+        // Identify token key based on origin
+        const tokenKey = DOMAIN_TOKEN_MAP[origin];
+
+        console.log("token found:", tokenKey)
+
+        if (!tokenKey) {
+            return res.status(403).json({
+                error: "Unauthorized domain"
+            });
+        }
+
+        // Read correct cookie
+        let token = null
+        if (req.cookies && req.cookies[tokenKey]) {
+            token = req.cookies[tokenKey];
+        }
+
+        console.log("Cookies received:", req.cookies);
+        console.log("Using token key:", tokenKey);
+
+        if (!token) {
+            return res.status(401).json({
+                error: "Auth token not found"
+            });
+        }
+
+        // Verify JWT
+        const decoded = decodeToken(token);
+
+        if (decoded.error) {
+            return res.status(403).json({
+                error: decoded.error
+            });
+        }
+
+        // Optional IP validation (if enabled later)
+        /*
+        if (decoded.payload.ip !== req.ip) {
+            return res.status(403).json({
+                error: "IP changed. Login required"
+            });
+        }
+        */
+
+        // Attach user info
+        req.user = decoded,
+
+            console.log("Auth success for:", tokenKey);
+        next();
+
+    } catch (err) {
+        console.error("Auth middleware error:", err);
+        res.status(500).json({
+            error: "Internal server error"
+        });
+    }
+};
+
+// JWT decoder
 const decodeToken = (token) => {
     try {
-        return {payload: jwt.verify(token, process.env.JWT_SECRET), error: null};
+        return {
+            payload: jwt.verify(token, process.env.JWT_SECRET),
+            error: null
+        };
     } catch (error) {
-        return {payload: null, error: error.message};
+        return {
+            payload: null,
+            error: error.message
+        };
     }
-}
+};
 
-
-module.exports = protect
+module.exports = protect;

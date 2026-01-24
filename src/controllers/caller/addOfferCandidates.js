@@ -46,12 +46,19 @@ const admin = require('./firebaseDbConnect');
 
 const addOfferCandidates = async (req, res) => {
     try {
-        const { offer_candidate, call_id } = req.body;
-        const { id: loggedInUserId } = req.user.payload;
+        const {
+            offer_candidate,
+            call_id
+        } = req.body;
+        const {
+            id: loggedInUserId
+        } = req.user.payload;
 
         // Validate call_id
         if (!call_id || typeof call_id !== "string") {
-            return res.status(400).json({ error: "Valid call_id is required" });
+            return res.status(400).json({
+                error: "Valid call_id is required"
+            });
         }
 
         // Validate candidate object
@@ -72,13 +79,15 @@ const addOfferCandidates = async (req, res) => {
         const callSnap = await callRef.get();
 
         if (!callSnap.exists) {
-            return res.status(404).json({ error: "Call record not found" });
+            return res.status(404).json({
+                error: "Call record not found"
+            });
         }
 
         const callData = callSnap.data();
 
         // Reject if call was already closed or rejected
-        const closedStatuses = ["Call rejected", "Call Complete"];
+        const closedStatuses = ["Call Rejected", "Call Completed"];
         if (closedStatuses.includes(callData.call_status)) {
             return res.status(409).json({
                 error: `Call cannot accept ICE candidates. Current status: ${callData.call_status}`,
@@ -100,11 +109,15 @@ const addOfferCandidates = async (req, res) => {
             timestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
 
-        return res.status(200).json({ message: "Offer candidate added successfully" });
+        return res.status(200).json({
+            message: "Offer candidate added successfully"
+        });
 
     } catch (err) {
         logger.error("Error adding offer candidate:", err);
-        return res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({
+            error: "Internal server error"
+        });
     }
 };
 
