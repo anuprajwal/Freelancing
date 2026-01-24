@@ -9,7 +9,6 @@ const {
 
 
 // the api to login any user 
-
 const loginUser = async (req, res) => {
     const {
         email,
@@ -18,7 +17,19 @@ const loginUser = async (req, res) => {
         role = "general_user"
     } = req.body;
 
-    const clientType = req.headers['x-client-type'] || 'web';
+    // ✅ Proper client detection
+    const clientType = (() => {
+        if (req.headers && req.headers['x-client-type']) {
+            return req.headers['x-client-type']; // mobile / postman / web (explicit)
+        }
+
+        if (req.headers && (req.headers.origin || req.headers.referer)) {
+            return 'web'; // browser
+        }
+
+        return 'api'; // postman / mobile / server
+    })();
+
     const user_ip = req.ip;
 
     if ((!email && !phone_number) || !password || !role) {
@@ -57,7 +68,7 @@ const loginUser = async (req, res) => {
 
         const token = generateToken(user, user_ip);
 
-        // 🌐 Browser → cookie
+        // 🌐 Browser → cookie only
         if (clientType === 'web') {
             res.cookie(`${role}_token`, token.token, {
                 httpOnly: true,
@@ -68,11 +79,14 @@ const loginUser = async (req, res) => {
             });
         }
 
-        // 📱 Mobile / Postman → token in body
+        console.log("Login response type:", clientType);
+
+        // 📱 Mobile / Postman → token in JSON
         return res.status(200).json({
             message: "Login Success",
             token: clientType !== 'web' ? token.token : undefined,
             expiresIn: token.expiresIn,
+            clientType,
             user: {
                 id: user.id,
                 email: user.email,
@@ -82,7 +96,7 @@ const loginUser = async (req, res) => {
 
     } catch (error) {
         console.error("Login Error:", error);
-        res.status(500).json({
+        return res.status(500).json({
             error: "Internal server error during login"
         });
     }
