@@ -93,7 +93,7 @@ const logger = require('../../../logger'); // optional
 const {
     Op
 } = require('sequelize');
-
+const CALL_STATUS = require("./states")
 /**
  * Initialise a call between appointment participants.
  * Request body: { appointment_id, offer }
@@ -107,8 +107,6 @@ const {
  *  - Send FCM push to callee tokens with call metadata.
  */
 const WAIT_TIME_SECONDS = parseInt(process.env.CALL_RING_WAIT_SECONDS || '45', 10); // configurable via .env
-
-const ACTIVE_CALL_STATUSES = ['Ringing', 'In Progress', 'Call Initialised']; // treat as busy
 
 const initialiseCall = async (req, res) => {
     const firebaseDb = admin.firestore();
@@ -194,7 +192,7 @@ const initialiseCall = async (req, res) => {
             // query for active statuses and not expired
             const now = Date.now();
             const snapshot = await userCallsRef
-                .where('call_status', 'in', ACTIVE_CALL_STATUSES)
+                .where('call_status', 'in', CALL_STATUS)
                 .get();
 
             if (snapshot.empty) return false;
@@ -253,7 +251,7 @@ const initialiseCall = async (req, res) => {
             offer,
             call_initiated_by: callerId,
             call_made_to: calleeId,
-            call_status: 'Ringing', // initial status
+            call_status: CALL_STATUS.RINGING, // initial status
             call_request: callRequest,
             created_at: admin.firestore.Timestamp.fromDate(now),
             expires_at: admin.firestore.Timestamp.fromDate(expiresAt),
@@ -272,7 +270,7 @@ const initialiseCall = async (req, res) => {
         const perUserEntry = {
             call_request: callRequest,
             call_id: callHistoryDocRef.id,
-            call_status: 'Ringing',
+            call_status: CALL_STATUS.RINGING,
             created_at: admin.firestore.Timestamp.fromDate(now),
             expires_at: admin.firestore.Timestamp.fromDate(expiresAt),
         };
@@ -318,7 +316,7 @@ const initialiseCall = async (req, res) => {
                 // await all; if some fail we log but still succeed overall
                 const sendResults = await Promise.allSettled(sendPromises);
                 sendResults.forEach((r, idx) => {
-                    if (r.status === 'rejected') {
+                    if (r.status === CALL_STATUS.REJECTED) {
                         console.warn(`Failed to send notification to token ${allRelatedTokens[idx].token}:`, r.reason);
                     }
                 });
@@ -331,7 +329,7 @@ const initialiseCall = async (req, res) => {
         return res.status(200).json({
             message: 'Call initiated',
             call_id: callHistoryDocRef.id,
-            call_status: 'Ringing',
+            call_status: CALL_STATUS.RINGING,
             expires_at: expiresAt.toISOString(),
             callee_id: calleeId,
             callee_role: appointment.doctor_id === calleeId ? 'doctor' : 'patient'

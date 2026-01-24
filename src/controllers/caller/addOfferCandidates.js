@@ -43,6 +43,7 @@
 
 const logger = require('../../../logger');
 const admin = require('./firebaseDbConnect');
+const CALL_STATUS = require("./states")
 
 const addOfferCandidates = async (req, res) => {
     try {
@@ -87,7 +88,7 @@ const addOfferCandidates = async (req, res) => {
         const callData = callSnap.data();
 
         // Reject if call was already closed or rejected
-        const closedStatuses = ["Call Rejected", "Call Completed"];
+        const closedStatuses = [CALL_STATUS.REJECTED, CALL_STATUS.COMPLETED];
         if (closedStatuses.includes(callData.call_status)) {
             return res.status(409).json({
                 error: `Call cannot accept ICE candidates. Current status: ${callData.call_status}`,

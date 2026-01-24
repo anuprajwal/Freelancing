@@ -1,5 +1,5 @@
 const admin = require('./firebaseDbConnect');
-
+const CALL_STATUS = require("./states")
 
 const NON_REJECTABLE_STATES = ["In Progress", "Call Completed"];
 
@@ -34,7 +34,7 @@ const rejectCall = async (req, res) => {
         const callData = callSnap.data();
 
         // ---------------- Validate State ----------------
-        if (NON_REJECTABLE_STATES.includes(callData.call_status)) {
+        if ([CALL_STATUS.COMPLETED, CALL_STATUS.IN_PROGRESS].includes(callData.call_status)) {
             return res.status(400).json({
                 error: "Call cannot be rejected now"
             });
@@ -49,7 +49,7 @@ const rejectCall = async (req, res) => {
 
         // ---------------- Update Call to Rejected ----------------
         await callHistoryDoc.set({
-            call_status: "Rejected",
+            call_status: CALL_STATUS.REJECTED,
             call_rejected_by: id,
             call_rejected_at: admin.firestore.Timestamp.now()
         }, {
