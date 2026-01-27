@@ -1,15 +1,195 @@
+// // controllers/payment/doctorKycController.js
+// const path = require("path");
+// const fs = require("fs");
+// const {
+//     razorpay,
+//     createLinkedAccount,
+//     createStakeholder,
+//     requestProductConfig,
+//     updateProductConfig,
+//     uploadDocument,
+//     updateKyc,
+// } = require("../../services/rzpService");
+// const {
+//     doctorProfile,
+//     User
+// } = require("../../../models");
+
+// /**
+//  * POST /doctor/:id/create-linked-account
+//  * Creates: linked account, stakeholder, product config
+//  */
+// exports.createLinkedAccountController = async (req, res) => {
+//     try {
+//         const doctorId = req.params.id;
+//         const doctor = await doctorProfile.findByPk(doctorId, {
+//             include: [{
+//                 model: User,
+//                 as: "user"
+//             }]
+//         });
+//         if (!doctor) return res.status(404).json({
+//             message: "Doctor not found"
+//         });
+//         if (doctor.rzp_account_id) return res.status(400).json({
+//             message: "Already linked"
+//         });
+
+//         // 1. Linked account
+//         const account = await createLinkedAccount(doctor);
+//         doctor.rzp_account_id = account.id;
+//         doctor.joined_at = new Date();
+//         doctor.kyc_status = "pending";
+//         await doctor.save();
+
+//         // 2. Stakeholder (doctor)
+//         const stakeholderPayload = {
+//             email: (doctor.user && doctor.user.email) || undefined,
+//             contact: doctor.phone || undefined,
+//             type: "individual",
+//             dob: doctor.date_of_birth ? new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
+//             permanent_address: {
+//                 line1: doctor.address_line1 || ""
+//             },
+//         };
+//         const stakeholder = await createStakeholder(account.id, stakeholderPayload);
+//         doctor.stakeholder_id = stakeholder.id;
+//         await doctor.save();
+
+//         // 3. Request product config
+//         const product = await requestProductConfig(account.id);
+//         doctor.product_id = product.id;
+//         await doctor.save();
+
+//         // 4. If bank details already present, update product
+//         if (doctor.account_number && doctor.ifsc_code && doctor.beneficiary_name) {
+//             await updateProductConfig(account.id, product.id, {
+//                 account_number: doctor.account_number,
+//                 ifsc: doctor.ifsc_code,
+//                 beneficiary_name: doctor.beneficiary_name,
+//             });
+//         }
+
+//         return res.json({
+//             account_id: account.id,
+//             stakeholder_id: stakeholder.id,
+//             product_id: product.id
+//         });
+//     } catch (err) {
+//         console.error(
+//             "createLinkedAccount err:",
+//             (err.response && err.response.data) || err.message || err
+//         );
+
+//         return res.status(500).json({
+//             message: "Failed to create linked account"
+//         });
+//     }
+// };
+
+// /**
+//  * POST /doctor/:id/upload-kyc
+//  * multipart form: file field "document"
+//  * body: { type: "pan"|"bank_account"|"address", pan_number?, ifsc?, account_number?, address_line1? }
+//  */
+
+// exports.uploadKycDocument = async (req, res) => {
+//     try {
+//         const doctorId = req.params.id;
+//         const {
+//             type,
+//             pan_number,
+//             ifsc,
+//             account_number,
+//             address_line1
+//         } = req.body;
+//         const doctor = await doctorProfile.findByPk(doctorId);
+//         if (!doctor) return res.status(404).json({
+//             message: "Doctor not found"
+//         });
+//         if (!doctor.rzp_account_id) return res.status(400).json({
+//             message: "Linked account not created"
+//         });
+//         if (!req.file) return res.status(400).json({
+//             message: "File required"
+//         });
+
+//         // temp file write
+//         const tmpPath = path.join(__dirname, "../../tmp", `${Date.now()}_${req.file.originalname}`);
+//         fs.writeFileSync(tmpPath, req.file.buffer);
+
+//         // upload to Razorpay Files API (purpose must match allowed values)
+//         const docId = await uploadDocument(tmpPath, type);
+
+//         // Persist doc ids + any fields
+//         if (type === "pan") {
+//             doctor.pan_doc_id = docId;
+//             if (pan_number) doctor.pan_number = pan_number;
+//         }
+//         if (type === "bank_account") {
+//             doctor.bank_doc_id = docId;
+//             if (account_number) doctor.account_number = account_number;
+//             if (ifsc) doctor.ifsc_code = ifsc;
+//         }
+//         if (type === "address") {
+//             doctor.address_doc_id = docId;
+//             if (address_line1) doctor.address_line1 = address_line1;
+//         }
+
+//         await doctor.save();
+
+//         // If all required docs + fields present -> update KYC on RZP and set status to submitted
+//         const hasAll = doctor.pan_doc_id && doctor.bank_doc_id && doctor.address_doc_id &&
+//             doctor.pan_number && doctor.account_number && doctor.ifsc_code && doctor.address_line1;
+
+//         if (hasAll) {
+//             await updateKyc(doctor.rzp_account_id, {
+//                 pan_number: doctor.pan_number,
+//                 pan_doc_id: doctor.pan_doc_id,
+//                 bank_doc_id: doctor.bank_doc_id,
+//                 ifsc: doctor.ifsc_code,
+//                 account_number: doctor.account_number,
+//                 address_line1: doctor.address_line1,
+//                 address_doc_id: doctor.address_doc_id,
+//             });
+//             doctor.kyc_status = "submitted";
+//             await doctor.save();
+//         }
+
+//         return res.json({
+//             success: true,
+//             doc_id: docId,
+//             type
+//         });
+//     } catch (err) {
+//         console.error(
+//             "uploadKycDocument err:",
+//             (err.response && err.response.data) || err.message || err
+//         );
+
+//         return res.status(500).json({
+//             message: "Failed to upload document"
+//         });
+//     }
+// };
+
+
+
 // controllers/payment/doctorKycController.js
+
 const path = require("path");
 const fs = require("fs");
+
 const {
     razorpay,
-    createLinkedAccount,
+    createLinkedAccount: createRzpLinkedAccount,
     createStakeholder,
     requestProductConfig,
     updateProductConfig,
     uploadDocument,
     updateKyc,
 } = require("../../services/rzpService");
+
 const {
     doctorProfile,
     User
@@ -17,52 +197,111 @@ const {
 
 /**
  * POST /doctor/:id/create-linked-account
- * Creates: linked account, stakeholder, product config
+ * Creates Razorpay linked account, stakeholder, and Route product
  */
 exports.createLinkedAccountController = async (req, res) => {
     try {
         const doctorId = req.params.id;
+
         const doctor = await doctorProfile.findByPk(doctorId, {
             include: [{
                 model: User,
                 as: "user"
-            }]
-        });
-        if (!doctor) return res.status(404).json({
-            message: "Doctor not found"
-        });
-        if (doctor.rzp_account_id) return res.status(400).json({
-            message: "Already linked"
+            }],
         });
 
-        // 1. Linked account
-        const account = await createLinkedAccount(doctor);
+        if (!doctor) {
+            return res.status(404).json({
+                message: "Doctor not found"
+            });
+        }
+
+        if (doctor.rzp_account_id) {
+            return res.status(400).json({
+                message: "Doctor already onboarded"
+            });
+        }
+
+        const phone =
+            doctor.phone ||
+            (doctor.user && doctor.user.phone) ||
+            (doctor.user && doctor.user.mobile) ||
+            (doctor.user && doctor.user.contact);
+
+
+        if (!phone) {
+            return res.status(400).json({
+                message: "Doctor phone number is required for Razorpay onboarding",
+            });
+        }
+
+        if (!doctor.address_line1) {
+            return res.status(400).json({
+                message: "Doctor address is required for Razorpay onboarding",
+            });
+        }
+
+        // Step 1: Create Razorpay linked account (minimal payload)
+        const account = await createRzpLinkedAccount(doctor);
+
         doctor.rzp_account_id = account.id;
         doctor.joined_at = new Date();
         doctor.kyc_status = "pending";
         await doctor.save();
 
-        // 2. Stakeholder (doctor)
+        // Step 2: Update account metadata (NO address fields here)
+        await razorpay.accounts.update(account.id, {
+            legal_business_name: doctor.clinic_name ||
+                (doctor.user && doctor.user.full_name) ||
+                (doctor.user && doctor.user.name) ||
+                "Individual Practitioner",
+            profile: {
+                category: "healthcare",
+                subcategory: "doctor",
+            },
+        });
+
+
+        // Step 3: Create stakeholder (address REQUIRED here)
         const stakeholderPayload = {
-            email: (doctor.user && doctor.user.email) || undefined,
-            contact: doctor.phone || undefined,
+            name: (doctor.user && doctor.user.full_name) ||
+                (doctor.user && doctor.user.name) ||
+                "Doctor",
+
+            email: doctor.user && doctor.user.email,
+
+            contact: phone,
             type: "individual",
-            dob: doctor.date_of_birth ? new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
+            dob: doctor.date_of_birth ?
+                new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
             permanent_address: {
-                line1: doctor.address_line1 || ""
+                line1: doctor.address_line1 || "NA",
+                city: doctor.city || "NA",
+                state: doctor.state || "NA",
+                postal_code: doctor.pincode || "000000",
+                country: "IN",
             },
         };
-        const stakeholder = await createStakeholder(account.id, stakeholderPayload);
+
+        const stakeholder = await createStakeholder(
+            account.id,
+            stakeholderPayload
+        );
+
         doctor.stakeholder_id = stakeholder.id;
         await doctor.save();
 
-        // 3. Request product config
+        // Step 4: Request Route product
         const product = await requestProductConfig(account.id);
         doctor.product_id = product.id;
         await doctor.save();
 
-        // 4. If bank details already present, update product
-        if (doctor.account_number && doctor.ifsc_code && doctor.beneficiary_name) {
+        // Step 5: Update bank details if already present
+        if (
+            doctor.account_number &&
+            doctor.ifsc_code &&
+            doctor.beneficiary_name
+        ) {
             await updateProductConfig(account.id, product.id, {
                 account_number: doctor.account_number,
                 ifsc: doctor.ifsc_code,
@@ -73,26 +312,26 @@ exports.createLinkedAccountController = async (req, res) => {
         return res.json({
             account_id: account.id,
             stakeholder_id: stakeholder.id,
-            product_id: product.id
+            product_id: product.id,
         });
     } catch (err) {
         console.error(
-            "createLinkedAccount err:",
+            "Razorpay onboarding error:",
             (err.response && err.response.data) || err.message || err
+
         );
 
         return res.status(500).json({
-            message: "Failed to create linked account"
+            message: "Failed to create linked account",
         });
     }
 };
 
 /**
  * POST /doctor/:id/upload-kyc
- * multipart form: file field "document"
- * body: { type: "pan"|"bank_account"|"address", pan_number?, ifsc?, account_number?, address_line1? }
+ * multipart/form-data
+ * body: { type: pan | bank_account | address, pan_number?, ifsc?, account_number?, address_line1? }
  */
-
 exports.uploadKycDocument = async (req, res) => {
     try {
         const doctorId = req.params.id;
@@ -103,34 +342,50 @@ exports.uploadKycDocument = async (req, res) => {
             account_number,
             address_line1
         } = req.body;
-        const doctor = await doctorProfile.findByPk(doctorId);
-        if (!doctor) return res.status(404).json({
-            message: "Doctor not found"
-        });
-        if (!doctor.rzp_account_id) return res.status(400).json({
-            message: "Linked account not created"
-        });
-        if (!req.file) return res.status(400).json({
-            message: "File required"
-        });
 
-        // temp file write
-        const tmpPath = path.join(__dirname, "../../tmp", `${Date.now()}_${req.file.originalname}`);
+        const doctor = await doctorProfile.findByPk(doctorId);
+
+        if (!doctor) {
+            return res.status(404).json({
+                message: "Doctor not found"
+            });
+        }
+
+        if (!doctor.rzp_account_id) {
+            return res
+                .status(400)
+                .json({
+                    message: "Linked account not created"
+                });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Document file is required"
+            });
+        }
+
+        const tmpPath = path.join(
+            __dirname,
+            "../../tmp",
+            `${Date.now()}_${req.file.originalname}`
+        );
+
         fs.writeFileSync(tmpPath, req.file.buffer);
 
-        // upload to Razorpay Files API (purpose must match allowed values)
         const docId = await uploadDocument(tmpPath, type);
 
-        // Persist doc ids + any fields
         if (type === "pan") {
             doctor.pan_doc_id = docId;
             if (pan_number) doctor.pan_number = pan_number;
         }
+
         if (type === "bank_account") {
             doctor.bank_doc_id = docId;
             if (account_number) doctor.account_number = account_number;
             if (ifsc) doctor.ifsc_code = ifsc;
         }
+
         if (type === "address") {
             doctor.address_doc_id = docId;
             if (address_line1) doctor.address_line1 = address_line1;
@@ -138,11 +393,16 @@ exports.uploadKycDocument = async (req, res) => {
 
         await doctor.save();
 
-        // If all required docs + fields present -> update KYC on RZP and set status to submitted
-        const hasAll = doctor.pan_doc_id && doctor.bank_doc_id && doctor.address_doc_id &&
-            doctor.pan_number && doctor.account_number && doctor.ifsc_code && doctor.address_line1;
+        const hasAllKycData =
+            doctor.pan_doc_id &&
+            doctor.bank_doc_id &&
+            doctor.address_doc_id &&
+            doctor.pan_number &&
+            doctor.account_number &&
+            doctor.ifsc_code &&
+            doctor.address_line1;
 
-        if (hasAll) {
+        if (hasAllKycData) {
             await updateKyc(doctor.rzp_account_id, {
                 pan_number: doctor.pan_number,
                 pan_doc_id: doctor.pan_doc_id,
@@ -152,6 +412,7 @@ exports.uploadKycDocument = async (req, res) => {
                 address_line1: doctor.address_line1,
                 address_doc_id: doctor.address_doc_id,
             });
+
             doctor.kyc_status = "submitted";
             await doctor.save();
         }
@@ -159,16 +420,17 @@ exports.uploadKycDocument = async (req, res) => {
         return res.json({
             success: true,
             doc_id: docId,
-            type
+            type,
         });
     } catch (err) {
         console.error(
-            "uploadKycDocument err:",
+            "uploadKycDocument error:",
             (err.response && err.response.data) || err.message || err
+
         );
 
         return res.status(500).json({
-            message: "Failed to upload document"
+            message: "Failed to upload KYC document",
         });
     }
 };
