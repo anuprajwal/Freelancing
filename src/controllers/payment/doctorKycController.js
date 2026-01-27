@@ -19,7 +19,7 @@ const {
  * POST /doctor/:id/create-linked-account
  * Creates: linked account, stakeholder, product config
  */
-exports.createLinkedAccount = async (req, res) => {
+exports.createLinkedAccountController = async (req, res) => {
     try {
         const doctorId = req.params.id;
         const doctor = await doctorProfile.findByPk(doctorId, {
