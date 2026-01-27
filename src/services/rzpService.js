@@ -48,6 +48,7 @@ async function createLinkedAccount(doctor) {
     // Use SDK create account (v1)
     const payload = {
         email: (doctor.user && doctor.user.email) || undefined,
+        phone: (doctor.user && doctor.user.phone_number) || undefined,
         type: "route",
     };
     return await razorpay.accounts.create(payload);
