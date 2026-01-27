@@ -255,13 +255,19 @@ exports.createLinkedAccountController = async (req, res) => {
             });
         }
 
+        console.log("stakeholder-4:", stakeholderPayload)
+
         // Step 1: Create Razorpay linked account (minimal payload)
         const account = await createRzpLinkedAccount(doctor);
+
+        console.log("stakeholder-3:", stakeholderPayload)
 
         doctor.rzp_account_id = account.id;
         doctor.joined_at = new Date();
         doctor.kyc_status = "pending";
         await doctor.save();
+
+        console.log("stakeholder-2:", stakeholderPayload)
 
         // Step 2: Update account metadata (NO address fields here)
         await razorpay.accounts.update(account.id, {
@@ -274,6 +280,8 @@ exports.createLinkedAccountController = async (req, res) => {
                 subcategory: "doctor",
             },
         });
+
+        console.log("stakeholder-1:", stakeholderPayload)
 
 
         // Step 3: Create stakeholder (address REQUIRED here)
