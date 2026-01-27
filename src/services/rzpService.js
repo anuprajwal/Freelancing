@@ -51,7 +51,20 @@ async function createLinkedAccount(doctor) {
         phone: (doctor.user && doctor.user.phone_number) || undefined,
         type: "route",
         legal_business_name: "business name",
-        business_type: "medical"
+        business_type: "medical",
+        profile: {
+            category: "healthcare",
+            subcategory: "doctor",
+            addresses: [{
+                type: "registered",
+                street1: doctor.address_line1 || "NA",
+                city: doctor.city || "NA",
+                state: doctor.state || "NA",
+                postal_code: doctor.pincode || "000000",
+                country: "IN"
+            }]
+        }
+
     };
     return await razorpay.accounts.create(payload);
 }
