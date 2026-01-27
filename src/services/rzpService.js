@@ -55,6 +55,10 @@ async function createLinkedAccount(doctor) {
         profile: {
             category: "healthcare",
             subcategory: "doctor"
+        },
+        addresses: {
+            street1: ["ranga"],
+            postal_code: ["506005"]
         }
 
 
