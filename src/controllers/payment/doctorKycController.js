@@ -297,6 +297,8 @@ exports.createLinkedAccountController = async (req, res) => {
             },
         };
 
+        console.log("stakeholder0:", stakeholderPayload)
+
         const stakeholder = await createStakeholder(
             account.id,
             stakeholderPayload
