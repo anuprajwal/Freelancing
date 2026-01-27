@@ -50,6 +50,7 @@ async function createLinkedAccount(doctor) {
         email: (doctor.user && doctor.user.email) || undefined,
         phone: (doctor.user && doctor.user.phone_number) || undefined,
         type: "route",
+        legal_business_name: "business name"
     };
     return await razorpay.accounts.create(payload);
 }
