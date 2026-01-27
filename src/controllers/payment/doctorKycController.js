@@ -228,6 +228,14 @@ exports.createLinkedAccountController = async (req, res) => {
             (doctor.user && doctor.user.mobile) ||
             (doctor.user && doctor.user.contact);
 
+        const address = {
+            line1: doctor.address_line1 || "NA",
+            city: doctor.city || "NA",
+            state: doctor.state || "NA",
+            postal_code: doctor.pincode || "000000",
+            country: "IN",
+        }
+
 
         if (!phone) {
             return res.status(400).json({
@@ -235,7 +243,13 @@ exports.createLinkedAccountController = async (req, res) => {
             });
         }
 
-        if (!doctor.address_line1) {
+        // if (!doctor.address_line1) {
+        //     return res.status(400).json({
+        //         message: "Doctor address is required for Razorpay onboarding",
+        //     });
+        // }
+
+        if (!address) {
             return res.status(400).json({
                 message: "Doctor address is required for Razorpay onboarding",
             });
@@ -275,7 +289,7 @@ exports.createLinkedAccountController = async (req, res) => {
             dob: doctor.date_of_birth ?
                 new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
             permanent_address: {
-                line1: doctor.address_line1 || "NA",
+                line1: address || "NA",
                 city: doctor.city || "NA",
                 state: doctor.state || "NA",
                 postal_code: doctor.pincode || "000000",
