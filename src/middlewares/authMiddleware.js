@@ -44,6 +44,10 @@ const protect = (req, res, next) => {
                 });
             }
 
+            console.log(req.cookies)
+            console.log()
+            console.log(req.cookies[tokenKey])
+
             if (req.cookies && req.cookies[tokenKey]) {
                 token = req.cookies[tokenKey];
             }
@@ -60,6 +64,7 @@ const protect = (req, res, next) => {
         }
 
         if (!token) {
+            console.log("token not found")
             return res.status(401).json({
                 error: "Auth token not found"
             });

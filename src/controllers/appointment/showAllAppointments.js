@@ -41,22 +41,23 @@ const doctorSideAppointments = async (doctor_id, limit, offset) => {
         },
         limit: limit, // Added limit
         offset: offset, // Added offset
-        // include: [{
-        //         model: checkupAppointment,
-        //         as: "checkupAppointment"
-        //     },
-        //     {
-        //         model: User,
-        //         as: "doctor",
-        //         required: true,
-        //         attributes: ["email", "username", "phone_number"],
-        //         include: [{
-        //             model: generalUser,
-        //             as: "generalUser",
-        //             required: true
-        //         }]
-        //     }
-        // ],
+        include: [{
+                model: checkupAppointment,
+                as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "patient",
+                required: true,
+                attributes: ["email", "username", "phone_number"],
+                include: [{
+                    model: generalUser,
+                    as: "generalUser",
+                    required: true,
+                    attributes: ["gender", "date_of_birth", "profile_picture"],
+                }]
+            }
+        ],
         order: [
             ["appointment_date", "DESC"]
         ]

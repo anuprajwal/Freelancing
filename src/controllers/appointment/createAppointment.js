@@ -78,6 +78,7 @@ const scheduleAppointment = async (req, res) => {
             appointment_end_time: end,
             appointment_status: payment_mode === "cash" ? "confirmed" : "pending",
             payment_mode,
+            appointment_type: type,
             belongs_to_hospital: doctorObj.organisation_id !== null,
             hospital_id: doctorObj.organisation_id
         });
