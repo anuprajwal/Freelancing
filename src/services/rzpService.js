@@ -57,7 +57,7 @@ async function createLinkedAccount(doctor) {
             subcategory: "doctor",
             addresses: {
                 street1: [doctor.address_line1 || "NA"],
-                postal_code: doctor.pincode || "000000",
+                postal_code: [doctor.pincode || "000000"],
             }
         }
 
