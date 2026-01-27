@@ -224,7 +224,7 @@ exports.createLinkedAccountController = async (req, res) => {
 
         const phone =
             doctor.phone ||
-            (doctor.user && doctor.user.phone) ||
+            (doctor.user && doctor.user.phone_number) ||
             (doctor.user && doctor.user.mobile) ||
             (doctor.user && doctor.user.contact);
 
