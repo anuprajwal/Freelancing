@@ -55,7 +55,14 @@ async function createLinkedAccount(doctor) {
         profile: {
             category: "healthcare",
             subcategory: "doctor",
-
+            addresses: {
+                type: "registered",
+                street1: doctor.address_line1 || "NA",
+                city: doctor.city || "NA",
+                state: doctor.state || "NA",
+                postal_code: doctor.pincode || "000000",
+                country: "IN"
+            }
         }
 
 
