@@ -302,13 +302,19 @@ exports.createLinkedAccountController = async (req, res) => {
             stakeholderPayload
         );
 
+        console.log("stakeholder1:", stakeholder)
+
         doctor.stakeholder_id = stakeholder.id;
         await doctor.save();
+
+        console.log("stakeholder2:", stakeholder)
 
         // Step 4: Request Route product
         const product = await requestProductConfig(account.id);
         doctor.product_id = product.id;
         await doctor.save();
+
+        console.log("stakeholder3:", stakeholder)
 
         // Step 5: Update bank details if already present
         if (
@@ -322,6 +328,8 @@ exports.createLinkedAccountController = async (req, res) => {
                 beneficiary_name: doctor.beneficiary_name,
             });
         }
+
+        console.log("stakeholder4:", stakeholder)
 
         return res.json({
             account_id: account.id,
