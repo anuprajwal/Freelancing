@@ -52,11 +52,14 @@ async function createLinkedAccount(doctor) {
         type: "route",
         legal_business_name: "business name",
         business_type: "individual",
-
         profile: {
             category: "healthcare",
             subcategory: "doctor",
-        }
+        },
+        addresses: [{
+            type: "registered",
+            country: "IN"
+        }]
 
     };
     console.log("debigging in services:", payload)
