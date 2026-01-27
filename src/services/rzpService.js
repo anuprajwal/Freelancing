@@ -54,11 +54,11 @@ async function createLinkedAccount(doctor) {
         business_type: "medical",
         profile: {
             category: "healthcare",
-            subcategory: "doctor"
-        },
-        addresses: {
-            street1: ["ranga"],
-            postal_code: ["506005"]
+            subcategory: "doctor",
+            addresses: {
+                street1: ["ranga"],
+                postal_code: ["506005"]
+            }
         }
 
     };
