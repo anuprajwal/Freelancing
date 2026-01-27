@@ -47,6 +47,7 @@ async function uploadDocument(filePath, purpose) {
 async function createLinkedAccount(doctor) {
     // Use SDK create account (v1)
     const payload = {
+        email: (doctor.user && doctor.user.email) || undefined,
         type: "route",
     };
     return await razorpay.accounts.create(payload);
