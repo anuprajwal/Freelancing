@@ -44,7 +44,7 @@ exports.createLinkedAccount = async (req, res) => {
 
         // 2. Stakeholder (doctor)
         const stakeholderPayload = {
-            email: doctor.user ? .email || undefined,
+            email: (doctor.user && doctor.user.email) || undefined,
             contact: doctor.phone || undefined,
             type: "individual",
             dob: doctor.date_of_birth ? new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
@@ -76,7 +76,11 @@ exports.createLinkedAccount = async (req, res) => {
             product_id: product.id
         });
     } catch (err) {
-        console.error("createLinkedAccount err:", err.response ? .data || err.message || err);
+        console.error(
+            "createLinkedAccount err:",
+            (err.response && err.response.data) || err.message || err
+        );
+
         return res.status(500).json({
             message: "Failed to create linked account"
         });
@@ -158,7 +162,11 @@ exports.uploadKycDocument = async (req, res) => {
             type
         });
     } catch (err) {
-        console.error("uploadKycDocument err:", err.response ? .data || err.message || err);
+        console.error(
+            "uploadKycDocument err:",
+            (err.response && err.response.data) || err.message || err
+        );
+
         return res.status(500).json({
             message: "Failed to upload document"
         });
