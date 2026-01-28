@@ -285,25 +285,45 @@ exports.createLinkedAccountController = async (req, res) => {
 
 
         // Step 3: Create stakeholder (address REQUIRED here)
+        // const stakeholderPayload = {
+        //     name: (doctor.user && doctor.user.full_name) ||
+        //         (doctor.user && doctor.user.name) ||
+        //         "Doctor",
+
+        //     email: doctor.user && doctor.user.email,
+
+        //     contact: phone,
+        //     type: "individual",
+        //     dob: doctor.date_of_birth ?
+        //         new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
+        //     permanent_address: {
+        //         line1: address || "NA",
+        //         city: doctor.city || "NA",
+        //         state: doctor.state || "NA",
+        //         postal_code: doctor.pincode || "000000",
+        //         country: "IN",
+        //     },
+        // };
+
         const stakeholderPayload = {
-            name: (doctor.user && doctor.user.full_name) ||
-                (doctor.user && doctor.user.name) ||
-                "Doctor",
+  name: doctor.user?.full_name || "Doctor",
+  email: doctor.user?.email,
+  contact: phone,
+  type: "individual",
 
-            email: doctor.user && doctor.user.email,
+  dob: doctor.date_of_birth
+    ? new Date(doctor.date_of_birth).toISOString().split("T")[0]
+    : undefined,
 
-            contact: phone,
-            type: "individual",
-            dob: doctor.date_of_birth ?
-                new Date(doctor.date_of_birth).toISOString().split("T")[0] : undefined,
-            permanent_address: {
-                line1: address || "NA",
-                city: doctor.city || "NA",
-                state: doctor.state || "NA",
-                postal_code: doctor.pincode || "000000",
-                country: "IN",
-            },
-        };
+  permanent_address: {
+    line1: doctor.address_line1 || "NA",
+    city: doctor.city || "NA",
+    state: doctor.state || "NA",
+    postal_code: doctor.pincode || "000000",
+    country: "IN"
+  }
+};
+
 
         console.log("stakeholder0:", stakeholderPayload)
 
