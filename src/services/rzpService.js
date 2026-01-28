@@ -282,27 +282,32 @@ async function uploadDocument(filePath, purpose) {
  * returns account object from RZP
  */
 async function createLinkedAccount(doctor) {
-    // Use SDK create account (v1)
-    const payload = {
-        email: (doctor.user && doctor.user.email) || undefined,
-        phone: (doctor.user && doctor.user.phone_number) || undefined,
-        type: "route",
-        legal_business_name: "business name",
-        business_type: "individual",
-        profile: {
-            category: "healthcare",
-            subcategory: "doctor",
-        },
-        addresses: [{
-            type: "registered",
-            country: "IN"
-        }]
+  const payload = {
+    type: "individual",
 
-    };
-    console.log("debigging in services:", payload)
+    email: doctor.user?.email,
+    phone: doctor.user?.phone_number,
 
-    return await razorpay.accounts.create(payload);
+    legal_business_name:
+      doctor.clinic_name ||
+      doctor.user?.full_name ||
+      "Individual Practitioner",
+
+    business_type: "individual",
+
+    profile: {
+      category: "healthcare",
+      subcategory: "doctor"
+    },
+
+    legal_info: {
+      pan: doctor.pan_number   // MUST EXIST
+    }
+  };
+
+  return await razorpay.accounts.create(payload);
 }
+
 
 /**
  * Create stakeholder (v1)
