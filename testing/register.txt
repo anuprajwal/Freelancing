@@ -109,3 +109,250 @@ delete appointment :
     "appointment_id":"8"
 }
 http://localhost:3002/api/appointment/delete-appointment? DELETE 
+
+
+
+
+
+ PAYMENT & ROUTE ARCHITECTURE – TEST DOCUMENTATION
+
+
+VENDOR ONBOARDING (ROUTE v2)
+ Endpoint
+POST /api/kyc/start-onboarding/:id
+
+ Purpose
+
+Creates:
+
+Linked Account
+
+Stakeholder
+
+Route Product
+
+Settlement configuration
+
+ Required DB Fields (doctor/vendor)
+{
+  "legal_entity_type": "proprietorship | partnership | private_limited | llp",
+  "vendor_type": "doctor | clinic | hospital",
+  "business_pan": "BUSINESS PAN",
+  "personal_pan": "OWNER PAN",
+  "address_line1": "...",
+  "city": "...",
+  "state": "...",
+  "pincode": "...",
+  "beneficiary_name": "...",
+  "account_number": "...",
+  "ifsc_code": "..."
+}
+
+ Success Response
+{
+  "account_id": "acc_xxxx",
+  "stakeholder_id": "sth_xxxx",
+  "product_id": "acc_prd_xxxx"
+}
+
+ Failure Cases
+Condition	               Response
+Missing PAN	               400
+Invalid business type	     400
+Razorpay validation error  500
+Already onboarded	         400
+
+
+
+PAYMENT FLOW
+ Create Order
+POST /api/payment/order
+
+Payload
+{
+  "amount": 500,
+  "appointmentId": 123,
+  "doctorId": 45
+}
+
+What Happens
+
+Creates Razorpay order
+
+Stores payment row (status = pending)
+
+Success
+{
+  "orderId": "order_xxxx",
+  "amount": 50000,
+  "key": "rzp_test_xxx"
+}
+
+ Verify Payment (Frontend Return Step)
+POST /api/payment/verify
+
+Payload
+{
+  "razorpay_order_id": "order_xxx",
+  "razorpay_payment_id": "pay_xxx",
+  "razorpay_signature": "signature"
+}
+
+What Happens
+
+Verifies signature
+
+Updates status → verification_pending
+
+Success
+{
+  "success": true,
+  "message": "Verification received"
+}
+ 
+  This does NOT confirm payment. Webhook does.
+  
+  
+   WEBHOOK (Authoritative Layer)
+POST /api/razorpay/webhook
+
+
+No authentication.
+
+Uses raw body + signature verification.
+
+Handles Events
+Event	Action
+payment.captured	payment_status → paid
+transfer.processed	transfer.status → processed
+transfer.failed	transfer.status → failed
+refund.processed	payment_status → refunded
+account.kyc.verified	doctor.kyc_status → verified
+Idempotency
+
+Every webhook has unique event_id
+
+Stored in webhook_events table
+
+Duplicate ignored
+
+Wrapped in DB transaction
+
+
+
+
+ TRANSFER STATE MACHINE
+
+Payment Status Lifecycle:
+
+pending
+→ verification_pending
+→ paid
+→ transfer_processing
+→ transfer_completed
+→ refunded
+
+
+Transfer Status Lifecycle:
+
+created
+→ processed
+→ failed
+→ reversed
+
+
+
+
+DIFFERENT VENDOR TYPES
+
+mapping for doctors, clinics, hospitals.:
+
+Vendor Model Requirements
+vendor_type
+legal_entity_type
+business_pan
+personal_pan
+
+Razorpay Mapping Logic
+Vendor Type	   business_type	             subcategory
+doctor	       proprietorship	             clinic
+clinic	       proprietorship/partnership	 clinic
+hospital	   private_limited	             hospital
+
+Important:
+
+business_type = legal structure
+
+subcategory = industry
+
+They are separate concepts.
+
+ FAILURE SCENARIOS & EXPECTED BEHAVIOR
+ Payment fails
+
+Webhook: payment.failed
+→ payment_status = failed
+→ Appointment remains unconfirmed
+
+ Transfer fails
+
+Webhook: transfer.failed
+→ transfer.status = failed
+→ payment_status = transfer_failed
+→ Admin notified
+→ Manual retry required
+
+ Webhook replay
+
+Duplicate event_id
+→ ignored safely
+
+ Refund after settlement
+
+Webhook: refund.processed
+→ payment_status = refunded
+→ Transfer reversal logic (future enhancement)
+
+ TESTING CHECKLIST
+ Onboarding Test
+
+Create doctor
+
+Call start-onboarding
+
+Verify account exists in Razorpay dashboard
+
+Verify KYC status webhook updates doctor
+
+ Payment Test
+
+Create order
+
+Pay via test card
+
+Confirm:
+
+verify route works
+
+webhook updates payment
+
+transfer row created
+
+transfer.processed event updates status
+
+ Refund Test
+
+Call refund endpoint
+
+Confirm refund webhook updates payment
+
+ Idempotency Test
+
+Replay same webhook manually
+
+Confirm no duplicate settlement rows
+
+ 
+
+
+
