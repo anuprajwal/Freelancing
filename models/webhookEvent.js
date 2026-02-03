@@ -1,34 +1,45 @@
 module.exports = (sequelize, DataTypes) => {
-    const WebhookEvent = sequelize.define(
-        "WebhookEvent",
-        {
-            id: {
-                type: DataTypes.INTEGER,
-                autoIncrement: true,
-                primaryKey: true,
-            },
+  const WebhookEvent = sequelize.define(
+    "WebhookEvent",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
 
-            event_type: {
-                type: DataTypes.STRING,
-                allowNull: false,
-            },
+      event_id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true, // prevents duplicate processing
+      },
 
-            payload: {
-                type: DataTypes.JSON,
-                allowNull: false,
-            },
+      event_type: {
+        type: DataTypes.STRING,
+        allowNull: false,
+      },
 
-            processed: {
-                type: DataTypes.BOOLEAN,
-                defaultValue: false,
-            },
-        },
-        {
-            tableName: "webhook_events",
-            timestamps: true,
-            underscored: true,
-        }
-    );
+      payload: {
+        type: DataTypes.JSON,
+        allowNull: false,
+      },
 
-    return WebhookEvent;
+      processed: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
+
+      processing_error: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      }
+    },
+    {
+      tableName: "webhook_events",
+      timestamps: true,
+      underscored: true,
+    }
+  );
+
+  return WebhookEvent;
 };
