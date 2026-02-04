@@ -15,34 +15,37 @@ const auth = {
 
 const BASE_V2 = "https://api.razorpay.com/v2";
 
-/* -----------------------------
+/* -----------------------------------
    1. CREATE LINKED ACCOUNT
-------------------------------*/
-async function createLinkedAccount(vendor) {
+------------------------------------ */
+async function createLinkedAccount(data) {
   const payload = {
     type: "route",
-    reference_id: `vendor_${vendor.id}`,
-    email: vendor.user.email,
-    phone: vendor.user.phone_number,
-    legal_business_name: vendor.legal_business_name,
-    contact_name: vendor.user.full_name,
-    business_type: vendor.legal_entity_type, // dynamic
+    reference_id: data.reference_id,
+    email: data.email,
+    phone: data.phone,
+    legal_business_name: data.legal_business_name,
+    contact_name: data.contact_name,
+    business_type: data.business_type,
+
     profile: {
       category: "healthcare",
-      subcategory: mapSubcategory(vendor.vendor_type),
+      subcategory: data.subcategory,
       addresses: {
         registered: {
-          street1: vendor.address_line1,
-          street2: vendor.address_line2 || "NA",
-          city: vendor.city,
-          state: vendor.state,
-          postal_code: vendor.pincode,
+          street1: data.address_line1,
+          street2: data.address_line2 || "NA",
+          city: data.city,
+          state: data.state,
+          postal_code: data.postal_code,
           country: "IN",
         },
       },
     },
+
     legal_info: {
-      pan: vendor.business_pan,
+      pan: data.business_pan,
+      ...(data.gst_number && { gst: data.gst_number }),
     },
   };
 
@@ -50,24 +53,24 @@ async function createLinkedAccount(vendor) {
   return resp.data;
 }
 
-/* -----------------------------
+/* -----------------------------------
    2. CREATE STAKEHOLDER
-------------------------------*/
-async function createStakeholder(accountId, vendor) {
+------------------------------------ */
+async function createStakeholder(accountId, data) {
   const payload = {
-    name: vendor.user.full_name,
-    email: vendor.user.email,
+    name: data.name,
+    email: data.email,
     addresses: {
       residential: {
-        street: vendor.address_line1,
-        city: vendor.city,
-        state: vendor.state,
-        postal_code: vendor.pincode,
+        street: data.address_line1,
+        city: data.city,
+        state: data.state,
+        postal_code: data.postal_code,
         country: "IN",
       },
     },
     kyc: {
-      pan: vendor.personal_pan,
+      pan: data.personal_pan,
     },
   };
 
@@ -80,9 +83,9 @@ async function createStakeholder(accountId, vendor) {
   return resp.data;
 }
 
-/* -----------------------------
+/* -----------------------------------
    3. ATTACH ROUTE PRODUCT
-------------------------------*/
+------------------------------------ */
 async function attachRouteProduct(accountId) {
   const resp = await axios.post(
     `${BASE_V2}/accounts/${accountId}/products`,
@@ -96,9 +99,9 @@ async function attachRouteProduct(accountId) {
   return resp.data;
 }
 
-/* -----------------------------
+/* -----------------------------------
    4. UPDATE SETTLEMENT DETAILS
-------------------------------*/
+------------------------------------ */
 async function updateSettlements(accountId, productId, bankDetails) {
   const payload = {
     settlements: {
@@ -117,28 +120,12 @@ async function updateSettlements(accountId, productId, bankDetails) {
   return resp.data;
 }
 
-/* -----------------------------
+/* -----------------------------------
    5. FETCH ACCOUNT STATUS
-------------------------------*/
+------------------------------------ */
 async function fetchAccount(accountId) {
   const resp = await axios.get(`${BASE_V2}/accounts/${accountId}`, { auth });
   return resp.data;
-}
-
-/* -----------------------------
-   HELPERS
-------------------------------*/
-function mapSubcategory(vendorType) {
-  switch (vendorType) {
-    case "doctor":
-      return "clinic";
-    case "clinic":
-      return "clinic";
-    case "hospital":
-      return "hospital";
-    default:
-      return "clinic";
-  }
 }
 
 module.exports = {
