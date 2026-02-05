@@ -15,6 +15,14 @@ const auth = {
 
 const BASE_V2 = "https://api.razorpay.com/v2";
 
+const Razorpay = require("razorpay");
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
+
+
 /* -----------------------------------
    1. CREATE LINKED ACCOUNT
 ------------------------------------ */
@@ -129,6 +137,7 @@ async function fetchAccount(accountId) {
 }
 
 module.exports = {
+  razorpay,
   createLinkedAccount,
   createStakeholder,
   attachRouteProduct,
