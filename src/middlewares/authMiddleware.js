@@ -94,7 +94,8 @@ const protect = (req, res, next) => {
         // Attach user info
         req.user = decoded,
 
-            console.log("Auth success for:", tokenKey);
+            console.log("Auth success for:", token);
+        console.log("decoded data:", decoded)
         next();
 
     } catch (err) {
