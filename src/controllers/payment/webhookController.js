@@ -1,9 +1,19 @@
 const crypto = require("crypto");
-const { sequelize, WebhookEvent, payments, transfer, settlement, doctorProfile, appointments } = require("../../../models");
+const {
+  sequelize,
+  WebhookEvent,
+  payments,
+  transfer,
+  settlement,
+  doctorProfile,
+  appointments
+} = require("../../../models");
 
 exports.handleWebhook = async (req, res) => {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!webhookSecret) return res.status(500).send("Webhook secret not configured");
+  if (!webhookSecret) {
+    return res.status(500).send("Webhook secret not configured");
+  }
 
   const signature = req.headers["x-razorpay-signature"];
   const rawBody = req.body;
@@ -13,20 +23,28 @@ exports.handleWebhook = async (req, res) => {
     .update(rawBody)
     .digest("hex");
 
-  if (expected !== signature)
+  if (expected !== signature) {
     return res.status(400).send("Invalid signature");
+  }
 
   const bodyJson = JSON.parse(rawBody.toString("utf8"));
-  const eventId = bodyJson.id; // ✅ TRUE EVENT ID
+  const eventId = bodyJson.id;
   const eventType = bodyJson.event;
 
-  // 🔒 IDEMPOTENCY CHECK
-  const existingEvent = await WebhookEvent.findOne({ where: { event_id: eventId } });
+  if (!eventId) {
+    return res.status(400).send("Invalid event id");
+  }
+
+  /* ================= IDEMPOTENCY ================= */
+
+  const existingEvent = await WebhookEvent.findOne({
+    where: { event_id: eventId }
+  });
+
   if (existingEvent) {
     return res.status(200).send("Already processed");
   }
 
-  // Save event first
   const eventRecord = await WebhookEvent.create({
     event_id: eventId,
     event_type: eventType,
@@ -40,13 +58,14 @@ exports.handleWebhook = async (req, res) => {
 
     switch (eventType) {
 
-      /* ================= PAYMENT CAPTURED ================= */
+      /* ======================================================
+         PAYMENT CAPTURED
+      ====================================================== */
       case "payment.captured": {
         const entity = bodyJson.payload.payment.entity;
-        const orderId = entity.order_id;
 
         const paymentRecord = await payments.findOne({
-          where: { transaction_id: orderId },
+          where: { transaction_id: entity.order_id },
           transaction: t,
         });
 
@@ -55,6 +74,8 @@ exports.handleWebhook = async (req, res) => {
           await paymentRecord.update({
             payment_status: "paid",
             transaction_id: entity.id,
+            payment_method: entity.method,
+            payment_date: new Date()
           }, { transaction: t });
 
           const appointment = await appointments.findByPk(
@@ -62,14 +83,37 @@ exports.handleWebhook = async (req, res) => {
             { transaction: t }
           );
 
-          if (appointment)
-            await appointment.update({ status: "confirmed" }, { transaction: t });
+          if (appointment) {
+            await appointment.update(
+              { status: "confirmed" },
+              { transaction: t }
+            );
+          }
         }
 
         break;
       }
 
-      /* ================= TRANSFER PROCESSED ================= */
+      /* ======================================================
+         PAYMENT FAILED
+      ====================================================== */
+      case "payment.failed": {
+        const entity = bodyJson.payload.payment.entity;
+
+        await payments.update({
+          payment_status: "failed",
+          payment_method: entity.method || "unknown"
+        }, {
+          where: { transaction_id: entity.order_id },
+          transaction: t
+        });
+
+        break;
+      }
+
+      /* ======================================================
+         TRANSFER EVENTS
+      ====================================================== */
       case "transfer.processed":
       case "transfer.paid":
       case "transfer.failed": {
@@ -99,7 +143,7 @@ exports.handleWebhook = async (req, res) => {
           raw_payload: transferEntity,
         }, { transaction: t });
 
-        // 🔒 Settlement dedupe
+        /* ---------- Settlement Dedupe ---------- */
         if (["processed", "paid"].includes(transferEntity.status)) {
 
           const existingSettlement = await settlement.findOne({
@@ -122,7 +166,9 @@ exports.handleWebhook = async (req, res) => {
         break;
       }
 
-      /* ================= ACCOUNT KYC ================= */
+      /* ======================================================
+         ACCOUNT KYC EVENTS
+      ====================================================== */
       case "account.kyc.verified":
       case "account.kyc.rejected": {
 
@@ -135,7 +181,10 @@ exports.handleWebhook = async (req, res) => {
 
         if (doctor) {
           await doctor.update({
-            kyc_status: eventType === "account.kyc.verified" ? "verified" : "rejected"
+            kyc_status:
+              eventType === "account.kyc.verified"
+                ? "verified"
+                : "rejected"
           }, { transaction: t });
         }
 
@@ -152,6 +201,7 @@ exports.handleWebhook = async (req, res) => {
     return res.status(200).send("ok");
 
   } catch (err) {
+
     await t.rollback();
 
     await eventRecord.update({
