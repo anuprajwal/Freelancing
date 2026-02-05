@@ -38,7 +38,8 @@ exports.createOrder = async (req, res) => {
     });
 
     await payments.create({
-      user_id: req.user.id,   // FIXED
+      user_id: req.user.payload.id,
+   // FIXED
       appointment_id: appointmentId,
       payment_status: "pending",
       payment_amount: amount,
