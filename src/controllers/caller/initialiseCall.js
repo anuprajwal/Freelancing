@@ -213,19 +213,22 @@ const initialiseCall = async (req, res) => {
         // If no tokens — still return success; client side may handle fallback
         if (allRelatedTokens && allRelatedTokens.length > 0) {
             const sendPromises = allRelatedTokens.map(tok => {
+
                 const payload = {
                     token: tok.token,
-                    notification: {
-                        title: 'Incoming Call',
-                        body: `Call from ${callerObj.username || 'Unknown'}`,
-                    },
                     data: {
-                        call_details: JSON.stringify(callRequest),
+                        title: 'Incoming Call',
+                        body: `Call from ${callerObj.username}`,
                         call_id: callHistoryDocRef.id,
                         appointment_id: String(appointmentId),
                         action: 'INCOMING_CALL',
+                        call_details: JSON.stringify(callRequest)
                     }
                 };
+
+
+                console.log("📤 Sending payload:", payload);
+
                 // return promise
                 return admin.messaging().send(payload);
             });
@@ -236,8 +239,14 @@ const initialiseCall = async (req, res) => {
                 sendResults.forEach((r, idx) => {
                     if (r.status === "rejected") {
                         console.warn(`Failed to send notification to token ${allRelatedTokens[idx].token}:`, r.reason);
+                    } else {
+                        console.log("✅ Notification sent!");
+                        console.log("Token:", allRelatedTokens[idx].token);
+                        console.log("MessageID:", r.value);
+
                     }
                 });
+                console.log("sent successfully")
             } catch (err) {
                 console.error('Error sending notifications (non-fatal):', err);
             }

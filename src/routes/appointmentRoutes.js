@@ -1,13 +1,26 @@
 const express = require("express");
-const  scheduleAppointment  = require("../controllers/appointment/createAppointment.js");
-const  deleteAppointment  = require("../controllers/appointment/deleteAppointment.js");
-const  showAllAppointments  = require("../controllers/appointment/showAllAppointments.js");
-const  protect  = require("../middlewares/authMiddleware.js");
+const scheduleAppointment = require("../controllers/appointment/createAppointment.js");
+const deleteAppointment = require("../controllers/appointment/deleteAppointment.js");
+const showAllAppointments = require("../controllers/appointment/showAllAppointments.js");
+const protect = require("../middlewares/authMiddleware.js");
 const checkAccountStatus = require("../middlewares/accountCheck.js")
-const {appointmentUpdateByDoctor, getPrescription} = require("../controllers/appointment/doctorUpdateAppointments.js");
+const {
+    appointmentUpdateByDoctor,
+    getPrescription
+} = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
-const { verifyPaymentAndAppointment, verifyPaymentAndCheckup } = require("../controllers/appointment/confirmPaymentAndAppointment.js")
-const {uploadDocument, getDocumentsByAppointment, getDocumentById, updateDocument, deleteDocument,} = require("../controllers/appointment/uploadHealthDocument.js")
+const showSingleAppointment = require("../controllers/appointment/getAppointmentData")
+const {
+    verifyPaymentAndAppointment,
+    verifyPaymentAndCheckup
+} = require("../controllers/appointment/confirmPaymentAndAppointment.js")
+const {
+    uploadDocument,
+    getDocumentsByAppointment,
+    getDocumentById,
+    updateDocument,
+    deleteDocument,
+} = require("../controllers/appointment/uploadHealthDocument.js")
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 
 
@@ -17,6 +30,7 @@ const router = express.Router();
 router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointment);
 router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
 router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
+router.get("/get-single-appointment", protect, checkAccountStatus, showSingleAppointment);
 
 router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
 router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
