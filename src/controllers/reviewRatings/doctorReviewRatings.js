@@ -43,7 +43,7 @@ const createDoctorReviewRating = async (req, res) => {
     const createdReviewRating = await reviewRating.create({
       doctor_id: appointment_consulted.doctor_id,
       appointment_id: appointment_consulted.id,
-      review: review,
+      review_text: review,
     });
 
     return res.status(201).json({ message: "Doctor review created successfully", createdReviewRating });
