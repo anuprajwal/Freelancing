@@ -17,7 +17,7 @@ const hospitalAdminRoutes = require("./src/routes/hospitalAdminRoutes.js");
 const documentRoutes = require("./src/routes/documentRoutes.js");
 const notificationRoutes = require("./src/routes/notificationRoutes.js");
 const ratingRoutes = require("./src/routes/reviewRatingsRoutes.js");
-const webhookRoutes = require("./src/routes/webhookRoutes.js");
+const webhookRoutes = require("./src/routes/webHookroutes.js");
 
 const https = require("https");
 const fs = require("fs");
