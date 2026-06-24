@@ -43,6 +43,11 @@ async function startupAuth() {
 
 startupAuth();
 
+
+( async ()=>{
+await startupAuth();
+
+    
 const express = require('express');
 const logger = require('./logger');
 const dotenv = require('dotenv');
@@ -176,3 +181,4 @@ https.createServer({
 ).listen(PORT, "0.0.0.0", () => {
     console.log("Auth backend HTTPS running on https://auth.local.docapp:5000");
 });
+})();
