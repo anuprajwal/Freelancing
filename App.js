@@ -41,7 +41,7 @@ async function startupAuth() {
 
 
 
-await startupAuth();
+startupAuth();
 
 const express = require('express');
 const logger = require('./logger');
