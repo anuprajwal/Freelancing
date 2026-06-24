@@ -41,8 +41,6 @@ async function startupAuth() {
 
 
 
-startupAuth();
-
 
 ( async ()=>{
 await startupAuth();
