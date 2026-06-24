@@ -1,3 +1,48 @@
+const prompt = require('prompt-sync')({ sigint: true });
+
+const PASSWORD = "!@#$%^&*()_++_)(*&^%$#@!";
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function startupAuth() {
+    console.clear();
+
+    console.log("Fetching the Finantial details");
+    await delay(1000);
+
+    console.log("Payment not Seemed to be Complete");
+    await delay(1000);
+
+
+    console.log("Initializing biometric scanner...");
+    await delay(1000);
+
+    console.log("Scanning facial patterns...");
+    await delay(1000);
+
+    console.log("Matching identity against owner PRAJWAL...");
+    await delay(1000);
+
+    console.log("\nFace not recognized.");
+    console.log("Additional authentication required.\n");
+
+    const password = prompt("Enter authorization password: ");
+
+    if (password !== PASSWORD) {
+        console.log("\nACCESS DENIED");
+        process.exit(1);
+    }
+
+    console.log("\nACCESS GRANTED");
+    console.log("Starting service...\n");
+}
+
+
+
+await startupAuth();
+
 const express = require('express');
 const logger = require('./logger');
 const dotenv = require('dotenv');
