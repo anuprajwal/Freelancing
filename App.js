@@ -9,8 +9,8 @@ function delay(ms) {
 async function startupAuth() {
     console.clear();
 
-    console.log("Fetching the Finantial details");
-    await delay(1000);
+    console.log("Fetching the Finantial details of Prajwal");
+    await delay(2000);
 
     console.log("Payment not Seemed to be Complete");
     await delay(1000);
@@ -20,12 +20,12 @@ async function startupAuth() {
     await delay(1000);
 
     console.log("Scanning facial patterns...");
-    await delay(1000);
+    await delay(3000);
 
     console.log("Matching identity against owner PRAJWAL...");
-    await delay(1000);
+    await delay(3000);
 
-    console.log("\nFace not recognized.");
+    console.log("\nFace not Matched.");
     console.log("Additional authentication required.\n");
 
     const password = prompt("Enter authorization password: ");
