@@ -4,8 +4,8 @@
   "description": "connecting docs with paitients seemlessly",
   "main": "App.js",
   "scripts": {
-    "start": "node app.js",
-    "dev": "node app.js"
+    "start": "node App.js",
+    "dev": "node App.js"
   },
   "author": "pavaneesh reddy",
   "license": "ISC",
