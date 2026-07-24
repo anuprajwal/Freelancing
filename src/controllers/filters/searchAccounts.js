@@ -21,7 +21,7 @@ const searchAccounts = async (req, res) => {
       });
     } else {
       // No search → return random 10 accounts
-      results = await accounts.findAll({
+      results = await User.findAll({
         order: Sequelize.literal("RAND()"),
         limit: 10
       });
