@@ -13,15 +13,7 @@ const verifyAdminAuth = (req, res, next) => {
             origin = req.headers.referer.replace(/\/$/, '');
         }
 
-        // 2. Extract Token based on source
-        if (origin) {
-            // 🌐 Source: Browser (Expect token in Cookies)
-            // Note: Ensure cookie-parser middleware is used in your main app
-            if (req.cookies && req.cookies.AdminToken) {
-                token = req.cookies.AdminToken;
-            }
-        } else {
-            // 📱 Source: Mobile / Postman / API (Expect token in Authorization Header)
+        
             if (
                 req.headers &&
                 req.headers.authorization &&
@@ -29,7 +21,6 @@ const verifyAdminAuth = (req, res, next) => {
             ) {
                 token = req.headers.authorization.split(' ')[1];
             }
-        }
 
         // 3. Fail fast if no token is found
         if (!token) {
