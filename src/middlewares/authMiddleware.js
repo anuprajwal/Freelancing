@@ -35,33 +35,15 @@ const protect = (req, res, next) => {
         let tokenKey = null;
 
         // 🌐 Browser
-        if (origin) {
-            tokenKey = DOMAIN_TOKEN_MAP[origin];
-
-            if (!tokenKey) {
-                return res.status(403).json({
-                    error: "Unauthorized domain"
-                });
-            }
-
-            console.log(req.cookies)
-            console.log()
-            console.log(req.cookies[tokenKey])
-
-            if (req.cookies && req.cookies[tokenKey]) {
-                token = req.cookies[tokenKey];
-            }
+        
+        if (
+            req.headers &&
+            req.headers.authorization &&
+            req.headers.authorization.startsWith('Bearer ')
+        ) {
+            token = req.headers.authorization.split(' ')[1];
         }
-        // 📱 Mobile / Postman
-        else {
-            if (
-                req.headers &&
-                req.headers.authorization &&
-                req.headers.authorization.startsWith('Bearer ')
-            ) {
-                token = req.headers.authorization.split(' ')[1];
-            }
-        }
+        
 
         if (!token) {
             console.log("token not found")
