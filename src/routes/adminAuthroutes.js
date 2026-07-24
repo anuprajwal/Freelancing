@@ -26,7 +26,7 @@ router.get("/stats", verifyAdminAuth, getAllStats);
 // router.post("/add-package" , verifyAdminAuth , addPackage);
 router.put("/hold-account/:userId", verifyAdminAuth, holdAccount)
 router.put("/delete-account/:userId", verifyAdminAuth, deleteAccount)
-router.get("/resume-account/:userId", verifyAdminAuth, resumeAccount)
+router.put("/resume-account/:userId", verifyAdminAuth, resumeAccount)
 router.get("/get-holded-accounts", verifyAdminAuth, getHoldedAccounts)
 router.put("/approve-doctor", verifyAdminAuth, approveDoctors)
 router.put("/approve-hospital", verifyAdminAuth, approveHospitals)
