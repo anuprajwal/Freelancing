@@ -84,7 +84,7 @@ const loginUser = async (req, res) => {
         // 📱 Mobile / Postman → token in JSON
         return res.status(200).json({
             message: "Login Success",
-            token: clientType !== 'web' ? token.token : undefined,
+            token: token.token,
             expiresIn: token.expiresIn,
             clientType,
             user: {
