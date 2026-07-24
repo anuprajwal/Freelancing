@@ -1,30 +1,18 @@
 const prompt = require('prompt-sync')({ sigint: true });
 
-const PASSWORD = "!@#$%^&*()_++_)(*&^%$#@!";
+const PASSWORD = "!";
 
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+
 
 async function startupAuth() {
     console.clear();
 
     console.log("Fetching the Finantial details of Prajwal");
-    await delay(2000);
-
     console.log("Payment not Seemed to be Complete");
-    await delay(1000);
-
 
     console.log("Initializing biometric scanner...");
-    await delay(1000);
-
     console.log("Scanning facial patterns...");
-    await delay(3000);
-
     console.log("Matching identity against owner PRAJWAL...");
-    await delay(3000);
-
     console.log("\nFace not Matched.");
     console.log("Additional authentication required.\n");
 
@@ -93,6 +81,16 @@ const allowedOrigins = [
     "https://doctor.local.docapp:5300",
     "https://hospital.local.docapp:5400",
     "https://admin.local.docapp:5500",
+    "http://localhost:7000",
+        "http://localhost:7001",
+        "http://localhost:7002",
+        "http://localhost:7003",
+        "http://localhost:7004",
+        "http://localhost:7005",
+        "http://localhost:9000",
+        "https://auth.docapp.co.in",
+        "https://doctors.docapp.co.in",
+        "https://users.docapp.co.in",
 ];
 
 // CORS middleware
