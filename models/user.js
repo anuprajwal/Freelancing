@@ -38,6 +38,11 @@ module.exports =  (sequelize, DataTypes) => {
         onUpdate: "CASCADE",
       });
 
+      User.hasMany(models.organisationRequest,{
+          foreignKey:"doctor_id",
+          as:"organisationRequests"
+      });
+
       User.hasMany(models.documents, {
         foreignKey: "user_id",
         as: "documents",
