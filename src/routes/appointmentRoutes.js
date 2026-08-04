@@ -22,6 +22,8 @@ const {
     deleteDocument,
 } = require("../controllers/appointment/uploadHealthDocument.js")
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
+const showUpcomingAppointments = require("../controllers/appointments/showUpcomingAppointments");
+
 
 
 
@@ -31,6 +33,7 @@ router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointm
 router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
 router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
 router.get("/get-single-appointment", protect, checkAccountStatus, showSingleAppointment);
+router.get("/upcoming", showUpcomingAppointments);
 
 router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
 router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
