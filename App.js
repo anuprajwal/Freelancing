@@ -92,6 +92,7 @@ const allowedOrigins = [
         "https://doctors.docapp.co.in",
         "https://users.docapp.co.in",
         "https://super.docapp.co.in"
+        "https://hospitals.docapp.co.in"
 ];
 
 // CORS middleware
