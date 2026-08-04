@@ -22,7 +22,7 @@ const {
     deleteDocument,
 } = require("../controllers/appointment/uploadHealthDocument.js")
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
-const showUpcomingAppointments = require("../controllers/appointments/showUpcomingAppointments");
+const showUpcomingAppointments = require("../controllers/appointments/showUpcomingAppointments.js");
 
 
 
