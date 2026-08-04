@@ -40,11 +40,7 @@ const getAllDoctors = async (req, res) => {
             "rejected"
         ];
 
-        console.log(Op);
-console.log(Op.like);
-console.log(Op.or);
-console.log(require("sequelize").version);
-
+        
         if (
             request_status &&
             !allowedStatus.includes(request_status)
@@ -70,19 +66,19 @@ console.log(require("sequelize").version);
 
                 {
                     email: {
-                        [Op.Like]: `%${search}%`
+                        [Op.like]: `%${search}%`
                     }
                 },
 
                 {
                     username: {
-                        [Op.Like]: `%${search}%`
+                        [Op.like]: `%${search}%`
                     }
                 },
 
                 {
                     phone_number: {
-                        [Op.Like]: `%${search}%`
+                        [Op.like]: `%${search}%`
                     }
                 }
 
