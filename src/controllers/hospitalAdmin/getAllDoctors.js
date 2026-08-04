@@ -96,19 +96,19 @@ const getAllDoctors = async (req, res) => {
 
                 {
                     email: {
-                        [Op.iLike]: `%${search}%`
+                        [Op.Like]: `%${search}%`
                     }
                 },
 
                 {
                     username: {
-                        [Op.iLike]: `%${search}%`
+                        [Op.Like]: `%${search}%`
                     }
                 },
 
                 {
                     phone_number: {
-                        [Op.iLike]: `%${search}%`
+                        [Op.Like]: `%${search}%`
                     }
                 }
 
