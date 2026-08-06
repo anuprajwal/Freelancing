@@ -39,8 +39,8 @@ router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointm
 router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
 router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
 router.get("/get-single-appointment", protect, checkAccountStatus, showSingleAppointment);
-router.get("/appointments/today", protect, checkAccountStatus, showTodayAppointments);
-router.get("/appointments/next", protect, checkAccountStatus, showNextAppointment);
+router.get("/today", protect, checkAccountStatus, showTodayAppointments);
+router.get("/next", protect, checkAccountStatus, showNextAppointment);
 router.get("/upcoming", protect, checkAccountStatus, showUpcomingAppointments);
 
 router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
