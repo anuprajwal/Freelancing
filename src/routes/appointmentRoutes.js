@@ -4,6 +4,12 @@ const deleteAppointment = require("../controllers/appointment/deleteAppointment.
 const showAllAppointments = require("../controllers/appointment/showAllAppointments.js");
 const protect = require("../middlewares/authMiddleware.js");
 const checkAccountStatus = require("../middlewares/accountCheck.js")
+const showTodayAppointments = require("../controllers/appointment/getTodayAppointment.js")
+const showNextAppointment = require("../controllers/appointment/getNextAppointment.js")
+
+
+
+
 const {
     appointmentUpdateByDoctor,
     getPrescription
@@ -33,7 +39,9 @@ router.post("/create-appointment", protect, checkAccountStatus, scheduleAppointm
 router.delete("/delete-appointment", protect, checkAccountStatus, deleteAppointment);
 router.get("/list-appointments", protect, checkAccountStatus, showAllAppointments);
 router.get("/get-single-appointment", protect, checkAccountStatus, showSingleAppointment);
-router.get("/upcoming", showUpcomingAppointments);
+router.get("/appointments/today", protect, checkAccountStatus, showTodayAppointments);
+router.get("/appointments/next", protect, checkAccountStatus, showNextAppointment);
+router.get("/upcoming", protect, checkAccountStatus, showUpcomingAppointments);
 
 router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
 router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
