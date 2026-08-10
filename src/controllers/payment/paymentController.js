@@ -105,7 +105,7 @@ exports.verifyPayment = async (req, res) => {
         // 4. Update your database
         await payments.update(
             {
-                payment_statu: "paid",
+                payment_status: "paid",
                 // optionally store razorpay_payment_id
                 // razorpay_payment_id: razorpay_payment_id
             },
