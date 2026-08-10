@@ -67,33 +67,69 @@ exports.createOrder = async (req, res) => {
    VERIFY PAYMENT (Lightweight)
 ===================================================== */
 exports.verifyPayment = async (req, res) => {
-  try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    try {
+        const {
+            razorpay_order_id,
+            razorpay_payment_id,
+            razorpay_signature
+        } = req.body;
 
-    const body = razorpay_order_id + "|" + razorpay_payment_id;
+        // 1. Verify signature
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
 
-    const expected = crypto
-      .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-      .update(body)
-      .digest("hex");
+        const expected = crypto
+            .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+            .update(body)
+            .digest("hex");
 
-    if (expected !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: "Invalid signature" });
+        if (expected !== razorpay_signature) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid signature"
+            });
+        }
+
+        // 2. Fetch payment from Razorpay
+        const payment = await razorpay.payments.fetch(
+            razorpay_payment_id
+        );
+
+        // 3. Check actual payment status
+        if (payment.status !== "captured") {
+            return res.status(400).json({
+                success: false,
+                message: `Payment is not successful. Status: ${payment.status}`
+            });
+        }
+
+        // 4. Update your database
+        await payments.update(
+            {
+                payment_statu: "paid",
+                // optionally store razorpay_payment_id
+                // razorpay_payment_id: razorpay_payment_id
+            },
+            {
+                where: {
+                    transaction_id: razorpay_order_id
+                }
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Payment verified successfully"
+        });
+
+    } catch (err) {
+        console.error("verifyPayment:", err.message);
+
+        return res.status(500).json({
+            success: false,
+            message: "Payment verification failed"
+        });
     }
-
-    await payments.update(
-      { payment_status: "verification_pending" },
-      { where: { transaction_id: razorpay_order_id } }
-    );
-
-    return res.json({ success: true });
-
-  } catch (err) {
-    console.error("verifyPayment:", err.message);
-    return res.status(500).json({ success: false });
-  }
 };
-
 
 /* =====================================================
    REFUND
