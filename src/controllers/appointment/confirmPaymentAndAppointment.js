@@ -1,35 +1,43 @@
 const razorpay = require("../../utils/razorpay");
 const {payments, appointments, checkupAppointment} = require("../../../models")
 
-
-const verifyPaymentAndAppointment = async (req, res)=>{
-    const {appointmentId} = req.body
-    const user_id = req.user.payload.id
+const verifyPaymentAndAppointment = async (req, res) => {
+    const { appointmentId, razorpay_order_id } = req.body;
 
     const payment_data = await payments.findOne({
-        where:{
-            appointment_id: appointmentId,
-            user_id
+        where: {
+            transaction_id: razorpay_order_id
         }
-    })
+    });
 
-    const {payment_status} = payment_data
-    
-    if (payment_status !== "paid"){
-        return res.status(400).json({error:"payment is not yet paid", payment: payment_data})
+    if (!payment_data) {
+        return res.status(404).json({
+            error: "Payment record not found"
+        });
+    }
+
+    const { payment_status } = payment_data;
+
+    if (payment_status !== "paid") {
+        return res.status(400).json({
+            error: "Payment is not yet paid",
+            payment: payment_data
+        });
     }
 
     await appointments.update(
-        {appointment_status: "confirmed"},
+        { appointment_status: "confirmed" },
         {
             where: {
-                id:appointmentId
+                id: appointmentId
             }
         }
-    )
+    );
 
-    return res.status(200).json({message:"your appointment is confirmed"})
-}
+    return res.status(200).json({
+        message: "Your appointment is confirmed"
+    });
+};
 
 
 
