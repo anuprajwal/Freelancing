@@ -16,7 +16,7 @@ const verifyPaymentAndAppointment = async (req, res)=>{
     const {payment_status} = payment_data
     
     if (payment_status !== "paid"){
-        return res.status(400).json({error:"payment is not yet paid"})
+        return res.status(400).json({error:"payment is not yet paid", payment: payment_data})
     }
 
     await appointments.update(
