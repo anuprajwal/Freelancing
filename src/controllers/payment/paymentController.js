@@ -20,7 +20,9 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const doctor = await doctorProfile.findByPk(doctorId);
+    const doctor = await doctorProfile.findOne({
+      where: { user_id: doctorId }
+    });
 
     if (!doctor || doctor.kyc_status !== "verified") {
       return res.status(400).json({
