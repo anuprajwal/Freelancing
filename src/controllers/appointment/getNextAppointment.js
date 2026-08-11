@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { appointments, checkupAppointment } = require("../../../models");
+const { appointments, checkupAppointment, User, doctorProfile, generalUser } = require("../../../models");
 
 const showNextAppointment = async (req, res) => {
 
@@ -53,6 +53,18 @@ const doctorNextAppointment = async (doctor_id) => {
             {
                 model: checkupAppointment,
                 as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "patient",
+                required: true,
+                attributes: ["email", "username", "phone_number"],
+                include: [{
+                    model: generalUser,
+                    as: "generalUser",
+                    required: true,
+                    attributes: ["id", "gender", "date_of_birth", "profile_picture"],
+                }]
             }
         ],
 
@@ -80,6 +92,21 @@ const patientNextAppointment = async (user_id) => {
             {
                 model: checkupAppointment,
                 as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "doctor",
+                required: true,
+                attributes: ["email", "username", "phone_number"],
+                include: [{
+                    model: doctorProfile,
+                    as: "doctorProfile",
+                    required: true,
+                    attributes: [
+                        "id", "gender", "specialization", "experience_years", "organisation_id",
+                        "consultation_fee", "verified_status", "profile_picture", "appointment_time"
+                    ]
+                }]
             }
         ],
 

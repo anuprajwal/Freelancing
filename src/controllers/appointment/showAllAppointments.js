@@ -54,7 +54,7 @@ const doctorSideAppointments = async (doctor_id, limit, offset) => {
                     model: generalUser,
                     as: "generalUser",
                     required: true,
-                    attributes: ["gender", "date_of_birth", "profile_picture"],
+                    attributes: ["id", "gender", "date_of_birth", "profile_picture"],
                 }]
             }
         ],
@@ -92,7 +92,7 @@ const patientSideAppointments = async (userId, limit, offset) => {
                     as: "doctorProfile",
                     required: true,
                     attributes: [
-                        "gender", "specialization", "experience_years", "organisation_id",
+                        "id", "gender", "specialization", "experience_years", "organisation_id",
                         "consultation_fee", "verified_status", "profile_picture", "appointment_time"
                     ]
                 }]
