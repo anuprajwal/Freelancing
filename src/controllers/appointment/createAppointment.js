@@ -93,7 +93,7 @@ const scheduleAppointment = async (req, res) => {
             appointmentId: createdAppointment.id,
         }
 
-        const orderDetails = await createOrder(doctorObj.consultation_fee, createdAppointment.id, req.body.doctor_id, notes, payment_mode, doctorObj.organisation_id);
+        const orderDetails = await createOrder(doctorObj.consultation_fee, createdAppointment.id, req.body.doctor_id, notes, payment_mode, doctorObj.organisation_id, req.user.payload.id);
 
         // const createPayment = await payments.create({
         //     user_id: req.user.payload.id,
@@ -177,7 +177,7 @@ const scheduleAppointment = async (req, res) => {
             message: "appointment scheduled",
             createdAppointment,
             success: true,
-            orderDetails: orderDetails
+            ...orderDetails
         })
     } catch (Error) {
         return res.status(400).json({

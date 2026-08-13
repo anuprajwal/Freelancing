@@ -11,11 +11,74 @@ const {
 /* =====================================================
    CREATE ORDER
 ===================================================== */
-exports.createOrder = async (amount, appointmentId, doctorId, notes, payment_mode, organisation_id) => {
-  try {
+// exports.createOrder = async (amount, appointmentId, doctorId, notes, payment_mode, organisation_id) => {
+//   try {
 
+//     if (!amount || !appointmentId || !doctorId) {
+//       return res.status(400).json({ message: "Missing required fields" });
+//     }
+
+//     const doctor = await doctorProfile.findOne({
+//       where: { user_id: doctorId }
+//     });
+
+//     if (!doctor || doctor.kyc_status !== "verified") {
+//       return res.status(400).json({
+//         message: "Doctor not eligible for payments"
+//       });
+//     }
+
+//     const totalPaise = Math.round(Number(amount) * 100);
+
+//     const order = await razorpay.orders.create({
+//       amount: totalPaise,
+//       currency: "INR",
+//       receipt: `appt_${appointmentId}_${Date.now()}`,
+//       notes: { appointmentId, doctorId }
+//     });
+
+//     await payments.create({
+//       user_id: req.user.payload.id,
+//       appointment_id: appointmentId,
+//       payment_status: "pending",
+//       payment_amount: amount,
+//       payment_date: new Date(),
+//       payment_method: payment_mode,
+//       transaction_id: order.id,
+//       payment_notes: JSON.stringify(notes),
+//       organisation_id: organisation_id,
+//       razorpay_order_id: order.id
+
+//     });
+
+//     return res.json({
+//       orderId: order.id,
+//       amount: order.amount,
+//       key: process.env.RAZORPAY_KEY_ID
+//     });
+
+//   } catch (err) {
+//     console.error("createOrder:", err.response?.data || err.message);
+//     return res.status(500).json({ message: "Order creation failed" });
+//   }
+// };
+
+
+/* =====================================================
+   CREATE ORDER (Helper Function)
+===================================================== */
+exports.createOrder = async (
+  amount, 
+  appointmentId, 
+  doctorId, 
+  notes, 
+  payment_mode, 
+  organisation_id, 
+  patientUserId // Passed explicitly from req.user.payload.id
+) => {
+  try {
     if (!amount || !appointmentId || !doctorId) {
-      return res.status(400).json({ message: "Missing required fields" });
+      throw new Error("Missing required fields for payment order creation.");
     }
 
     const doctor = await doctorProfile.findOne({
@@ -23,13 +86,12 @@ exports.createOrder = async (amount, appointmentId, doctorId, notes, payment_mod
     });
 
     if (!doctor || doctor.kyc_status !== "verified") {
-      return res.status(400).json({
-        message: "Doctor not eligible for payments"
-      });
+      throw new Error("Doctor is not eligible to receive payments.");
     }
 
     const totalPaise = Math.round(Number(amount) * 100);
 
+    // 1. Create Razorpay Order
     const order = await razorpay.orders.create({
       amount: totalPaise,
       currency: "INR",
@@ -37,32 +99,32 @@ exports.createOrder = async (amount, appointmentId, doctorId, notes, payment_mod
       notes: { appointmentId, doctorId }
     });
 
+    // 2. Log Pending Payment Record
     await payments.create({
-      user_id: req.user.payload.id,
+      user_id: patientUserId,
       appointment_id: appointmentId,
       payment_status: "pending",
       payment_amount: amount,
       payment_date: new Date(),
       payment_method: payment_mode,
       transaction_id: order.id,
-      payment_notes: JSON.stringify(notes),
+      payment_notes: JSON.stringify(notes || {}),
       organisation_id: organisation_id,
       razorpay_order_id: order.id
-
     });
 
-    return res.json({
+    // 3. Return payload back to the main controller
+    return {
       orderId: order.id,
       amount: order.amount,
       key: process.env.RAZORPAY_KEY_ID
-    });
+    };
 
   } catch (err) {
-    console.error("createOrder:", err.response?.data || err.message);
-    return res.status(500).json({ message: "Order creation failed" });
+    console.error("createOrder Helper Error:", err.response?.data || err.message);
+    throw err; // Re-throw to be caught by the parent route handler
   }
 };
-
 
 /* =====================================================
    VERIFY PAYMENT (Lightweight)
