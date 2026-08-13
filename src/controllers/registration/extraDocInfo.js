@@ -38,7 +38,6 @@ const updateExtraDocInfo = async(req, res)=>{
 
 const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
     const slots = await createOrMergeDoctorSlots(req.user.payload.id,availability_schedule, appointment_slot);
-    console.log("printin slots in main",slots)
     if (slots.error){
         return false
     }else if (slots){

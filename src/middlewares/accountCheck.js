@@ -11,8 +11,6 @@ const checkAccountStatus = async (req, res, next) => {
             req.user.payload.id :
             null; // assuming JWT middleware sets req.user
 
-        console.log("a minute...", userId)
-
         if (!userId) {
             return res.status(401).json({
                 message: "User not authenticated"

@@ -10,7 +10,6 @@ const approveDoctors = async (req, res) => {
         id,
         scope
     } = req.admin
-    console.log(req.admin)
     const {
         doctor_id
     } = req.body

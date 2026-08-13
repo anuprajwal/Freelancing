@@ -7,7 +7,6 @@ const {
 
 const getUserDetails = async (req, res) => {
     try {
-        console.log(req.user)
         const {
             id
         } = req.user.payload
@@ -87,7 +86,6 @@ const getUserDetails = async (req, res) => {
             include: includes
         });
 
-        console.log("userDetails", userDetails);
 
         res.status(200).json({
             message: "succesfully fetched the user details",

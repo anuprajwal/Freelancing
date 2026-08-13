@@ -1,19 +1,12 @@
 const { doctorProfile, organisationProfile, documents, address, User } = require("../../../models");
-// const logger = require("../../../logger");
 
-/**
- * Controller: Get all unverified doctor and organisation accounts
- * Route: GET /admin/unverified-accounts
- */
 const getUnverifiedAccounts = async (req, res) => {
 //   logger.info(`Route to get unverified accounts called by admin`);
 
   try {
-    // Fetch unverified doctors
     const unverifiedDoctors = await doctorProfile.findAll({
         where: { verified_status: false },
         include: [      
-          // 👤 Include User Info
           {
             model: User,
             as: "user",
@@ -24,7 +17,6 @@ const getUnverifiedAccounts = async (req, res) => {
               "created_at",
             ],
             include: [
-              // 📄 Include Documents (inside User)
               {
                 model: documents,
                 as: "documents",
@@ -59,11 +51,9 @@ const getUnverifiedAccounts = async (req, res) => {
       });
       
 
-    // Fetch unverified organisations
     const unverifiedOrganisations = await organisationProfile.findAll({
       where: { verified_status: false },
       include: [      
-        // 👤 Include User Info
         {
           model: User,
           as: "user",
@@ -74,7 +64,6 @@ const getUnverifiedAccounts = async (req, res) => {
             "created_at",
           ],
           include: [
-            // 📄 Include Documents (inside User)
             {
               model: documents,
               as: "documents",

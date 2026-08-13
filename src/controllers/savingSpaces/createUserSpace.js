@@ -16,7 +16,6 @@ async function createS3UserFolders(bucketName, mainFolderName) {
 
     try {
       await s3.putObject(params).promise();
-      console.log(`Created folder: ${key}`);
     } catch (err) {
       console.error(`Failed to create folder ${key}:`, err.message);
     }

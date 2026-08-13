@@ -34,7 +34,6 @@ const showAllAppointments = async (req, res) => {
 };
 
 const doctorSideAppointments = async (doctor_id, limit, offset) => {
-    console.log("fetching appointments for:", doctor_id)
     const upcommingAppointments = await appointments.findAll({
         where: {
             doctor_id

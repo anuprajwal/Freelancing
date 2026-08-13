@@ -7,7 +7,6 @@ const uploadDocument = async (req, res) => {
   const { appointment_id } = req.body;
   const { id: user_id } = req.user.payload;
 
-  console.log(appointment_id)
 
   if (!req.file) return res.status(400).send("No file uploaded");
   const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
@@ -91,8 +90,6 @@ const getDocumentById = async (req, res) => {
       where: {id : doc.appointment_id}
     })
     const doctorObj = await User.findByPk(appointment.doctor_id)
-    console.log(doc.user_id, req.user.payload.id)
-    console.log(doctorObj.id, req.user.payload.id)
     if (doc.user_id !== req.user.payload.id && doctorObj.id !== req.user.payload.id) return res.status(401).json({error:"unauthorised"})
     res.json(doc);
   } catch (error) {

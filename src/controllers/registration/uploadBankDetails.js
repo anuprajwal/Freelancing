@@ -19,18 +19,13 @@ const uploadBankDetails = async (req, res) => {
         ifsc_code
     } = req.body;
 
-    console.log(req.body)
 
-    console.log("wfs", account_number, beneficiary_name, ifsc_code)
-
-    // Input validation
     if (!account_number || !beneficiary_name || !ifsc_code) {
         // logger.warn(`Missing required bank fields by user: ${id}`);
         return res.status(400).json({
             error: "All fields are required"
         });
     }
-    console.log("jdskcnweilmk")
 
     if (account_number.length < 6) {
         return res.status(400).json({

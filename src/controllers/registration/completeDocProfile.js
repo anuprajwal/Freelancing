@@ -8,7 +8,6 @@ const completeDoctorProfile = async (req, res) => {
     const { payload } = req.user; 
     const { id } = payload;
 
-    console.log("id:  ",id)
     
     const user = await validateUserRole(id, "doctor");
     if (!user){

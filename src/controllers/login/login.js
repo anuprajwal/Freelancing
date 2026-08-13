@@ -17,17 +17,16 @@ const loginUser = async (req, res) => {
         role = "general_user"
     } = req.body;
 
-    // ✅ Proper client detection
     const clientType = (() => {
         if (req.headers && req.headers['x-client-type']) {
-            return req.headers['x-client-type']; // mobile / postman / web (explicit)
+            return req.headers['x-client-type']; 
         }
 
         if (req.headers && (req.headers.origin || req.headers.referer)) {
-            return 'web'; // browser
+            return 'web'; 
         }
 
-        return 'api'; // postman / mobile / server
+        return 'api';
     })();
 
     const user_ip = req.ip;
@@ -68,7 +67,6 @@ const loginUser = async (req, res) => {
 
         const token = generateToken(user, user_ip);
 
-        // 🌐 Browser → cookie only
         if (clientType === 'web') {
             res.cookie(`${role}_token`, token.token, {
                 httpOnly: true,
@@ -79,9 +77,7 @@ const loginUser = async (req, res) => {
             });
         }
 
-        console.log("Login response type:", clientType);
 
-        // 📱 Mobile / Postman → token in JSON
         return res.status(200).json({
             message: "Login Success",
             token: token.token,
@@ -113,8 +109,6 @@ const generateToken = (user, user_ip) => {
     }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRES_IN
     });
-    console.log("token generated for user", user.email, "id", token);
-    console.log("token expires in:", process.env.JWT_EXPIRES_IN)
     return {
         token,
         expiresIn: process.env.JWT_EXPIRES_IN

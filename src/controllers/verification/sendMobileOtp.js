@@ -23,7 +23,6 @@ const sendPhoneOtp = async (req, res) => {
 
     // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    console.log("Sending Phone OTP:", otp);
 
     // ---- SMS CONFIG FROM ENV ----
     const smsURL = "https://www.fast2sms.com/dev/bulkV2";
@@ -41,7 +40,6 @@ const sendPhoneOtp = async (req, res) => {
     // ---- SEND SMS ----
     try {
       const response = await axios.get(smsURL, { params });
-      console.log("OTP SMS Sent:", response.data);
     } catch (error) {
       console.error("SMS sending error:", error.response?.data || error.message);
       return res.status(500).json({ message: "Failed to send SMS OTP" });

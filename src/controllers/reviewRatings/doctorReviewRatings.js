@@ -4,7 +4,6 @@ const checkSimilarUser = require("../../utils/checkSimilarUser");
 // API to ive ratings to the doctor based on each appointment
 const createDoctorReviewRating = async (req, res) => {
   const { appointment_id, review } = req.body;
-  console.log("appointment_id", appointment_id, "review", review);
   if (!appointment_id || !review) {
     return res.status(400).json({ error: "Missing required fields" });
   }

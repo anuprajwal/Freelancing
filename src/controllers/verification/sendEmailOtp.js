@@ -19,7 +19,6 @@ const sendEmailOtp = async (req, res) => {
   
   let otp = Math.floor(100000 + Math.random() * 900000) + "";
 
-  console.log("sending the otp:", otp)
 
   axios.post('http://127.0.0.1:5500/api/send-email', { to: email, subject: "verify your email", text: otp }, {
     headers: {
@@ -27,7 +26,6 @@ const sendEmailOtp = async (req, res) => {
     }
   })
   .then(response => {
-    console.log('Response:', response.data);
   })
   .catch(error => {
     console.error('Error:', error.message);
@@ -39,14 +37,12 @@ const sendEmailOtp = async (req, res) => {
         user_id: id,
       },
     });
-    console.log(id, email, typeof otp)
     await otpStorage.create({
       user_id: id,
       email: email,
       otp,
     });
   }catch(e){
-    console.log(`error recieved ${e}`)
     return res.status(500).json({ error: `Error in Server :${e}` });
   }
   

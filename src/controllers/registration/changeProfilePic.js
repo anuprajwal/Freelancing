@@ -25,16 +25,12 @@ const uploadProfilePic = async (req, res) => {
 
     try {
       await s3.headObject({ Bucket: process.env.S3_BUCKET_NAME, Key: key }).promise();
-      console.log('Existing profile_pic found. Deleting...');
 
-      // Step 2: Delete it
       await s3.deleteObject({ Bucket: process.env.S3_BUCKET_NAME, Key: key }).promise();
-      console.log('Old profile_pic deleted.');
     } catch (headErr) {
       if (headErr.code !== 'NotFound') {
-        throw headErr; // throw other errors
+        throw headErr;
       }
-      console.log('No existing profile_pic found.');
     }
 
   

@@ -18,7 +18,7 @@ const verifyToken = (req, res) => {
         // 3. Return success
         return res.status(200).json({
             authenticated: true,
-            user: decoded // Includes id, email, role, etc.
+            user: decoded
         });
     } catch (err) {
         return res.status(401).json({

@@ -17,7 +17,6 @@ const deleteProfilePic = async (req, res) => {
     // Step 1: Check if file exists
     try {
       await s3.headObject({ Bucket: process.env.S3_BUCKET_NAME, Key: key }).promise();
-      console.log("Profile pic found. Deleting...");
     } catch (err) {
       if (err.code === "NotFound") {
         return res.status(404).json({ error: "No profile picture found to delete" });
@@ -31,7 +30,6 @@ const deleteProfilePic = async (req, res) => {
       Key: key
     }).promise();
 
-    console.log("Deleted from S3");
 
     // Step 3: Update DB to remove profile_picture URL
     if (userData.role === "general_user") {

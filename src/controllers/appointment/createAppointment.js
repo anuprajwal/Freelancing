@@ -113,9 +113,6 @@ const scheduleAppointment = async (req, res) => {
         if (slotRecord && !Array.isArray(slotRecord.slots)) {
             let slotsData = [];
 
-            console.log(createdAppointment)
-            console.log(createPayment)
-
             try {
                 let raw = slotRecord.slots;
 

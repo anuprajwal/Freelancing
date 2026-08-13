@@ -52,8 +52,6 @@ const protect = (req, res, next) => {
             });
         }
 
-        console.log("Auth source:", origin ? "Browser" : "API Client");
-        console.log("Token key:", tokenKey || "Authorization header");
 
         // Verify JWT
         const decoded = decodeToken(token);
@@ -76,8 +74,6 @@ const protect = (req, res, next) => {
         // Attach user info
         req.user = decoded,
 
-            console.log("Auth success for:", token);
-        console.log("decoded data:", decoded)
         next();
 
     } catch (err) {

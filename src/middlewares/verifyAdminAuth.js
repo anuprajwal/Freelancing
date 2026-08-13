@@ -42,7 +42,6 @@ const verifyAdminAuth = (req, res, next) => {
         // Using .payload to match your decodeToken structure
         req.admin = decoded.payload;
 
-        console.log("Admin Auth success:", req.admin.id || "Admin");
         next();
 
     } catch (err) {

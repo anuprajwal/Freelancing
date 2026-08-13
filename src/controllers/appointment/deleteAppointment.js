@@ -38,14 +38,12 @@ const appt = await appointments.findOne({
   // Step 3: Add the slot back to doctorSlots
   const slotRecord = await doctorSlots.findOne({ where: { doctor_id : doctor_profile_data.user_id } });
 
-  console.log(appointment_start_time, appointment_end_time)
   const converted_date = appointment_date.toISOString().split('T')[0];
 
   if (slotRecord && Array.isArray(slotRecord.slots)) {
     const updatedSlots = [...slotRecord.slots];
     const dateIndex = updatedSlots.findIndex(s => s.date === converted_date);
 
-    console.log(dateIndex)
 
     if (dateIndex !== -1) {
       const daySlots = updatedSlots[dateIndex].slots || [];
@@ -56,8 +54,6 @@ const appt = await appointments.findOne({
         slot.start === appointment_start_time && slot.end === appointment_end_time
       );
 
-      console.log(isAlreadyThere)
-      console.log(daySlots)
 
       if (!isAlreadyThere) {
         const [startHours, startMinutes] = appointment_start_time.split(":");

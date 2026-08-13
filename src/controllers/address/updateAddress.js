@@ -6,7 +6,6 @@ const updateAddress =async(req, res)=>{
     const {payload}=req.user
     const {id} = payload
 
-	console.log(id)
 
     // logger.info(`request made to update existing address by user: ${id}`)
     const {addressId}=req.body
@@ -25,10 +24,6 @@ const updateAddress =async(req, res)=>{
     const {country = getAddress.country, state=getAddress.state, city=getAddress.city, pincode=getAddress.pincode, street=getAddress.street,landmark=getAddress.landmark,houseNo=getAddress.houseNo} = req.body
 
     if (!city || !pincode || !street){
-	    console.log(city, pincode, street)
-	    console.log(getAddress.city)
-	    console.log(getAddress.pincode)
-	    console.log(getAddress.street)
         // logger.warning(`fields are not complete in the request made by the user : ${id}`)
         return res.status(400).json({error:"All fields are required"})
     }
