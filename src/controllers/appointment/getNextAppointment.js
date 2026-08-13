@@ -58,7 +58,7 @@ const doctorNextAppointment = async (doctor_id) => {
                 model: User,
                 as: "patient",
                 required: true,
-                attributes: ["email", "username", "phone_number"],
+                attributes: ["id", "email", "username", "phone_number"],
                 include: [{
                     model: generalUser,
                     as: "generalUser",
@@ -97,7 +97,7 @@ const patientNextAppointment = async (user_id) => {
                 model: User,
                 as: "doctor",
                 required: true,
-                attributes: ["email", "username", "phone_number"],
+                attributes: ["id", "email", "username", "phone_number"],
                 include: [{
                     model: doctorProfile,
                     as: "doctorProfile",

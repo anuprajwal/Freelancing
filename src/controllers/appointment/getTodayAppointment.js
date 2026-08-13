@@ -57,6 +57,18 @@ const doctorTodayAppointments = async (doctor_id) => {
             {
                 model: checkupAppointment,
                 as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "patient",
+                required: true,
+                attributes: ["id", "email", "username", "phone_number"],
+                include: [{
+                    model: generalUser,
+                    as: "generalUser",
+                    required: true,
+                    attributes: ["id", "gender", "date_of_birth", "profile_picture"],
+                }]
             }
         ],
 
@@ -83,6 +95,21 @@ const patientTodayAppointments = async (user_id) => {
             {
                 model: checkupAppointment,
                 as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "doctor",
+                required: true,
+                attributes: ["id", "email", "username", "phone_number"],
+                include: [{
+                    model: doctorProfile,
+                    as: "doctorProfile",
+                    required: true,
+                    attributes: [
+                        "id", "gender", "specialization", "experience_years", "organisation_id",
+                        "consultation_fee", "verified_status", "profile_picture", "appointment_time"
+                    ]
+                }]
             }
         ],
 
