@@ -28,7 +28,7 @@ async function startCron() {
                 // Find appointments older than 10 minutes and still pending
                 const pendingAppointments = await appointments.findAll({
                     where: {
-                        payment_mode: 'online',
+                        payment_mode: ["card", "bank_transfer", "mobile_banking"],
                         appointment_status: 'pending',
                         created_at: {
                             [Op.lt]: tenMinutesAgo
