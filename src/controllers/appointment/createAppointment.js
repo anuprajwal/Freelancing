@@ -8,6 +8,7 @@ const {
 const logger = require("../../../logger");
 const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
+const { createOrder } = require("../payment/paymentController");
 
 const scheduleAppointment = async (req, res) => {
     try {
@@ -25,10 +26,10 @@ const scheduleAppointment = async (req, res) => {
             }
         })
 
-        if (!doctorObj) {
-            return res.status(404).json({
-                error: "cant find the doctor, user wants to find"
-            })
+        if (!doctorObj || doctorObj.kyc_status !== "verified") {
+            return res.status(400).json({
+                message: "Doctor not eligible for payments"
+            });
         }
 
         const doctor_id = doctorObj.user_id
@@ -92,17 +93,19 @@ const scheduleAppointment = async (req, res) => {
             appointmentId: createdAppointment.id,
         }
 
-        const createPayment = await payments.create({
-            user_id: req.user.payload.id,
-            appointment_id: createdAppointment.id,
-            checkup_id: null,
-            payment_status: "pending",
-            payment_date: new Date(),
-            payment_amount: doctorObj.consultation_fee,
-            payment_method: payment_mode,
-            organisation_id: doctorObj.organisation_id,
-            payment_notes: JSON.stringify(notes)
-        })
+        await createOrder(doctorObj.consultation_fee, createdAppointment.id, req.body.doctor_id, notes, payment_mode, doctorObj.organisation_id);
+
+        // const createPayment = await payments.create({
+        //     user_id: req.user.payload.id,
+        //     appointment_id: createdAppointment.id,
+        //     checkup_id: null,
+        //     payment_status: "pending",
+        //     payment_date: new Date(),
+        //     payment_amount: doctorObj.consultation_fee,
+        //     payment_method: payment_mode,
+        //     organisation_id: doctorObj.organisation_id,
+        //     payment_notes: JSON.stringify(notes)
+        // })
 
         // Step 4: Remove the booked slot from doctorSlots
         let slotRecord = await doctorSlots.findOne({

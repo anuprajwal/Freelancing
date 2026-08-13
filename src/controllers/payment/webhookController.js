@@ -65,7 +65,7 @@ exports.handleWebhook = async (req, res) => {
         const entity = bodyJson.payload.payment.entity;
 
         const paymentRecord = await payments.findOne({
-          where: { transaction_id: entity.order_id },
+          where: { razorpay_order_id: entity.order_id },
           transaction: t,
         });
 
@@ -73,7 +73,7 @@ exports.handleWebhook = async (req, res) => {
 
           await paymentRecord.update({
             payment_status: "paid",
-            transaction_id: entity.id,
+            razorpay_order_id: entity.id,
             payment_method: entity.method,
             payment_date: new Date()
           }, { transaction: t });
@@ -104,7 +104,7 @@ exports.handleWebhook = async (req, res) => {
           payment_status: "failed",
           payment_method: entity.method || "unknown"
         }, {
-          where: { transaction_id: entity.order_id },
+          where: { razorpay_order_id: entity.order_id },
           transaction: t
         });
 

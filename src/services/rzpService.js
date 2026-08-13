@@ -13,7 +13,7 @@ const auth = {
   password: RZP_KEY_SECRET,
 };
 
-const BASE_V2 = "https://api.razorpay.com/v2";
+const BASE_V2 = process.env.RAZORPAY_BASE_URL || "https://api.razorpay.com/v2";
 
 const Razorpay = require("razorpay");
 

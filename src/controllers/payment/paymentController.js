@@ -6,15 +6,13 @@ const {
   payments,
   appointments,
   doctorProfile,
-  transfer: TransferModel
 } = require("../../../models");
 
 /* =====================================================
    CREATE ORDER
 ===================================================== */
-exports.createOrder = async (req, res) => {
+exports.createOrder = async (amount, appointmentId, doctorId, notes, payment_mode, organisation_id) => {
   try {
-    const { amount, appointmentId, doctorId } = req.body;
 
     if (!amount || !appointmentId || !doctorId) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -41,13 +39,16 @@ exports.createOrder = async (req, res) => {
 
     await payments.create({
       user_id: req.user.payload.id,
-   // FIXED
       appointment_id: appointmentId,
       payment_status: "pending",
       payment_amount: amount,
       payment_date: new Date(),
-      payment_method: "pending",
-      transaction_id: order.id
+      payment_method: payment_mode,
+      transaction_id: order.id,
+      payment_notes: JSON.stringify(notes),
+      organisation_id: organisation_id,
+      razorpay_order_id: order.id
+
     });
 
     return res.json({
@@ -106,12 +107,11 @@ exports.verifyPayment = async (req, res) => {
         await payments.update(
             {
                 payment_status: "paid",
-                // optionally store razorpay_payment_id
-                // razorpay_payment_id: razorpay_payment_id
+                razorpay_payment_id: razorpay_payment_id
             },
             {
                 where: {
-                    transaction_id: razorpay_order_id
+                    razorpay_order_id: razorpay_order_id
                 }
             }
         );

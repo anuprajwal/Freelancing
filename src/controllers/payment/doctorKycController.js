@@ -50,7 +50,8 @@ exports.startOnboarding = async (req, res) => {
       !city ||
       !state ||
       !postal_code ||
-      !business_pan
+      !business_pan ||
+      !personal_pan
     ) {
       return res.status(400).json({
         message: "Missing required onboarding fields",
