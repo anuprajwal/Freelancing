@@ -137,7 +137,6 @@ exports.verifyPayment = async (req, res) => {
         {
           payment_status: "paid",
           razorpay_payment_id: razorpay_payment_id,
-          payment_method: payment.method || "card",
           payment_date: new Date()
         },
         { transaction }
