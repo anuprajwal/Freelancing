@@ -48,7 +48,7 @@ const doctorSideAppointments = async (doctor_id, limit, offset) => {
                 model: User,
                 as: "patient",
                 required: true,
-                attributes: ["email", "username", "phone_number"],
+                attributes: ["id", "email", "username", "phone_number"],
                 include: [{
                     model: generalUser,
                     as: "generalUser",
@@ -85,7 +85,7 @@ const patientSideAppointments = async (userId, limit, offset) => {
                 model: User,
                 as: "doctor",
                 required: true,
-                attributes: ["email", "username", "phone_number"],
+                attributes: ["id", "email", "username", "phone_number"],
                 include: [{
                     model: doctorProfile,
                     as: "doctorProfile",
