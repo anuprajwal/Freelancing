@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const { razorpay } = require("../../services/rzpService");
 const {
   payments,
+  sequelize,
   appointments,
   doctorProfile,
 } = require("../../../models");
