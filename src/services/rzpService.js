@@ -172,12 +172,76 @@ const razorpay = new Razorpay({
 /* -----------------------------------
    1. CREATE LINKED ACCOUNT
 ------------------------------------ */
+// async function createLinkedAccount(data) {
+//   // HERE THERE IS A CHANGE MADE:
+//   // Detect if business type is 'individual'. For individuals, Razorpay V2 API rejects
+//   // root-level 'legal_info.pan' (treating it as Company PAN). 
+//   // It must instead be attached exclusively via the Stakeholder API.
+//   const isIndividual = data.business_type === "individual";
+
+//   const payload = {
+//     type: "route",
+//     reference_id: data.reference_id,
+//     email: data.email,
+//     phone: data.phone,
+//     legal_business_name: data.legal_business_name,
+//     contact_name: data.contact_name,
+//     business_type: data.business_type,
+
+//     profile: {
+//       category: "healthcare",
+//       subcategory: data.subcategory || "healthcare",
+//       addresses: {
+//         registered: {
+//           street1: data.address_line1,
+//           street2: data.address_line2 || "NA",
+//           city: data.city,
+//           state: data.state,
+//           postal_code: data.postal_code,
+//           country: "IN",
+//         },
+//       },
+//     },
+
+//     // HERE THERE IS A CHANGE MADE:
+//     // Only attach legal_info if business is non-individual (has Company PAN) or if GST is explicitly supplied.
+//     ...(!isIndividual || data.gst_number
+//       ? {
+//           legal_info: {
+//             ...(!isIndividual && data.business_pan ? { pan: data.business_pan } : {}),
+//             ...(data.gst_number ? { gst: data.gst_number } : {}),
+//           },
+//         }
+//       : {}),
+//   };
+
+//   const resp = await axios.post(`${BASE_V2}/accounts`, payload, { auth });
+//   return resp.data;
+// }
+
+// services/rzpService.js
+
 async function createLinkedAccount(data) {
-  // HERE THERE IS A CHANGE MADE:
-  // Detect if business type is 'individual'. For individuals, Razorpay V2 API rejects
-  // root-level 'legal_info.pan' (treating it as Company PAN). 
-  // It must instead be attached exclusively via the Stakeholder API.
   const isIndividual = data.business_type === "individual";
+
+  // Allowed healthcare subcategories mapped to valid Razorpay Route enums
+  const validHealthcareSubcategories = [
+    "clinic",
+    "hospital",
+    "pharmacy",
+    "pathology_lab",
+    "optometrist",
+    "ayurvedic",
+    "homeopathy",
+    "medical_equipment",
+    "other_healthcare"
+  ];
+
+  // HERE THERE IS A CHANGE MADE:
+  // Validate subcategory against Razorpay's dictionary. Default to "clinic" for doctors.
+  const resolvedSubcategory = validHealthcareSubcategories.includes(data.subcategory)
+    ? data.subcategory
+    : "clinic";
 
   const payload = {
     type: "route",
@@ -190,7 +254,7 @@ async function createLinkedAccount(data) {
 
     profile: {
       category: "healthcare",
-      subcategory: data.subcategory || "healthcare",
+      subcategory: resolvedSubcategory, // Pass valid subcategory enum
       addresses: {
         registered: {
           street1: data.address_line1,
@@ -203,8 +267,6 @@ async function createLinkedAccount(data) {
       },
     },
 
-    // HERE THERE IS A CHANGE MADE:
-    // Only attach legal_info if business is non-individual (has Company PAN) or if GST is explicitly supplied.
     ...(!isIndividual || data.gst_number
       ? {
           legal_info: {
