@@ -22,7 +22,8 @@ const filterDoctor = async (req, res) => {
     try {
         // 2. Build the Dynamic Where Clause for doctorProfile (Specialization)
         const doctorWhereClause = {
-            verified_status: true
+            verified_status: true,
+            kyc_status: "verified"
         };
 
         if (specialization && specialization.trim() !== "") {

@@ -91,21 +91,11 @@ const scheduleAppointment = async (req, res) => {
             appointmentDate: createdAppointment.appointment_date,
             appointmentTime: `${createdAppointment.appointment_start_time}-${createdAppointment.appointment_end_time}`,
             appointmentId: createdAppointment.id,
+            doctorEmail: doctorUserObj.email,
+            organisationId: doctorObj.organisation_id,
         }
 
         const orderDetails = await createOrder(doctorObj.consultation_fee, createdAppointment.id, req.body.doctor_id, notes, payment_mode, doctorObj.organisation_id, req.user.payload.id);
-
-        // const createPayment = await payments.create({
-        //     user_id: req.user.payload.id,
-        //     appointment_id: createdAppointment.id,
-        //     checkup_id: null,
-        //     payment_status: "pending",
-        //     payment_date: new Date(),
-        //     payment_amount: doctorObj.consultation_fee,
-        //     payment_method: payment_mode,
-        //     organisation_id: doctorObj.organisation_id,
-        //     payment_notes: JSON.stringify(notes)
-        // })
 
         // Step 4: Remove the booked slot from doctorSlots
         let slotRecord = await doctorSlots.findOne({
