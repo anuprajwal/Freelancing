@@ -15,7 +15,8 @@ const { doctorProfile, User } = require("../../../models");
 ----------------------------------------------------*/
 exports.startOnboarding = async (req, res) => {
   try {
-    const doctor = await doctorProfile.findByPk(req.params.id, {
+    const doctor = await doctorProfile.findOne({
+      where: { user_id: req.params.id },
       include: [{ model: User, as: "user" }],
     });
 
