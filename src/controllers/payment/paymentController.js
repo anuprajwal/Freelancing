@@ -41,9 +41,6 @@ exports.createOrder = async (
       throw new Error("Invalid appointment or access unauthorized.");
     }
 
-    if (["completed", "confirmed", "cancelled"].includes(appointment.appointment_status)) {
-      throw new Error(`Appointment cannot be paid for in '${appointment.appointment_status}' state.`);
-    }
 
     // 3. Fetch Doctor Profile & Validate Razorpay Route Account
     const doctor = await doctorProfile.findOne({
