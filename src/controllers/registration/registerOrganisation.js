@@ -35,6 +35,11 @@ const createOrgProfile = async (req, res)=>{
        return req.status(400).json({error:"all fields are required"})
     }
 
+    if (org_license.length > 45){
+        // logger.warning(`organisation license: ${org_license} is not valid`)
+        return req.status(400).json({error:"organisation license is not valid"})
+    }
+
     if (!valid_type.includes(org_type)){
         // logger.warning(`organisation type: ${org_type} is not valid`)
         return req.status(400).json({error:"organisation type is not valid"})

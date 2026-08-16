@@ -1,4 +1,4 @@
-const {organisationRequest} = require("../../../models")
+const {organisationRequest, organisationProfile} = require("../../../models")
 
 
 const requestAdmissionRequest = async (req, res)=>{
@@ -24,6 +24,16 @@ const requestAdmissionRequest = async (req, res)=>{
     if (!organisation_id){
         return res.status(400).json({error:"cant find the required parameters in the body"})
     }
+
+    await organizationProfile.findOne({
+        where:{
+            id : organisation_id
+        }
+    }).then(async (organisation)=>{
+        if (!organisation){
+            return res.status(400).json({error:"the organisation you are trying to request doesnot exist"})
+        }
+    })
 
     await organisationRequest.create({
         doctor_id : id,
