@@ -10,7 +10,6 @@ const loginAdmin = async (req, res) => {
         password
     } = req.body;
 
-    // ✅ Client detection logic (identical to login.js)
     const clientType = (() => {
         if (req.headers && req.headers['x-client-type']) {
             return req.headers['x-client-type'];

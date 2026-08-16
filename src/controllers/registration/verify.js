@@ -56,7 +56,7 @@ const approveHospitals = async (req, res) => {
         org_id
     } = req.body
 
-    if (scope === "admin") {
+    if (scope !== "admin") {
         return res.status(401).json({
             error: "unauthorised"
         })
