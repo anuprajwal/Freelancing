@@ -152,7 +152,7 @@ const getAllDoctors = async (req, res) => {
                     model: organisationRequest,
                     as: "organisationRequests",
 
-                    required: false,
+                    required: true,
 
                     where: organisationWhere
                 }
