@@ -93,11 +93,11 @@ const getAllDoctors = async (req, res) => {
         const doctorProfileWhere = {};
 
         if (verified === "true") {
-            doctorProfileWhere.is_verified = true;
+            doctorProfileWhere.verified_status = true;
         }
 
         if (verified === "false") {
-            doctorProfileWhere.is_verified = false;
+            doctorProfileWhere.verified_status = false;
         }
 
         //-----------------------------------------
