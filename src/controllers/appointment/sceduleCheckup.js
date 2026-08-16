@@ -16,7 +16,7 @@ const { createOrder } = require("../payment/paymentController");
 
 const scheduleCheckup = async (req, res) => {
   try {
-    const { appointment_id, date: dateStr, start, end, type, payment_mode } = req.body;
+    const { appointment_id, date: dateStr, start, end, type } = req.body;
     const requesterUserId = req.user.payload.id;
 
     // Basic validation
@@ -136,6 +136,12 @@ const scheduleCheckup = async (req, res) => {
       if (!doctorUserObj.userName || !doctorUserObj.email || !userObj.userName || !userObj.email) {
         return res.status(400).json({
           error: "Required profile details missing (name/email) for generating the payment order."
+        });
+      }
+
+      if (!req.body.payment_mode) {
+        return res.status(400).json({
+          error: "The appointment requires payment, but no payment_mode was provided in the request."
         });
       }
     }
