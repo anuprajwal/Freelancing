@@ -11,17 +11,9 @@ const checkSlotAvailability = require("../slots/checkSlots");
 const checkAnotherAppointment = require("../slots/checkAppointmentAvailability");
 const logger = require("../../../logger");
 
-/**
- * scheduleCheckup
- * Request body expected:
- * {
- *   appointment_id: number,
- *   date: "YYYY-MM-DD" (string) OR ISO string,
- *   start: "HH:MM" (string),
- *   end: "HH:MM" (string),
- *   type: "online_video" | "online_audio" | "offline"
- * }
- */
+// CHANGED: Imported createOrder from paymentController
+const { createOrder } = require("../payment/paymentController");
+
 const scheduleCheckup = async (req, res) => {
   try {
     const { appointment_id, date: dateStr, start, end, type, payment_mode } = req.body;
@@ -32,7 +24,7 @@ const scheduleCheckup = async (req, res) => {
       return res.status(400).json({ error: "appointment_id, date, start, end and type are required" });
     }
 
-    if (!['online_video','online_audio','offline'].includes(type)) {
+    if (!['online_video', 'online_audio', 'offline'].includes(type)) {
       return res.status(400).json({ error: "Invalid appointment type" });
     }
 
@@ -54,27 +46,15 @@ const scheduleCheckup = async (req, res) => {
     }
 
     // Check existing checkup for this appointment_id
+    const { Op } = require('sequelize');
     const existing = await checkupAppointment.findOne({
       where: {
-        appointment_id: appointment_id,
-        checkup_status: ['pending', 'confirmed', 'completed'] // Sequelize will accept array? use Op.in if needed
+        appointment_id,
+        checkup_status: { [Op.in]: ['pending', 'confirmed', 'completed'] }
       }
     });
 
-    // Sequelize `where` with array needs Op.in; handle both
-    if (!existing) {
-      // fallback: explicit query using Op
-      const { Op } = require('sequelize');
-      const existing2 = await checkupAppointment.findOne({
-        where: {
-          appointment_id,
-          checkup_status: { [Op.in]: ['pending', 'confirmed', 'completed'] }
-        }
-      });
-      if (existing2) {
-        return res.status(400).json({ error: "A follow-up checkup already exists for this appointment" });
-      }
-    } else {
+    if (existing) {
       return res.status(400).json({ error: "A follow-up checkup already exists for this appointment" });
     }
 
@@ -104,13 +84,11 @@ const scheduleCheckup = async (req, res) => {
     }
 
     // Validate slot availability with doctor's user id
-    // Get doctorProfile for this appointment's doctor (doctorProfile.doctor_user id is doctor user id)
     const doctorProf = await doctorProfile.findOne({ where: { user_id: appointmentData.doctor_id } });
     if (!doctorProf) {
       return res.status(404).json({ error: "Doctor profile not found for this appointment" });
     }
 
-    // doctorSlots uses doctor_id as user_id (based on your scheduleAppointment implementation)
     const doctorUserId = doctorProf.user_id;
 
     // Check slot availability
@@ -125,10 +103,47 @@ const scheduleCheckup = async (req, res) => {
       return res.status(409).json({ error: "Doctor already has an appointment at this slot." });
     }
 
-    // Create checkupAppointment
+    // =========================================================================
+    // CHANGED: Pre-payment parameter check and validation
+    // Before proceeding to create checkup or orders, ensure doctor & user models
+    // contain all properties necessary for order generation.
+    // =========================================================================
+    let doctorUserObj = null;
+    let userObj = null;
+
+    if (isPaymentRequired) {
+      if (doctorProf.kyc_status !== "verified") {
+        return res.status(400).json({
+          error: "Doctor is not eligible for receiving payments or KYC unverified."
+        });
+      }
+
+      if (!doctorProf.consultation_fee || Number(doctorProf.consultation_fee) <= 0) {
+        return res.status(400).json({
+          error: "Doctor consultation fee is missing or invalid for paid checkup."
+        });
+      }
+
+      doctorUserObj = await User.findByPk(doctorUserId);
+      userObj = await User.findByPk(requesterUserId);
+
+      if (!doctorUserObj || !userObj) {
+        return res.status(400).json({
+          error: "Incomplete user details: Patient or Doctor user record not found."
+        });
+      }
+
+      if (!doctorUserObj.userName || !doctorUserObj.email || !userObj.userName || !userObj.email) {
+        return res.status(400).json({
+          error: "Required profile details missing (name/email) for generating the payment order."
+        });
+      }
+    }
+
+    // Create checkupAppointment record
     const created = await checkupAppointment.create({
       user_id: requesterUserId,
-      doctor_id: doctorProf.id,       // doctorProfile.id (model expects doctor_profiles.id)
+      doctor_id: doctorProf.id,       
       appointment_id: appointment_id,
       checkup_date: requestedDate,
       checkup_start_time: start,
@@ -137,45 +152,47 @@ const scheduleCheckup = async (req, res) => {
       is_payment_required: isPaymentRequired
     });
 
-    // If payment required (>15 days), create a payment entry (optional fields set)
-    let paymentRecord = null;
+    // =========================================================================
+    // CHANGED: Create Razorpay Order via createOrder helper function
+    // =========================================================================
+    let orderDetails = null;
     if (isPaymentRequired) {
-      // derive payment amount from doctor profile (consultation_fee) if present
-      const amount = doctorProf.consultation_fee || 0;
+      const notes = {
+        patientName: userObj.userName,
+        patientEmail: userObj.email,
+        doctorName: doctorUserObj.userName,
+        doctorEmail: doctorUserObj.email,
+        appointmentDate: dateStr,
+        appointmentTime: `${start}-${end}`,
+        appointmentId: appointment_id,
+        checkupId: created.id,
+        organisationId: doctorProf.organisation_id
+      };
 
-      // create a payment row; adapt fields to your payments model
-      paymentRecord = await payments.create({
-        user_id: requesterUserId,
-        appointment_id: appointment_id,
-        checkup_id: created.id,
-        payment_status: "pending",
-        payment_date: new Date(),
-        payment_amount: amount,
-        payment_method: payment_mode || 'mobile_banking', // prefer incoming payment_mode else default
-        organisation_id: doctorProf.organisation_id || null,
-        payment_notes: JSON.stringify({
-          note: "Follow-up checkup scheduled beyond free window",
-          appointmentId: appointment_id,
-          checkupId: created.id
-        })
-      });
+      // Call the createOrder function using the same signature as scheduleAppointment
+      orderDetails = await createOrder(
+        doctorProf.consultation_fee,
+        appointment_id,
+        doctorUserId,
+        notes,
+        payment_mode || 'card',
+        doctorProf.organisation_id,
+        requesterUserId
+      );
     }
 
     // Remove the booked slot from doctorSlots (doctorUserId)
     let slotRecord = await doctorSlots.findOne({ where: { doctor_id: doctorUserId } });
 
     if (slotRecord) {
-      // normalize slots into array
       let slotsData = [];
       try {
         let raw = slotRecord.slots;
 
-        // handle Buffer (some setups)
         if (Buffer.isBuffer(raw)) raw = raw.toString();
 
         if (typeof raw === "string") {
           slotsData = JSON.parse(raw);
-          // handle double-encoded
           if (typeof slotsData === "string") {
             slotsData = JSON.parse(slotsData);
           }
@@ -191,7 +208,7 @@ const scheduleCheckup = async (req, res) => {
       }
 
       if (Array.isArray(slotsData)) {
-        const updatedSlots = JSON.parse(JSON.stringify(slotsData)); // deep copy
+        const updatedSlots = JSON.parse(JSON.stringify(slotsData)); 
         const dateIndex = updatedSlots.findIndex(s => s.date === dateStr);
 
         if (dateIndex !== -1) {
@@ -207,13 +224,16 @@ const scheduleCheckup = async (req, res) => {
       }
     }
 
-    // Success response
+    // =========================================================================
+    // CHANGED: Spread order details into the response if payment was required
+    // =========================================================================
     return res.status(200).json({
       message: "Checkup scheduled successfully",
       checkup: created,
-      payment: paymentRecord ? { id: paymentRecord.id, status: paymentRecord.payment_status } : null,
       free: !isPaymentRequired,
-	    appointment_id : created.id
+      appointment_id: created.id,
+      success: true,
+      ...(orderDetails || {})
     });
 
   } catch (err) {
