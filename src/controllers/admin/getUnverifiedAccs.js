@@ -58,6 +58,7 @@ const getUnverifiedAccounts = async (req, res) => {
           model: User,
           as: "user",
           attributes: [
+            "id",
             "username",
             "email",
             "phone_number",
