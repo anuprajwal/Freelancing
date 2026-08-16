@@ -9,15 +9,15 @@ const {
 } = require("sequelize");
 
 const filterDoctor = async (req, res) => {
-    // 1. Extract query parameters
+    // 1. Extract query parameters including pagination
     const {
         specialization,
         pincode
     } = req.query;
 
     // Use Math.max to prevent negative pagination values
-    const limit = Math.max(1, parseInt(req.query.limit) || 4);
-    const offset = Math.max(0, parseInt(req.query.offset) || 0);
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 4);
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
 
     try {
         // 2. Build the Dynamic Where Clause for doctorProfile (Specialization)
@@ -27,7 +27,6 @@ const filterDoctor = async (req, res) => {
         };
 
         if (specialization && specialization.trim() !== "") {
-            // Partial match: searches for "card" within "Cardiologist"
             doctorWhereClause.specialization = {
                 [Op.like]: `%${specialization}%`
             };
@@ -36,13 +35,12 @@ const filterDoctor = async (req, res) => {
         // 3. Define the Address Inclusion (Pincode Partial Match)
         const addressWhere = {};
         if (pincode && pincode.trim() !== "") {
-            // Partial match: searches for "400" within "400001"
             addressWhere.pincode = {
                 [Op.like]: `%${pincode}%`
             };
         }
 
-        // 4. Execute Query with findAndCountAll
+        // 4. Execute Query with findAndCountAll using limit and offset
         const {
             count,
             rows: doctors
@@ -50,7 +48,7 @@ const filterDoctor = async (req, res) => {
             where: doctorWhereClause,
             limit: limit,
             offset: offset,
-            distinct: true, // Essential for accurate counts when using nested includes
+            distinct: true,
             attributes: [
                 "id", "user_id", "date_of_birth", "gender", "specialization",
                 "experience_years", "consultation_fee", "organisation_id",
@@ -60,7 +58,6 @@ const filterDoctor = async (req, res) => {
                 model: User,
                 as: "user",
                 attributes: ['phone_number', 'username', 'email', 'is_email_verified', 'is_phone_verified'],
-                // If filtering by pincode, the User/Address relation becomes required (INNER JOIN)
                 required: !!pincode,
                 include: [{
                         model: doctorSlots,
@@ -70,7 +67,6 @@ const filterDoctor = async (req, res) => {
                         model: address,
                         as: "address",
                         where: addressWhere,
-                        // Ensure that if a pincode is provided, we only return doctors linked to that address
                         required: !!pincode
                     }
                 ]
