@@ -25,7 +25,7 @@ const requestAdmissionRequest = async (req, res)=>{
         return res.status(400).json({error:"cant find the required parameters in the body"})
     }
 
-    await organizationProfile.findOne({
+    await organisationProfile.findOne({
         where:{
             id : organisation_id
         }
