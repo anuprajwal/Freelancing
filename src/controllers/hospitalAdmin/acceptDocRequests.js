@@ -32,14 +32,27 @@ const acceptDocRequests = async (req, res)=>{
         }
     )
 
-    await doctorProfile.update(
-        {organisation_id:req_details.org_id},
-        {
-            where:{
-                user_id:req_details.doctor_id
+    if (request_status === "accepted"){
+        await doctorProfile.update(
+            {organisation_id:req_details.org_id},
+            {
+                where:{
+                    user_id:req_details.doctor_id
+                }
             }
-        }
-    )
+        )
+    }else{
+        await doctorProfile.update(
+            {organisation_id:null},
+            {
+                where:{
+                    user_id:req_details.doctor_id
+                }
+            }
+        )
+    }
+
+    
 
     return res.status(200).json({message:`sucessfully ${request_status}`})
 }
