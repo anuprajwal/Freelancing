@@ -133,6 +133,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
 
+      consultation_fee: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+      },
+
       rzp_account_id: {
         type: DataTypes.STRING,
         allowNull: true,

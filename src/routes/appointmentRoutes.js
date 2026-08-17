@@ -16,10 +16,7 @@ const {
 } = require("../controllers/appointment/doctorUpdateAppointments.js");
 const scheduleCheckup = require("../controllers/appointment/sceduleCheckup.js");
 const showSingleAppointment = require("../controllers/appointment/getAppointmentData")
-const {
-    verifyPaymentAndAppointment,
-    verifyPaymentAndCheckup
-} = require("../controllers/appointment/confirmPaymentAndAppointment.js")
+
 const {
     uploadDocument,
     getDocumentsByAppointment,
@@ -47,7 +44,6 @@ router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmen
 router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
 
 router.post("/schedule-checkup-appointment", protect, checkAccountStatus, scheduleCheckup)
-router.put("/confirm-checkup", protect, checkAccountStatus, verifyPaymentAndCheckup)
 
 router.post("/upload-appointment-document", protect, checkAccountStatus, upload.single("document"), uploadDocument)
 router.get("/get-document-for/:appointment_id", protect, checkAccountStatus, getDocumentsByAppointment);
