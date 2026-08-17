@@ -24,7 +24,7 @@ const getDoctorsByOrganisation = async (req, res) => {
     // Fetch doctors linked to the organisation
     const doctors = await doctorProfile.findAll({
       where: { 
-        organisation_id : organisation.id,
+        organisation_id : organisation_id,
         verified_status: true, // ✅ only verified doctors
       },      
       include: [
