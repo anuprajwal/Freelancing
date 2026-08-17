@@ -132,6 +132,25 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(20),
         allowNull: true,
       },
+
+      rzp_account_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      stakeholder_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      product_id: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
+      kyc_status: {
+        type: DataTypes.ENUM("pending", "verified", "failed"),
+        defaultValue: "pending",
+      },
+
+
       created_at: {
         type: DataTypes.DATE,
         allowNull: false,
