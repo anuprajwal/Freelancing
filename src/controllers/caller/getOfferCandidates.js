@@ -32,7 +32,7 @@ const getOfferSdp = async (req, res) => {
         const callData = callSnap.data();
 
         // Optional: Restrict access to participants only
-        if (![callData.call_initiated_by, callData.call_to_user].includes(loggedInUserId)) {
+        if (![callData.call_initiated_by, callData.call_made_to].includes(loggedInUserId)) {
             return res.status(403).json({
                 error: "You are not allowed to access this call offer."
             });
