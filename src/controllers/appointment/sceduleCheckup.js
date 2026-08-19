@@ -133,7 +133,7 @@ const scheduleCheckup = async (req, res) => {
         });
       }
 
-      if (!doctorUserObj.user_name || !doctorUserObj.email || !userObj.user_name || !userObj.email) {
+      if (!doctorUserObj.username || !doctorUserObj.email || !userObj.username || !userObj.email) {
         return res.status(400).json({
           error: "Required profile details missing (name/email) for generating the payment order."
         });
