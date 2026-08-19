@@ -39,7 +39,7 @@ const getOfferSdp = async (req, res) => {
         }
 
         // Retrieve offer SDP
-        const offer_sdp = callData.offer_sdp || null;
+        const offer_sdp = callData.offer?.sdp || null;
 
         if (!offer_sdp) {
             return res.status(404).json({
