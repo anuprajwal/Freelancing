@@ -244,6 +244,7 @@ const scheduleCheckup = async (req, res) => {
 
   } catch (err) {
     // // logger && logger.error("scheduleCheckup error:", err);
+    console.log("scheduleCheckup error:", err);
     return res.status(500).json({ error: "Internal server error", details: err.message });
   }
 };
