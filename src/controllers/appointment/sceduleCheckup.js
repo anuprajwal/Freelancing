@@ -181,7 +181,7 @@ const scheduleCheckup = async (req, res) => {
         appointment_id,
         doctorUserId,
         notes,
-        payment_mode || 'card',
+        req.body.payment_mode || 'card',
         doctorProf.organisation_id,
         requesterUserId
       );
