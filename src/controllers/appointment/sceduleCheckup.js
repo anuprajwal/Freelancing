@@ -208,7 +208,7 @@ const scheduleCheckup = async (req, res) => {
           slotsData = [];
         }
       } catch (err) {
-        logger && logger.error("Failed to parse doctorSlots.slots JSON:", err);
+        // // logger && logger.error("Failed to parse doctorSlots.slots JSON:", err);
         slotRecord.slots = [];
         slotsData = [];
       }
@@ -243,7 +243,7 @@ const scheduleCheckup = async (req, res) => {
     });
 
   } catch (err) {
-    logger && logger.error("scheduleCheckup error:", err);
+    // // logger && logger.error("scheduleCheckup error:", err);
     return res.status(500).json({ error: "Internal server error", details: err.message });
   }
 };
