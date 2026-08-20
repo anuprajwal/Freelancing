@@ -381,7 +381,7 @@ const scheduleAppointment = async (req, res) => {
   } catch (err) {
     console.error("scheduleAppointment Error:", err.message);
     return res.status(400).json({
-      error: err.message
+      error: err
     });
   }
 };

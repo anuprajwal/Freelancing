@@ -652,7 +652,7 @@ exports.createOrder = async (
       );
     }
   } catch (err) {
-    console.error("createOrder Error:", err.response?.data || err.message);
+    console.error("createOrder Error:", err);
     throw err;
   }
 };
