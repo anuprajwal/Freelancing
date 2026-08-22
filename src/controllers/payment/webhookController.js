@@ -90,8 +90,10 @@ exports.handleWebhook = async (req, res) => {
           where: { razorpay_order_id: entity.order_id },
           transaction: t,
         });
+        console.log("Payment record found:", paymentRecord ? "Yes" : "No");
 
         if (paymentRecord && paymentRecord.payment_status !== "paid") {
+          console.log("Updating payment record to 'paid' status for order ID:", entity.order_id);
 
           await paymentRecord.update({
             payment_status: "paid",
@@ -99,19 +101,24 @@ exports.handleWebhook = async (req, res) => {
             payment_method: entity.method,
             payment_date: new Date()
           }, { transaction: t });
+          console.log("Payment record updated successfully");
 
           const appointment = await appointments.findByPk(
             paymentRecord.appointment_id,
             { transaction: t }
           );
+          console.log("Associated appointment found:", appointment ? "Yes" : "No");
 
           if (appointment) {
+            cosnole.log("Updating appointment status to 'confirmed' for appointment ID:", appointment.id);
             await appointment.update(
               { status: "confirmed" },
               { transaction: t }
             );
           }
+          console.log("Appointment status updated successfully");
         }
+        console.log("Payment processing completed for order ID:", entity.order_id);
 
         break;
       }
@@ -128,9 +135,10 @@ exports.handleWebhook = async (req, res) => {
           payment_status: "failed",
           payment_method: entity.method || "unknown"
         }, {
-          where: { razorpay_order_id: entity.order_id },
+          where: { razorpay_order_id: entity.source },
           transaction: t
         });
+        console.log("Payment record updated to 'failed' status for order ID:", entity.order_id);
 
         break;
       }
@@ -151,33 +159,41 @@ exports.handleWebhook = async (req, res) => {
           transaction: t,
         });
 
+        console.log("Local transfer record found:", localTransfer ? "Yes" : "No");
+
         if (!localTransfer) {
           localTransfer = await transfer.findOne({
             where: {
-              order_id: transferEntity.order_id,
+              order_id: transferEntity.source,
               amount: transferEntity.amount,
             },
             transaction: t,
           });
         }
+        console.log("Local transfer record found after fallback:", localTransfer ? "Yes" : "No");
 
         if (!localTransfer) break;
+        console.log("Updating local transfer record with Razorpay transfer ID and status");
 
         await localTransfer.update({
           razorpay_transfer_id: transferEntity.id,
           status: transferEntity.status,
           raw_payload: transferEntity,
         }, { transaction: t });
+        console.log("Local transfer record updated successfully");
 
         /* ---------- Settlement Dedupe ---------- */
         if (["processed", "paid"].includes(transferEntity.status)) {
+          console.log("Checking for existing settlement record for Razorpay transfer ID:", transferEntity.id);
 
           const existingSettlement = await settlement.findOne({
             where: { razorpay_transfer_id: transferEntity.id },
             transaction: t,
           });
+          console.log("Existing settlement record found:", existingSettlement ? "Yes" : "No");
 
           if (!existingSettlement) {
+            console.log("Creating new settlement record for Razorpay transfer ID:", transferEntity.id);
             await settlement.create({
               transfer_id: localTransfer.id,
               razorpay_transfer_id: transferEntity.id,
@@ -186,8 +202,11 @@ exports.handleWebhook = async (req, res) => {
               currency: localTransfer.currency,
               status: transferEntity.status,
             }, { transaction: t });
+            console.log("Settlement record created successfully");
           }
+          console.log("Settlement record already exists, skipping creation");
         }
+        console.log("Transfer event processing completed for Razorpay transfer ID:", transferEntity.id);
 
         break;
       }
@@ -208,15 +227,19 @@ exports.handleWebhook = async (req, res) => {
           where: { rzp_account_id: accId },
           transaction: t,
         });
+        console.log("Associated doctor profile found:", doctor ? "Yes" : "No");
 
         if (doctor) {
+          console.log("Updating doctor's KYC status based on event type:", eventType);
           await doctor.update({
             kyc_status:
               eventType === "account.kyc.verified"
                 ? "verified"
                 : "rejected"
           }, { transaction: t });
+          console.log("Doctor's KYC status updated successfully");
         }
+        console.log("Account KYC event processing completed for account ID:", accId);
 
         break;
       }
@@ -225,10 +248,12 @@ exports.handleWebhook = async (req, res) => {
         console.log("Unhandled event type:", eventType);
         break;
     }
+    console.log("Marking event record as processed for event ID:", eventId);
 
     await eventRecord.update({ processed: true }, { transaction: t });
-
+    console.log("Event record marked as processed successfully");
     await t.commit();
+    console.log("Transaction committed successfully for event ID:", eventId);
     return res.status(200).send("ok");
 
   } catch (err) {

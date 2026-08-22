@@ -108,7 +108,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       payment_method: {
-        type: DataTypes.ENUM("cash", "card", "bank_transfer", "mobile_banking" , "pending"),
+        type: DataTypes.STRING,
         allowNull: false,
       },
       payment_notes: {
