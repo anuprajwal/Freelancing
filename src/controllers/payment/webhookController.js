@@ -62,7 +62,9 @@ exports.handleWebhook = async (req, res) => {
          PAYMENT CAPTURED
       ====================================================== */
       case "payment.captured": {
+        console.log("Payment captured event received:", bodyJson);
         const entity = bodyJson.payload.payment.entity;
+        console.log("Payment entity:", entity);
 
         const paymentRecord = await payments.findOne({
           where: { razorpay_order_id: entity.order_id },
@@ -98,7 +100,9 @@ exports.handleWebhook = async (req, res) => {
          PAYMENT FAILED
       ====================================================== */
       case "payment.failed": {
+        console.log("Payment failed event received:", bodyJson);
         const entity = bodyJson.payload.payment.entity;
+        console.log("Payment entity:", entity);
 
         await payments.update({
           payment_status: "failed",
@@ -117,8 +121,10 @@ exports.handleWebhook = async (req, res) => {
       case "transfer.processed":
       case "transfer.paid":
       case "transfer.failed": {
+        console.log("Transfer event received:", bodyJson);
 
         const transferEntity = bodyJson.payload.transfer.entity;
+        console.log("Transfer entity:", transferEntity);
 
         let localTransfer = await transfer.findOne({
           where: { razorpay_transfer_id: transferEntity.id },
@@ -169,10 +175,14 @@ exports.handleWebhook = async (req, res) => {
       /* ======================================================
          ACCOUNT KYC EVENTS
       ====================================================== */
+      case "account.activated":
       case "account.kyc.verified":
+      case "account.rejected":
       case "account.kyc.rejected": {
+        console.log("Account KYC event received:", bodyJson);
 
         const accId = bodyJson.payload.account.entity.id;
+        console.log("Account ID:", accId);
 
         const doctor = await doctorProfile.findOne({
           where: { rzp_account_id: accId },
