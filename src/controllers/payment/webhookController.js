@@ -19,6 +19,9 @@ exports.handleWebhook = async (req, res) => {
   console.log("Webhook secret:", webhookSecret);
 
   const signature = req.headers["x-razorpay-signature"];
+  const event_check_id = req.headers["x-razorpay-event-id"];
+
+  console.log("Received event ID:", event_check_id);
   const rawBody = req.body;
 
   const expected = crypto
