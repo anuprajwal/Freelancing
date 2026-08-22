@@ -32,6 +32,7 @@ exports.handleWebhook = async (req, res) => {
   if (expected !== signature) {
     return res.status(400).send("Invalid signature");
   }
+  console.log("Signature verified successfully");
 
   const bodyJson = JSON.parse(rawBody.toString("utf8"));
   const eventId = bodyJson.id;
@@ -41,15 +42,21 @@ exports.handleWebhook = async (req, res) => {
     return res.status(400).send("Invalid event id");
   }
 
+  console.log("Processing event:", eventType, "with ID:", eventId);
+
   /* ================= IDEMPOTENCY ================= */
 
   const existingEvent = await WebhookEvent.findOne({
     where: { event_id: eventId }
   });
 
+  console.log("Existing event found:", existingEvent ? "Yes" : "No");
+
   if (existingEvent) {
     return res.status(200).send("Already processed");
   }
+
+  console.log("Creating new event record for processing");
 
   const eventRecord = await WebhookEvent.create({
     event_id: eventId,
@@ -58,9 +65,12 @@ exports.handleWebhook = async (req, res) => {
     processed: false,
   });
 
+  console.log("Event record created with ID:", eventRecord.id);
+
   const t = await sequelize.transaction();
 
   try {
+    console.log("Starting transaction for event processing");
 
     switch (eventType) {
 
@@ -208,6 +218,7 @@ exports.handleWebhook = async (req, res) => {
       }
 
       default:
+        console.log("Unhandled event type:", eventType);
         break;
     }
 
@@ -217,6 +228,7 @@ exports.handleWebhook = async (req, res) => {
     return res.status(200).send("ok");
 
   } catch (err) {
+    console.log("Error processing webhook:", err);
 
     await t.rollback();
 
@@ -225,7 +237,7 @@ exports.handleWebhook = async (req, res) => {
       processing_error: err.message
     });
 
-    console.error("Webhook failed:", err);
+    console.log("Webhook failed:", err);
     return res.status(500).send("Processing failed");
   }
 };
