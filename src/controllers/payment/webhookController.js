@@ -34,11 +34,14 @@ exports.handleWebhook = async (req, res) => {
   }
   console.log("Signature verified successfully");
 
+  console.log("Raw body:", rawBody.toString("utf8"));
+
   const bodyJson = JSON.parse(rawBody.toString("utf8"));
   const eventId = bodyJson.id;
   const eventType = bodyJson.event;
 
   if (!eventId) {
+    console.error("Invalid event id:", eventId);
     return res.status(400).send("Invalid event id");
   }
 
