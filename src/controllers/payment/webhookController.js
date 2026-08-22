@@ -11,9 +11,12 @@ const {
 
 exports.handleWebhook = async (req, res) => {
   const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+  console.log("Webhook received:", req.body.toString("utf8"));
   if (!webhookSecret) {
+    console.error("Webhook secret not configured");
     return res.status(500).send("Webhook secret not configured");
   }
+  console.log("Webhook secret:", webhookSecret);
 
   const signature = req.headers["x-razorpay-signature"];
   const rawBody = req.body;
@@ -22,6 +25,9 @@ exports.handleWebhook = async (req, res) => {
     .createHmac("sha256", webhookSecret)
     .update(rawBody)
     .digest("hex");
+
+  console.log("Received signature:", signature);
+  console.log("Expected signature:", expected);
 
   if (expected !== signature) {
     return res.status(400).send("Invalid signature");
