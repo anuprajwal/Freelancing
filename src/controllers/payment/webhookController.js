@@ -112,7 +112,7 @@ exports.handleWebhook = async (req, res) => {
           if (appointment) {
             console.log("Updating appointment status to 'confirmed' for appointment ID:", appointment.id);
             await appointment.update(
-              { status: "confirmed" },
+              { appointment_status: "confirmed" },
               { transaction: t }
             );
           }
