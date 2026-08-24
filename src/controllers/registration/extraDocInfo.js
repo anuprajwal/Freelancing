@@ -11,9 +11,9 @@ const updateExtraDocInfo = async(req, res)=>{
         return res.status(404).json({error:"couldnot find doctor profile on this account"})
     }
 
-    const {availability_schedule, consultation_fee, experience_years, appointment_slot} = req.body
+    const {availability_schedule, consultation_fee,  appointment_slot} = req.body
 
-    if (!availability_schedule || !consultation_fee || !experience_years || !appointment_slot){
+    if (!availability_schedule || !consultation_fee || !appointment_slot){
         return res.status(400).json({error:"all the required fields are not satisfied in the request"})
     }
     
@@ -22,7 +22,6 @@ const updateExtraDocInfo = async(req, res)=>{
     }
 
     const consultationSaved = await addConsultationFee(req, res, consultation_fee)
-    const experienceSaved = await addExperience(req, res, experience_years)
     const availabilitySaved = await addAvailabilitySchedule(req, res, availability_schedule)
 
     const slotSaved = await createSlot(req, res, availability_schedule, appointment_slot)
@@ -44,16 +43,6 @@ const createSlot = async(req, res, availability_schedule, appointment_slot)=>{
         return true
     }
     
-}
-
-const addExperience = async(req, res, experience_years)=>{
-    if (typeof experience_years !== 'number'){
-        return res.status(400).json({error:"years in not in correct format"})
-    }
-
-    await doctorProfile.update({experience_years}, {where:{user_id:req.user.payload.id}})
-
-    return true
 }
 
 const addConsultationFee = async (req, res, consultation_fee)=>{
