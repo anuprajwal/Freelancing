@@ -92,8 +92,8 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(150),
         allowNull: true,
       },
-      experience_years: {
-        type: DataTypes.INTEGER,
+      practice_start_date: {
+        type: DataTypes.DATE,
         allowNull: true,
       },
       organisation_id: {

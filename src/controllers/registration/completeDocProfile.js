@@ -39,7 +39,7 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     profile_picture,
     specialization,
     license_number,
-    experience_years
+    practice_start_date,
   } = req.body;
 
   
@@ -58,7 +58,7 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     profile_picture: profile_picture ?? doctorObj.profile_picture,
     specialization: specialization ?? doctorObj.specialization,
     license_number: license_number ?? doctorObj.license_number,
-    experience_years: experience_years ?? doctorObj.experience_years
+    practice_start_date: practice_start_date ?? doctorObj.practice_start_date
   };
 
   await doctorProfile.update({
@@ -67,14 +67,14 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     profile_picture : updatedDoctor.profile_picture,
     specialization : updatedDoctor.specialization,
     license_number : updatedDoctor.license_number,
-    experience_years : updatedDoctor.experience_years
+    practice_start_date : updatedDoctor.practice_start_date
   }, {where:{user_id:req.user.payload.id}})
   return res.status(200).json({ message: "Profile updated successfully" });
 }
 
 
 const createDoctorProfile = async (req, res)=>{
-  const {date_of_birth, experience_years, gender, profile_picture="https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png", specialization, license_number } = req.body
+  const {date_of_birth, practice_start_date, gender, profile_picture="https://res.cloudinary.com/dwshjkk42/image/upload/v1751270760/doctor_8997187_mgopyu.png", specialization, license_number } = req.body
 
   if (!date_of_birth || !specialization || !license_number){
     return res.status(400).json({error:"couldnot find required fields in the request"})
@@ -93,7 +93,7 @@ const createDoctorProfile = async (req, res)=>{
     profile_picture,
     specialization,
     license_number,
-    experience_years
+    practice_start_date,
   })
 
   return res.status(200).json({ message: "Profile updated successfully" });
