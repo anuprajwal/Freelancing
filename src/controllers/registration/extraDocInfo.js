@@ -30,7 +30,7 @@ const updateExtraDocInfo = async(req, res)=>{
         return res.status(400).json({error:"appointment mode is not acceptable, slots not created"})
     }
 
-    if (consultationSaved && experienceSaved && availabilitySaved && slotSaved){
+    if (consultationSaved && availabilitySaved && slotSaved){
         return res.status(200).json({message:"succesfully completed adding the extra info of doctors"})
     }
 }
