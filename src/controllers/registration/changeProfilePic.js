@@ -39,7 +39,8 @@ const uploadProfilePic = async (req, res) => {
       Bucket: process.env.S3_BUCKET_NAME,
       Key: key,
       Body: file.buffer,
-      ContentType: file.mimetype
+      ContentType: file.mimetype,
+      CacheControl: 'no-cache, no-store'
     };
   
     s3.upload(params, async (err, data) => {
