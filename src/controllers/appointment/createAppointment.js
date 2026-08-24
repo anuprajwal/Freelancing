@@ -202,6 +202,25 @@ const { createOrder } = require("../payment/paymentController");
 
 const scheduleAppointment = async (req, res) => {
   try {
+
+    const { id, scope } = req.user.payload;
+    if (scope !== "general_user") {
+      return res.status(403).json({
+        error: "Only general users can schedule appointments."
+      });
+    }
+
+    const user_profile = await User.findByPk(id);
+    if (!user_profile) {
+      return res.status(404).json({
+        error: "User profile not found."
+      });
+    }
+    if (!user_profile.role === "general_user") {
+      return res.status(403).json({
+        error: "Only general users can schedule appointments."
+      });
+    }
     const {
       date,
       start,
