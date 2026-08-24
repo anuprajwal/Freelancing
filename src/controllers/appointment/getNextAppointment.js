@@ -103,7 +103,7 @@ const patientNextAppointment = async (user_id) => {
                     as: "doctorProfile",
                     required: true,
                     attributes: [
-                        "id", "gender", "specialization", "experience_years", "organisation_id",
+                        "id", "gender", "specialization", "practice_start_date", "organisation_id",
                         "consultation_fee", "verified_status", "profile_picture", "appointment_time"
                     ]
                 }]

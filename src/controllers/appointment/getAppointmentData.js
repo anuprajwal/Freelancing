@@ -101,7 +101,7 @@ const patientSingleAppointment = async (userId, appointmentId) => {
                     model: doctorProfile,
                     as: "doctorProfile",
                     attributes: [
-                        "gender", "specialization", "experience_years",
+                        "gender", "specialization", "practice_start_date",
                         "organisation_id", "consultation_fee",
                         "verified_status", "profile_picture", "appointment_time"
                     ]
