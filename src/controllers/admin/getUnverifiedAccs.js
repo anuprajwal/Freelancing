@@ -42,7 +42,7 @@ const getUnverifiedAccounts = async (req, res) => {
           "specialization",
           "gender",
           "date_of_birth",
-          "experience_years",
+          "practice_start_date",
           "license_number",
           "profile_picture",
           "created_at",

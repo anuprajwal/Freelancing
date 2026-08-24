@@ -33,7 +33,7 @@ const filterDoctorByLocation = async (req, res)=>{
             model: doctorProfile,
             as: "doctorProfile",
             attributes: [
-              "gender", "experience_years", "consultation_fee",
+              "gender", "practice_start_date", "consultation_fee",
               "specialization", "profile_picture", "appointment_time"
             ],
             where: {

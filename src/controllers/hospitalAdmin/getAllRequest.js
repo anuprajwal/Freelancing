@@ -23,7 +23,7 @@ const getAllRequests = async (req, res)=>{
                     model: doctorProfile,
                     as: 'doctorProfile',
                     required: true,
-                    attributes: ['date_of_birth', 'gender', 'specialization', "experience_years", "license_number", "verified_status"], 
+                    attributes: ['date_of_birth', 'gender', 'specialization', "practice_start_date", "license_number", "verified_status"], 
                   }
                 ]
               }

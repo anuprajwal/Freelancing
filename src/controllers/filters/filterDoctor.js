@@ -51,7 +51,7 @@ const filterDoctor = async (req, res) => {
             distinct: true,
             attributes: [
                 "id", "user_id", "date_of_birth", "gender", "specialization",
-                "experience_years", "consultation_fee", "organisation_id",
+                "practice_start_date", "consultation_fee", "organisation_id",
                 "verified_status", "profile_picture", "appointment_time"
             ],
             include: [{

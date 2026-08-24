@@ -29,7 +29,7 @@ const filterHospitalsByLocation = async (req, res)=>{
             {
                 model: organisationProfile,
                 as: "organisationProfile",
-                attributes: ["gender", "experience_years", "consultation_fee", "specialization", "profile_picture", "appointment_time"],
+                attributes: ["gender", "practice_start_date", "consultation_fee", "specialization", "profile_picture", "appointment_time"],
                 where: {
                     verified_status: "approved"
                 }
