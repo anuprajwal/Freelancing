@@ -19,7 +19,7 @@ const uploadProfilePic = async (req, res) => {
     const file = req.file;
     const fileName = 'profile_pic.jpg'
     const emailUnique = userData.email.split("@")
-    const mainFolder = `${userData.role}_${emailUnique}_${userData.phone_number}_main_folder`
+    const mainFolder = `${userData.role}_${emailUnique[0]}_${emailUnique[1]}_${userData.phone_number}_main_folder`
 
     const key = `${mainFolder}/user_profile/${fileName}`;
 
