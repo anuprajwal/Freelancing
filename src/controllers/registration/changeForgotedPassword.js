@@ -29,12 +29,8 @@ const changeForgottenPassword = async (req, res)=>{
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-    await User.update({
-        password_hash: hashedPassword,
-        where:{
-            id
-        }
-    })
+    userData.password_hash = hashedPassword;
+    await userData.save();
 
     return res.status(200).json({message:"password changed succesfully"})
 }
