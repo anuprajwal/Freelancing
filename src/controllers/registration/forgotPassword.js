@@ -19,7 +19,7 @@ const forgotPassword = async (req, res)=>{
     }
 
     const {id, password_hash} = userData
-    const createdUrl = `https://auth.docapp.co.in/${password_hash}/${id}`
+    const createdUrl = `https://auth.docapp.co.in/${encodeURIComponent(password_hash)}/${id}`
 
     axios.post('http://127.0.0.1:5500/api/send-email', { to: email, subject: "change your password", text: createdUrl }, {
       headers: {
