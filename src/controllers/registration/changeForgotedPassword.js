@@ -1,7 +1,8 @@
 const {User} = require("../../../models")
 
 const changeForgottenPassword = async (req, res)=>{
-    const {id, password_hash} = req.params
+    const {id} = req.params
+    let {password_hash} = req.params
     const {newPassword} = req.body
 
     if (password_hash) {
