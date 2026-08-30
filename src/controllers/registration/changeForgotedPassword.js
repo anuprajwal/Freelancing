@@ -4,6 +4,10 @@ const changeForgottenPassword = async (req, res)=>{
     const {id, password_hash} = req.params
     const {newPassword} = req.body
 
+    if (password_hash) {
+        password_hash = decodeURIComponent(password_hash);
+    }
+
     const userData = await User.findOne({
         where:{
             id,
