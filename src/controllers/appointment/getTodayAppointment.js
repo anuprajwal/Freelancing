@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { appointments, checkupAppointment } = require("../../../models");
+const { appointments, checkupAppointment, User, generalUser, doctorProfile } = require("../../../models");
 
 const showTodayAppointments = async (req, res) => {
     const { id, scope } = req.user.payload;
