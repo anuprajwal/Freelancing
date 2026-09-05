@@ -37,7 +37,7 @@ const filterDoctorByLocation = async (req, res)=>{
               "specialization", "profile_picture", "appointment_time"
             ],
             where: {
-              verified_status: "approved"
+              verified_status: true;
             }
           }
         ],
