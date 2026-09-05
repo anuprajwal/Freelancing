@@ -1,4 +1,4 @@
-const { doctorProfile, address } = require("../../../models");
+const { doctorProfile, address, User } = require("../../../models");
 const { Op, Sequelize } = require("sequelize");
 
 const searchDoctors = async (req, res) => {
@@ -20,10 +20,7 @@ const searchDoctors = async (req, res) => {
     const doctors = await doctorProfile.findAll({
       where: whereClause,
       include: [
-        {
-          model: address,
-          as: "address"
-        },
+        {model : User, as: "user", attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
       ],
 
       ...(isSearchQuery ? {} : { order: Sequelize.literal("RAND()") }),
