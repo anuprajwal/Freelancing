@@ -7,14 +7,6 @@ const PASSWORD = "!";
 async function startupAuth() {
     console.clear();
 
-    console.log("Fetching the Finantial details of Prajwal");
-    console.log("Payment not Seemed to be Complete");
-
-    console.log("Initializing biometric scanner...");
-    console.log("Scanning facial patterns...");
-    console.log("Matching identity against owner PRAJWAL...");
-    console.log("\nFace not Matched.");
-    console.log("Additional authentication required.\n");
 
     const password = prompt("Enter authorization password: ");
 
