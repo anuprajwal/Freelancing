@@ -1,5 +1,6 @@
 const { literal, Op } = require("sequelize")
 const {User, doctorProfile} = require("../../../models")
+const { raw } = require("express")
 
 const filterDoctorByLocation = async (req, res)=>{
     const userLatitude = parseFloat(req.query.userLatitude) || null
@@ -70,7 +71,7 @@ const filterDoctorByLocation = async (req, res)=>{
 
     const plainDocs = docs.map(doc => doc.get({ plain: true }));
 
-    return res.status(200).json({message:"filtered doctors successfully", doctorDetails: plainDocs})
+    return res.status(200).json({message:"filtered doctors successfully", doctorDetails: plainDocs, raw: docs, userLocation: {latitude: userLatitude, longitude: userLongitude}, filterInMeters})
 }
 
 
