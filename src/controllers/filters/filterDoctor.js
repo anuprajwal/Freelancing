@@ -9,8 +9,9 @@ const {
 } = require("sequelize");
 
 const filterDoctor = async (req, res) => {
-    // 1. Extract query parameters including pagination
+    // 1. Extract query parameters including pagination and search filters
     const {
+        name,
         specialization,
         pincode
     } = req.query;
@@ -20,7 +21,7 @@ const filterDoctor = async (req, res) => {
     const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
 
     try {
-        // 2. Build the Dynamic Where Clause for doctorProfile (Specialization)
+        // 2. Build the Dynamic Where Clause for doctorProfile
         const doctorWhereClause = {
             verified_status: true,
             kyc_status: "verified"
@@ -28,19 +29,29 @@ const filterDoctor = async (req, res) => {
 
         if (specialization && specialization.trim() !== "") {
             doctorWhereClause.specialization = {
-                [Op.like]: `%${specialization}%`
+                [Op.like]: `%${specialization.trim()}%`
             };
         }
 
-        // 3. Define the Address Inclusion (Pincode Partial Match)
+        // 3. Define User Where Clause (Doctor Name / Username Match)
+        const userWhere = {};
+        const trimmedName = name ? name.trim() : "";
+        if (trimmedName) {
+            userWhere.username = {
+                [Op.like]: `%${trimmedName}%`
+            };
+        }
+
+        // 4. Define Address Inclusion (Pincode Partial Match)
         const addressWhere = {};
-        if (pincode && pincode.trim() !== "") {
+        const trimmedPincode = pincode ? pincode.trim() : "";
+        if (trimmedPincode) {
             addressWhere.pincode = {
-                [Op.like]: `%${pincode}%`
+                [Op.like]: `%${trimmedPincode}%`
             };
         }
 
-        // 4. Execute Query with findAndCountAll using limit and offset
+        // 5. Execute Query with findAndCountAll using limit and offset
         const {
             count,
             rows: doctors
@@ -58,7 +69,8 @@ const filterDoctor = async (req, res) => {
                 model: User,
                 as: "user",
                 attributes: ['phone_number', 'username', 'email', 'is_email_verified', 'is_phone_verified'],
-                required: !!pincode,
+                where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
+                required: !!trimmedName || !!trimmedPincode,
                 include: [{
                         model: doctorSlots,
                         as: "doctorSlots"
@@ -66,14 +78,14 @@ const filterDoctor = async (req, res) => {
                     {
                         model: address,
                         as: "address",
-                        where: addressWhere,
-                        required: !!pincode
+                        where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
+                        required: !!trimmedPincode
                     }
                 ]
             }]
         });
 
-        // 5. Response handling
+        // 6. Response handling (exact structure retained)
         return res.status(200).json({
             success: true,
             total: count,
