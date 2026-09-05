@@ -65,24 +65,32 @@ const filterDoctor = async (req, res) => {
                 "practice_start_date", "consultation_fee", "organisation_id",
                 "verified_status", "profile_picture", "appointment_time"
             ],
-            include: [{
-                model: User,
-                as: "user",
-                attributes: ['phone_number', 'username', 'email', 'is_email_verified', 'is_phone_verified'],
-                where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
-                required: !!trimmedName || !!trimmedPincode,
-                include: [{
-                        model: doctorSlots,
-                        as: "doctorSlots"
-                    },
-                    {
-                        model: address,
-                        as: "address",
-                        where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-                        required: !!trimmedPincode
-                    }
-                ]
-            }]
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ['phone_number', 'username', 'email', 'is_email_verified', 'is_phone_verified'],
+                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
+                    required: !!trimmedName || !!trimmedPincode,
+                    include: [
+                        {
+                            model: doctorSlots,
+                            as: "doctorSlots"
+                        },
+                        {
+                            model: address,
+                            as: "address",
+                            where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
+                            required: !!trimmedPincode
+                        }
+                    ]
+                },
+                {
+                    model: organisationProfile,
+                    as: "organisationProfile", // Match the alias defined in your associations, or omit if none
+                    required: false // Left outer join: populates data when organisation_id is not null, returns null when it is null
+                }
+            ]
         });
 
         // 6. Response handling (exact structure retained)
