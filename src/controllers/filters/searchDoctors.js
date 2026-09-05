@@ -11,16 +11,15 @@ const searchDoctors = async (req, res) => {
     const whereClause = {
       verified_status: true,
       ...(isSearchQuery && {
-        doctor_name: {
+        username: {
           [Op.like]: `%${trimmedName}%`
         }
       })
     };
 
     const doctors = await doctorProfile.findAll({
-      where: whereClause,
       include: [
-        {model : User, as: "user", attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
+        {model : User, as: "user", where: whereClause, attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
       ],
 
       ...(isSearchQuery ? {} : { order: Sequelize.literal("RAND()") }),

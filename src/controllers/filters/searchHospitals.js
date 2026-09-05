@@ -10,14 +10,9 @@ const searchHospitals = async (req, res) => {
     // If search query exists → search using LIKE
     if (name && name.trim() !== "") {
       organisations = await organisationProfile.findAll({
-        where: {
-          verified_status: true,
-          organisation_name: {
-            [Op.like]: `%${name}%`
-          }
-        },
+        
         include: [
-          {model: User, as: "user", attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
+          {model: User, as: "user", where: { verified_status: true, username: { [Op.like]: `%${name}%` } }, attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
         ],
         limit: 15
       });
@@ -29,7 +24,7 @@ const searchHospitals = async (req, res) => {
           verified_status: true
         },
         include: [
-          {model: User, as: "user", attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
+          {model: User, as: "user", where: { verified_status: true }, attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
          
         ],
         order: Sequelize.literal("RAND()"),  // Random sorting
