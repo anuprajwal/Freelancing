@@ -36,9 +36,9 @@ const filterDoctorByLocation = async (req, res)=>{
               "gender", "practice_start_date", "consultation_fee",
               "specialization", "profile_picture", "appointment_time"
             ],
-            // where: {
-            //   verified_status: true,
-            // }
+            where: {
+              verified_status: true,
+            }
           }
         ],
         where: {
