@@ -24,7 +24,7 @@ const searchHospitals = async (req, res) => {
           verified_status: true
         },
         include: [
-          {model: User, as: "user", where: { verified_status: true }, attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
+          {model: User, as: "user", attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
          
         ],
         order: Sequelize.literal("RAND()"),  // Random sorting

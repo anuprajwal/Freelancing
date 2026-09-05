@@ -9,7 +9,6 @@ const searchDoctors = async (req, res) => {
     const isSearchQuery = Boolean(trimmedName);
 
     const whereClause = {
-      verified_status: true,
       ...(isSearchQuery && {
         username: {
           [Op.like]: `%${trimmedName}%`
@@ -18,6 +17,9 @@ const searchDoctors = async (req, res) => {
     };
 
     const doctors = await doctorProfile.findAll({
+        where: {
+          verified_status: true
+        },
       include: [
         {model : User, as: "user", where: whereClause, attributes: ["id", "email", "phone_number"], include: [{model: address, as: "address"}]},
       ],
