@@ -2,7 +2,8 @@ const {
     doctorProfile,
     address,
     doctorSlots,
-    User
+    User,
+    organisationProfile
 } = require("../../../models");
 const {
     Op
@@ -87,8 +88,8 @@ const filterDoctor = async (req, res) => {
                 },
                 {
                     model: organisationProfile,
-                    as: "organisationProfile", // Match the alias defined in your associations, or omit if none
-                    required: false // Left outer join: populates data when organisation_id is not null, returns null when it is null
+                    as: "organisationProfile",
+                    required: false
                 }
             ]
         });

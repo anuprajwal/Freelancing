@@ -1,5 +1,5 @@
 const { literal, Op } = require("sequelize")
-const {User, doctorProfile} = require("../../../models")
+const {User, doctorProfile, organisationProfile} = require("../../../models")
 
 const filterDoctorByLocation = async (req, res)=>{
     const userLatitude = parseFloat(req.query.userLatitude) || null
@@ -38,7 +38,12 @@ const filterDoctorByLocation = async (req, res)=>{
             ],
             where: {
               verified_status: true,
-            }
+            },
+            include: [{
+              model: organisationProfile,
+              as: "organisationProfile",
+              required: false
+            }]  
           }
         ],
         where: {
