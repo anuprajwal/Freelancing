@@ -41,7 +41,7 @@ const filterDoctorByLocation = async (req, res)=>{
             },
             include: [{
               model: organisationProfile,
-              as: "organisationProfile",
+              as: "organisation",
               required: false
             }]  
           }

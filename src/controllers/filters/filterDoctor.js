@@ -88,7 +88,7 @@ const filterDoctor = async (req, res) => {
                 },
                 {
                     model: organisationProfile,
-                    as: "organisationProfile",
+                    as: "organisation",
                     required: false
                 }
             ]
