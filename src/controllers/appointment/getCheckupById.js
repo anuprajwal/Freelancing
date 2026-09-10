@@ -80,9 +80,6 @@ const doctorFollowup = async (id) => {
                 }]
             }
         ],
-
-        order: [["appointment_date", "ASC"]]
-
     });
 
 };
@@ -92,13 +89,7 @@ const patientFollowup = async (id) => {
     return checkupAppointment.findOne({
 
         where: {
-
             appointment_id: id,
-
-            appointment_date: {
-                [Op.gte]: new Date()
-            }
-
         },
 
         include: [
@@ -118,9 +109,6 @@ const patientFollowup = async (id) => {
                 }]
             }
         ],
-
-        order: [["appointment_date", "ASC"]]
-
     });
 
 };
