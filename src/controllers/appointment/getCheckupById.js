@@ -94,18 +94,18 @@ const patientFollowup = async (id) => {
 
         include: [
             {
-                model: User,
-                as: "user",
+                model: doctorProfile,
+                as: "doctor",
                 required: true,
-                attributes: ["id", "email", "username", "phone_number"],
+                attributes: [
+                    "id", "gender", "specialization", "practice_start_date", "organisation_id",
+                    "consultation_fee", "verified_status", "profile_picture", "appointment_time"
+                ],
                 include: [{
-                    model: doctorProfile,
-                    as: "doctorProfile",
+                    model: User,
+                    as: "user",
                     required: true,
-                    attributes: [
-                        "id", "gender", "specialization", "practice_start_date", "organisation_id",
-                        "consultation_fee", "verified_status", "profile_picture", "appointment_time"
-                    ]
+                    attributes: ["id", "email", "username", "phone_number"],
                 }]
             }
         ],
