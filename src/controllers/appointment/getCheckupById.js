@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const { appointments, checkupAppointment, User, doctorProfile, generalUser } = require("../../../models");
 
-const showNextAppointment = async (req, res) => {
+const showCheckupById = async (req, res) => {
 
     const { id, scope } = req.user.payload;
 
@@ -125,4 +125,4 @@ const patientFollowup = async (id) => {
 
 };
 
-module.exports = showNextAppointment;
+module.exports = showCheckupById;
