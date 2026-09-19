@@ -1,5 +1,4 @@
-const { Op } = require("sequelize");
-const { appointments, checkupAppointment, User, doctorProfile, generalUser } = require("../../../models");
+const { checkupAppointment, User, doctorProfile, generalUser } = require("../../../models");
 
 const showCheckupById = async (req, res) => {
 

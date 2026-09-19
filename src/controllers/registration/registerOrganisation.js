@@ -11,7 +11,7 @@ const registerOrganisation = async (req, res)=>{
 
     const userObj = await User.findByPk(id)
     
-    if (userObj.role !== 'hospital_organisation'){
+    if (userObj.role == 'hospital_organisation'){
         return res.status(404).json({error: "the user who is making the request is not regestered as hospital_organisation"})
     }
 
