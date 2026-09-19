@@ -48,6 +48,8 @@ const registerUser = async (req, res) => {
             }
         });
 
+        console.log("aukbvdcjn:",existingUser)
+
         if (existingUser) {
             return res.status(409).json({
                 error: `User already exists with this email and phone number as a ${role}`
