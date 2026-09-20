@@ -6,7 +6,8 @@ const {
   transfer,
   settlement,
   doctorProfile,
-  appointments
+  appointments,
+  organisationProfile
 } = require("../../../models");
 
 exports.handleWebhook = async (req, res) => {
@@ -238,6 +239,20 @@ exports.handleWebhook = async (req, res) => {
                 : "rejected"
           }, { transaction: t });
           console.log("Doctor's KYC status updated successfully");
+        }else{
+          console.log("checking for hospital profile associated with account ID:", accId);
+          const hospital = await organisationProfile.findOne({
+            where: { rzp_account_id: accId },
+            transaction: t,
+          });
+          console.log("Associated hospital profile found:", hospital ? "Yes" : "No");
+          await hospital.update({
+            kyc_status:
+              eventType === "account.kyc.verified"
+                ? "verified"
+                : "rejected"
+          }, { transaction: t });
+          console.log("Hospital's KYC status updated successfully");
         }
         console.log("Account KYC event processing completed for account ID:", accId);
 
