@@ -9,10 +9,6 @@ const {
 } = require('sequelize');
 
 const filterHospitals = async (req, res) => {
-    // 1. Debug incoming query parameters
-    console.log("=============== [DEBUG] INCOMING QUERY ===============");
-    console.log("req.query:", req.query);
-
     const {
         name,
         type = ["hospital", "clinic", "pharmacy", "laboratory"],
@@ -69,7 +65,6 @@ const filterHospitals = async (req, res) => {
                     .filter(Boolean);
             }
 
-            console.log("[DEBUG] Extracted Specializations Array:", specsArray);
 
             if (specsArray.length > 0) {
                 // Use sequelize.where + sequelize.col to avoid auto-quoting issues on JSON columns
@@ -87,7 +82,6 @@ const filterHospitals = async (req, res) => {
             }
         }
 
-        console.log("[DEBUG] Compiled organisationWhere:", JSON.stringify(organisationWhere, null, 2));
 
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
             where: organisationWhere,
@@ -109,11 +103,8 @@ const filterHospitals = async (req, res) => {
                     required: !!trimmedPincode // Returns null if no match and not required
                 }
             ],
-            logging: (sql) => console.log("[DEBUG] Executed Raw SQL Query:\n", sql) // Logs exact executed SQL
         });
 
-        console.log(`[DEBUG] Results Found: Count=${count}, Rows=${organisations.length}`);
-        console.log("=======================================================");
 
         return res.status(200).json({
             success: true,
