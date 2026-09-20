@@ -1,24 +1,27 @@
 const {
     organisationProfile,
     address,
-    User
+    User,
+    sequelize // Ensure sequelize instance is imported for custom queries
 } = require("../../../models");
 const {
     Op
 } = require('sequelize');
 
-// The API to filter out verified organisations/hospitals with pagination and search
 const filterHospitals = async (req, res) => {
+    // 1. Debug incoming query parameters
+    console.log("=============== [DEBUG] INCOMING QUERY ===============");
+    console.log("req.query:", req.query);
+
     const {
         name,
         type = ["hospital", "clinic", "pharmacy", "laboratory"],
         pincode,
     } = req.query;
 
-    // Accept both `specialization` and `specializations_provided` parameter names
+    // Accept both parameter variations
     const specializationQuery = req.query.specializations_provided || req.query.specialization;
 
-    // Extract and parse limit and offset from query params
     const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
     const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
 
@@ -26,7 +29,7 @@ const filterHospitals = async (req, res) => {
         const trimmedName = name ? name.trim() : "";
         const trimmedPincode = pincode ? pincode.trim() : "";
 
-        // User filter condition if name is passed
+        // User filter
         const userWhere = {};
         if (trimmedName) {
             userWhere.username = {
@@ -34,7 +37,7 @@ const filterHospitals = async (req, res) => {
             };
         }
 
-        // Address filter condition if pincode is passed
+        // Address filter
         const addressWhere = {};
         if (trimmedPincode) {
             addressWhere.pincode = {
@@ -42,19 +45,18 @@ const filterHospitals = async (req, res) => {
             };
         }
 
-        // Main filter conditions for organisationProfile
+        // Base filter condition
         const organisationWhere = {
             verified_status: true
         };
 
-        // Type filter
         if (type) {
             organisationWhere.organisation_type = {
                 [Op.in]: Array.isArray(type) ? type : [type]
             };
         }
 
-        // Specialization filter handling
+        // Specialization Filter Logic
         if (specializationQuery) {
             let specsArray = [];
 
@@ -67,15 +69,25 @@ const filterHospitals = async (req, res) => {
                     .filter(Boolean);
             }
 
-            // Matches stringified JSON like '["physiotherapy","neurology"]'
+            console.log("[DEBUG] Extracted Specializations Array:", specsArray);
+
             if (specsArray.length > 0) {
-                organisationWhere[Op.and] = specsArray.map((spec) => ({
-                    specializations_provided: {
-                        [Op.like]: `%${spec}%` // Case-insensitive matching: use Op.iLike if on PostgreSQL
-                    }
-                }));
+                // Use sequelize.where + sequelize.col to avoid auto-quoting issues on JSON columns
+                const specConditions = specsArray.map((spec) => 
+                    sequelize.where(
+                        sequelize.fn('LOWER', sequelize.col('organisationProfile.specializations_provided')),
+                        {
+                            [Op.like]: `%${spec}%`
+                        }
+                    )
+                );
+
+                // Combine with Op.and (or Op.or depending on matching requirements)
+                organisationWhere[Op.and] = specConditions;
             }
         }
+
+        console.log("[DEBUG] Compiled organisationWhere:", JSON.stringify(organisationWhere, null, 2));
 
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
             where: organisationWhere,
@@ -94,10 +106,14 @@ const filterHospitals = async (req, res) => {
                     model: address,
                     as: "address",
                     where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-                    required: !!trimmedPincode
+                    required: !!trimmedPincode // Returns null if no match and not required
                 }
-            ]
+            ],
+            logging: (sql) => console.log("[DEBUG] Executed Raw SQL Query:\n", sql) // Logs exact executed SQL
         });
+
+        console.log(`[DEBUG] Results Found: Count=${count}, Rows=${organisations.length}`);
+        console.log("=======================================================");
 
         return res.status(200).json({
             success: true,
@@ -108,7 +124,7 @@ const filterHospitals = async (req, res) => {
             message: organisations.length === 0 ? "No organisations found matching the criteria." : "Organisations retrieved successfully"
         });
     } catch (error) {
-        console.log(error);
+        console.error("[DEBUG] Error Executing Query:", error);
         return res.status(500).json({
             success: false,
             error: "Failed to filter organisations",
