@@ -13,8 +13,10 @@ const filterHospitals = async (req, res) => {
         name,
         type = ["hospital", "clinic", "pharmacy", "laboratory"],
         pincode,
-        specialization,
     } = req.query;
+
+    // Accept both `specialization` and `specializations_provided` parameter names
+    const specializationQuery = req.query.specializations_provided || req.query.specialization;
 
     // Extract and parse limit and offset from query params
     const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
@@ -52,33 +54,26 @@ const filterHospitals = async (req, res) => {
             };
         }
 
-        // Specializations filter handling (String -> Array conversion)
-        if (specialization) {
+        // Specialization filter handling
+        if (specializationQuery) {
             let specsArray = [];
 
-            if (Array.isArray(specialization)) {
-                specsArray = specialization.map((s) => s.trim()).filter(Boolean);
-            } else if (typeof specialization === 'string') {
-                specsArray = specialization
+            if (Array.isArray(specializationQuery)) {
+                specsArray = specializationQuery.map((s) => s.trim().toLowerCase()).filter(Boolean);
+            } else if (typeof specializationQuery === 'string') {
+                specsArray = specializationQuery
                     .split(',')
-                    .map((s) => s.trim())
+                    .map((s) => s.trim().toLowerCase())
                     .filter(Boolean);
             }
 
+            // Matches stringified JSON like '["physiotherapy","neurology"]'
             if (specsArray.length > 0) {
-                // OPTION A: If your DB column is Postgres ARRAY or JSONB (Matches if ANY spec matches)
-                organisationWhere.specializations_provided = {
-                    [Op.overlap]: specsArray // Use Op.contains if you require ALL specified specs to match
-                };
-
-                // OPTION B: If your DB column is a standard TEXT/VARCHAR field, uncomment below instead:
-                /*
-                organisationWhere[Op.or] = specsArray.map((spec) => ({
+                organisationWhere[Op.and] = specsArray.map((spec) => ({
                     specializations_provided: {
-                        [Op.like]: `%${spec}%`
+                        [Op.like]: `%${spec}%` // Case-insensitive matching: use Op.iLike if on PostgreSQL
                     }
                 }));
-                */
             }
         }
 
