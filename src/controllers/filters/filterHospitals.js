@@ -105,7 +105,7 @@ const filterHospitals = async (req, res) => {
         name,
         type = ["hospital", "clinic", "pharmacy", "laboratory"],
         pincode,
-        specializations_provided,
+        specialization,
     } = req.query;
 
     // Extract and parse limit and offset from query params
@@ -145,13 +145,13 @@ const filterHospitals = async (req, res) => {
         }
 
         // Specializations filter handling (String -> Array conversion)
-        if (specializations_provided) {
+        if (specializations) {
             let specsArray = [];
 
-            if (Array.isArray(specializations_provided)) {
-                specsArray = specializations_provided.map((s) => s.trim()).filter(Boolean);
-            } else if (typeof specializations_provided === 'string') {
-                specsArray = specializations_provided
+            if (Array.isArray(specializations)) {
+                specsArray = specialization.map((s) => s.trim()).filter(Boolean);
+            } else if (typeof specialization === 'string') {
+                specsArray = specialization
                     .split(',')
                     .map((s) => s.trim())
                     .filter(Boolean);
