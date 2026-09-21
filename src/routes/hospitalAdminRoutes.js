@@ -12,6 +12,7 @@ const removeHospitalStaff = require("../controllers/hospitalAdmin/removeStaff.js
 const getAllRequests = require("../controllers/hospitalAdmin/getAllRequest.js")
 const requestAdmissionRequest = require("../controllers/hospitalAdmin/requestAHospitalAdmission.js")
 const acceptDocRequests = require('../controllers/hospitalAdmin/acceptDocRequests.js')
+const { setDoctorsSlotConfig } = require("../controllers/hospitalAdmin/saveSlotConfig.js")
 
 
 
@@ -25,5 +26,5 @@ router.delete("/remove-staff", protect, checkAccountStatus, hospitalAdminAuth,re
 router.get('/get-admission-request', protect, checkAccountStatus, hospitalAdminAuth, getAllRequests)
 router.post('/doctor-request-admission', protect, checkAccountStatus, requestAdmissionRequest)
 router.put('/react-to-admission', protect, checkAccountStatus, hospitalAdminAuth, acceptDocRequests)
-
+router.put('/set-doctors-slot-config', protect, checkAccountStatus, hospitalAdminAuth, setDoctorsSlotConfig)
 module.exports = router;

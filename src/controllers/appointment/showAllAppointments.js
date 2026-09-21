@@ -3,7 +3,8 @@ const {
     checkupAppointment,
     User,
     doctorProfile,
-    generalUser
+    generalUser,
+    organisation_profile
 } = require('../../../models');
 
 const showAllAppointments = async (req, res) => {
@@ -20,6 +21,8 @@ const showAllAppointments = async (req, res) => {
             userAppointments = await patientSideAppointments(userId, limit, offset);
         } else if (req.user.payload.scope === "doctor") {
             userAppointments = await doctorSideAppointments(userId, limit, offset);
+        } else if (req.user.payload.scope === "hospital_organisation") {
+            userAppointments = await hospitalSideAppointments(userId, limit, offset);
         }
 
         return res.status(200).json({
@@ -103,6 +106,65 @@ const patientSideAppointments = async (userId, limit, offset) => {
     });
 
     return userAppointments;
+};
+
+const hospitalSideAppointments = async (user_id, limit, offset) => {
+    // 1. Fetch the organisation profile using the user_id
+    const organisationProfileRecord = await organisation_profile.findOne({
+        where: { user_id }
+    });
+
+    // Handle case where organisation profile is not found
+    if (!organisationProfileRecord) {
+        return [];
+    }
+
+    // 2. Fetch appointments matching the organisation_id
+    const hospitalAppointments = await appointments.findAll({
+        where: {
+            organisation_id: organisationProfileRecord.id
+        },
+        limit: limit,
+        offset: offset,
+        include: [
+            {
+                model: checkupAppointment,
+                as: "checkupAppointment"
+            },
+            {
+                model: User,
+                as: "patient",
+                required: true,
+                attributes: ["id", "email", "username", "phone_number"],
+                include: [{
+                    model: generalUser,
+                    as: "generalUser",
+                    required: true,
+                    attributes: ["id", "gender", "date_of_birth", "profile_picture"]
+                }]
+            },
+            {
+                model: User,
+                as: "doctor",
+                required: true,
+                attributes: ["id", "email", "username", "phone_number"],
+                include: [{
+                    model: doctorProfile,
+                    as: "doctorProfile",
+                    required: true,
+                    attributes: [
+                        "id", "gender", "specialization", "practice_start_date",
+                        "consultation_fee", "verified_status", "profile_picture"
+                    ]
+                }]
+            }
+        ],
+        order: [
+            ["appointment_date", "DESC"]
+        ]
+    });
+
+    return hospitalAppointments;
 };
 
 module.exports = showAllAppointments;
