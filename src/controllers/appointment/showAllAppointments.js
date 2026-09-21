@@ -4,7 +4,7 @@ const {
     User,
     doctorProfile,
     generalUser,
-    organisation_profile
+    organisationProfile
 } = require('../../../models');
 
 const showAllAppointments = async (req, res) => {
@@ -110,7 +110,7 @@ const patientSideAppointments = async (userId, limit, offset) => {
 
 const hospitalSideAppointments = async (user_id, limit, offset) => {
     // 1. Fetch the organisation profile using the user_id
-    const organisationProfileRecord = await organisation_profile.findOne({
+    const organisationProfileRecord = await organisationProfile.findOne({
         where: { user_id }
     });
 
