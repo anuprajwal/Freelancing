@@ -1,4 +1,4 @@
-const { User, doctorProfile, organisationProfile } = require("../../models");
+const { User, doctorProfile, organisationProfile } = require("../../../models");
 const { Op } = require("sequelize");
 
 const setDoctorsSlotConfig = async (req, res) => {
