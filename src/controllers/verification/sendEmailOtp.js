@@ -34,7 +34,7 @@ const sendEmailOtp = async (req, res) => {
   try{
     await otpStorage.destroy({
       where: {
-        user_id: id,
+        user_id: id, email: email
       },
     });
     await otpStorage.create({

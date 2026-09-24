@@ -46,7 +46,7 @@ const sendPhoneOtp = async (req, res) => {
     }
 
     // ---- SAVE OTP ----
-    await otpStorage.destroy({ where: { user_id: id } });
+    await otpStorage.destroy({ where: { user_id: id, phone_number: phoneNumber } });
 
     await otpStorage.create({
       user_id: id,
