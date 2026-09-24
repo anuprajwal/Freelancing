@@ -32,12 +32,6 @@ const verifyOtp = async (req, res) => {
       verificationType = "email";
       whereCondition.email = email;
 
-      if (user.email !== email) {
-        return res.status(400).json({
-          message: "Email does not match your registered email"
-        });
-      }
-
       if (user.is_email_verified) {
         return res.status(400).json({ message: "Email already verified" });
       }
@@ -46,12 +40,6 @@ const verifyOtp = async (req, res) => {
     if (phoneNumber) {
       verificationType = "phone";
       whereCondition.phone_number = phoneNumber;
-
-      if (user.phone_number !== phoneNumber) {
-        return res.status(400).json({
-          message: "Phone number does not match your registered number"
-        });
-      }
 
       if (user.is_phone_verified) {
         return res.status(400).json({ message: "Phone already verified" });
