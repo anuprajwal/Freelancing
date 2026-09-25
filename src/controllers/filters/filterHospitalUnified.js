@@ -7,7 +7,6 @@ const {
 } = require("../../../models");
 
 
-
 const filterHospitalsCombined = async (req, res) => {
     const {
         name,
@@ -89,16 +88,15 @@ const filterHospitalsCombined = async (req, res) => {
         // 4. User Where Clause (Location Distance Match)
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
         const userWhere = {};
-        let distanceFormula = null;
         let attributesInclude = [];
         let orderClause = [];
 
         if (isGeoSearchActive) {
             // Mysql distance calculation referencing latitude/longitude directly on the User model (`user` alias)
-            distanceFormula = `
+            const distanceFormula = `
                 ST_Distance_Sphere(
                     Point(\`user\`.\`longitude\`, \`user\`.\`latitude\`),
-                    Point(${parsedLng},${parsedLat})
+                    Point(${parsedLng}, ${parsedLat})
                 )
             `;
 
@@ -106,10 +104,10 @@ const filterHospitalsCombined = async (req, res) => {
 
             // Apply distance filter directly inside userWhere
             userWhere[Op.and] = userWhere[Op.and] || [];
-            userWhere[Op.and].push(literal(`${distanceFormula} <=${maxDistanceMeters}`));
+            userWhere[Op.and].push(literal(`${distanceFormula} <= ${maxDistanceMeters}`));
 
-            // Sort by nearest distance first
-            orderClause.push([literal(distanceFormula), 'ASC']);
+            // Sort by nearest distance using the projected 'distance' alias
+            orderClause.push([literal('distance'), 'ASC']);
         }
 
         // 5. Address Where Clause (Pincode Match)
@@ -167,6 +165,5 @@ const filterHospitalsCombined = async (req, res) => {
         });
     }
 };
-
 
 module.exports = filterHospitalsCombined
