@@ -8,6 +8,7 @@ const {
     Op
 } = require('sequelize');
 
+
 const filterHospitals = async (req, res) => {
     const {
         name,
@@ -25,26 +26,26 @@ const filterHospitals = async (req, res) => {
         const trimmedName = name ? name.trim() : "";
         const trimmedPincode = pincode ? pincode.trim() : "";
 
-        // User filter
-        const userWhere = {};
-        if (trimmedName) {
-            userWhere.username = {
-                [Op.like]: `%${trimmedName}%`
-            };
-        }
-
-        // Address filter
-        const addressWhere = {};
-        if (trimmedPincode) {
-            addressWhere.pincode = {
-                [Op.like]: `%${trimmedPincode}%`
-            };
-        }
-
         // Base filter condition
         const organisationWhere = {
             verified_status: true
         };
+
+        // Name filter: match either organisation_name OR user.username
+        if (trimmedName) {
+            organisationWhere[Op.or] = [
+                {
+                    organisation_name: {
+                        [Op.like]: `%${trimmedName}%`
+                    }
+                },
+                {
+                    '$user.username$': {
+                        [Op.like]: `%${trimmedName}%`
+                    }
+                }
+            ];
+        }
 
         if (type) {
             organisationWhere.organisation_type = {
@@ -65,7 +66,6 @@ const filterHospitals = async (req, res) => {
                     .filter(Boolean);
             }
 
-
             if (specsArray.length > 0) {
                 // Use sequelize.where + sequelize.col to avoid auto-quoting issues on JSON columns
                 const specConditions = specsArray.map((spec) => 
@@ -77,11 +77,18 @@ const filterHospitals = async (req, res) => {
                     )
                 );
 
-                // Combine with Op.and (or Op.or depending on matching requirements)
+                // Combine with Op.and
                 organisationWhere[Op.and] = specConditions;
             }
         }
 
+        // Address filter
+        const addressWhere = {};
+        if (trimmedPincode) {
+            addressWhere.pincode = {
+                [Op.like]: `%${trimmedPincode}%`
+            };
+        }
 
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
             where: organisationWhere,
@@ -93,18 +100,16 @@ const filterHospitals = async (req, res) => {
                     model: User,
                     as: "user",
                     attributes: ["id", "email", "phone_number", "username"],
-                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
-                    required: !!trimmedName
+                    required: false // LEFT JOIN so matches on org name alone aren't excluded
                 },
                 {
                     model: address,
                     as: "address",
                     where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-                    required: !!trimmedPincode // Returns null if no match and not required
+                    required: !!trimmedPincode // INNER JOIN only when filtering by pincode
                 }
             ],
         });
-
 
         return res.status(200).json({
             success: true,
@@ -140,26 +145,29 @@ const filterHospitalIdName = async (req, res) => {
         const trimmedName = name ? name.trim() : "";
 
         // User filter
-        const userWhere = {};
-
-        // Base filter condition
         const organisationWhere = {
             verified_status: true
         };
 
+        // If trimmedName is provided, check if organisation_name OR user.username matches
         if (trimmedName) {
-            userWhere.username = {
-                [Op.like]: `%${trimmedName}%`
-            };
-            organisationWhere.organisation_name = {
-                [Op.like]: `%${trimmedName}%`
-            };
+            organisationWhere[Op.or] = [
+                {
+                    organisation_name: {
+                        [Op.like]: `%${trimmedName}%`
+                    }
+                },
+                {
+                    '$user.username$': {
+                        [Op.like]: `%${trimmedName}%`
+                    }
+                }
+            ];
         }
-
 
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
             where: organisationWhere,
-            attributes: ['id', 'organisation_name'], // Only select id and organisation_name
+            attributes: ['id', 'organisation_name'],
             limit: limit,
             offset: offset,
             distinct: true,
@@ -168,12 +176,10 @@ const filterHospitalIdName = async (req, res) => {
                     model: User,
                     as: "user",
                     attributes: ["id", "email", "phone_number", "username"],
-                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
-                    required: !!trimmedName
+                    required: false // Ensures a LEFT OUTER JOIN so matches on org name alone aren't excluded
                 }
             ],
         });
-
 
         return res.status(200).json({
             success: true,
