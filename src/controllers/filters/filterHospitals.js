@@ -141,17 +141,20 @@ const filterHospitalIdName = async (req, res) => {
 
         // User filter
         const userWhere = {};
-        if (trimmedName) {
-            userWhere.username = {
-                [Op.like]: `%${trimmedName}%`
-            };
-        }
-
 
         // Base filter condition
         const organisationWhere = {
             verified_status: true
         };
+
+        if (trimmedName) {
+            userWhere.username = {
+                [Op.like]: `%${trimmedName}%`
+            };
+            organisationWhere.organisation_name = {
+                [Op.like]: `%${trimmedName}%`
+            };
+        }
 
 
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
