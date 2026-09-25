@@ -10,7 +10,6 @@ const {
 const { Op, literal } = require("sequelize");
 
 
-
 const filterDoctorCombined = async (req, res) => {
     // 1. Extract query parameters
     const { name, specialization, pincode, userLatitude, userLongitude } = req.query;
@@ -65,51 +64,51 @@ const filterDoctorCombined = async (req, res) => {
             }
         }
 
-        // 3. User Where Clause (Doctor Name Match)
-        const userWhere = {};
+        // 3. User Where Clause (Name + Location Distance Match)
+        const userWhere = {
+            role: "doctor"
+        };
+
         if (trimmedName) {
             userWhere.username = {
                 [Op.like]: `%${trimmedName}%`
             };
         }
 
-        // 4. Address Where Clause (Pincode + Geolocation Match)
-        const addressWhere = {};
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
-
-        if (trimmedPincode) {
-            addressWhere.pincode = {
-                [Op.like]: `%${trimmedPincode}%`
-            };
-        }
-
         let distanceFormula = null;
         let attributesInclude = [];
         let orderClause = [];
 
         if (isGeoSearchActive) {
-            // Mysql distance calculation based on address table coordinates
+            // Mysql distance formula targeting latitude/longitude on the `User` model (`user` alias)
             distanceFormula = `
                 6371000 * ACOS(
                     COS(RADIANS(${parsedLat})) *
-                    COS(RADIANS(\`user->address\`.\`latitude\`)) *
-                    COS(RADIANS(\`user->address\`.\`longitude\`) - RADIANS(${parsedLng})) +
+                    COS(RADIANS(\`user\`.\`latitude\`)) *
+                    COS(RADIANS(\`user\`.\`longitude\`) - RADIANS(${parsedLng})) +
                     SIN(RADIANS(${parsedLat})) *
-                    SIN(RADIANS(\`user->address\`.\`latitude\`))
+                    SIN(RADIANS(\`user\`.\`latitude\`))
                 )
             `;
 
             attributesInclude.push([literal(distanceFormula), "distance"]);
 
-            // Filter address by maximum distance
-            addressWhere[Op.and] = addressWhere[Op.and] || [];
-            addressWhere[Op.and].push(literal(`${distanceFormula} <=${filterInMeters}`));
+            // Apply distance filter directly inside userWhere
+            userWhere[Op.and] = userWhere[Op.and] || [];
+            userWhere[Op.and].push(literal(`${distanceFormula} <=${filterInMeters}`));
 
             // Sort by nearest distance first
             orderClause.push([literal(distanceFormula), "ASC"]);
         }
 
-        const requireAddress = !!trimmedPincode || isGeoSearchActive;
+        // 4. Address Where Clause (Pincode Match)
+        const addressWhere = {};
+        if (trimmedPincode) {
+            addressWhere.pincode = {
+                [Op.like]: `%${trimmedPincode}%`
+            };
+        }
 
         // 5. Execute Combined Query
         const { count, rows: doctors } = await doctorProfile.findAndCountAll({
@@ -141,14 +140,18 @@ const filterDoctorCombined = async (req, res) => {
                     model: User,
                     as: "user",
                     attributes: [
+                        "id",
                         "phone_number",
                         "username",
                         "email",
+                        "latitude",
+                        "longitude",
                         "is_email_verified",
                         "is_phone_verified"
                     ],
-                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
-                    required: !!trimmedName || requireAddress, // Inner join if filtering user by name or location/pincode
+                    where: userWhere,
+                    // Inner join User if searching by name OR searching by geolocation distance
+                    required: !!trimmedName || isGeoSearchActive,
 
                     include: [
                         {
@@ -159,7 +162,8 @@ const filterDoctorCombined = async (req, res) => {
                             model: address,
                             as: "address",
                             where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-                            required: requireAddress
+                            // Inner join address table ONLY when a pincode filter is supplied
+                            required: !!trimmedPincode
                         }
                     ]
                 },

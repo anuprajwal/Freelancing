@@ -7,6 +7,7 @@ const {
 } = require("../../../models");
 
 
+
 const filterHospitalsCombined = async (req, res) => {
     const {
         name,
@@ -32,7 +33,7 @@ const filterHospitalsCombined = async (req, res) => {
 
         // Base filter condition on organisationProfile
         const organisationWhere = {
-            verified_status: true // Note: modify to "approved" if matching verified_status string from location filter
+            verified_status: true
         };
 
         // 1. Name Filter: match either organisation_name OR user.username
@@ -85,43 +86,39 @@ const filterHospitalsCombined = async (req, res) => {
             }
         }
 
-        // 4. Address & Distance Filters
-        const addressWhere = {};
+        // 4. User Where Clause (Location Distance Match)
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
-
-        // Pincode filter
-        if (trimmedPincode) {
-            addressWhere.pincode = {
-                [Op.like]: `%${trimmedPincode}%`
-            };
-        }
-
-        // Spatial / Geolocation Distance Condition
+        const userWhere = {};
         let distanceFormula = null;
         let attributesInclude = [];
         let orderClause = [];
 
         if (isGeoSearchActive) {
-            // MySQL 8.0 distance calculation from address coordinates
+            // Mysql distance calculation referencing latitude/longitude directly on the User model (`user` alias)
             distanceFormula = `
                 ST_Distance_Sphere(
-                    Point(\`address\`.\`longitude\`, \`address\`.\`latitude\`),
-                    Point(${parsedLng}, ${parsedLat})
+                    Point(\`user\`.\`longitude\`, \`user\`.\`latitude\`),
+                    Point(${parsedLng},${parsedLat})
                 )
             `;
 
             attributesInclude.push([literal(distanceFormula), "distance"]);
 
-            // Filter address by maximum distance in meters
-            addressWhere[Op.and] = addressWhere[Op.and] || [];
-            addressWhere[Op.and].push(literal(`${distanceFormula} <= ${maxDistanceMeters}`));
+            // Apply distance filter directly inside userWhere
+            userWhere[Op.and] = userWhere[Op.and] || [];
+            userWhere[Op.and].push(literal(`${distanceFormula} <=${maxDistanceMeters}`));
 
-            // Sort by closest distance first
+            // Sort by nearest distance first
             orderClause.push([literal(distanceFormula), 'ASC']);
         }
 
-        // Require inner join on address if searching by pincode OR geolocation
-        const requireAddress = !!trimmedPincode || isGeoSearchActive;
+        // 5. Address Where Clause (Pincode Match)
+        const addressWhere = {};
+        if (trimmedPincode) {
+            addressWhere.pincode = {
+                [Op.like]: `%${trimmedPincode}%`
+            };
+        }
 
         // Execute combined query
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
@@ -137,14 +134,17 @@ const filterHospitalsCombined = async (req, res) => {
                 {
                     model: User,
                     as: "user",
-                    attributes: ["id", "email", "phone_number", "username", "role"],
-                    required: false // LEFT JOIN so matches on org name alone aren't excluded
+                    attributes: ["id", "email", "phone_number", "username", "role", "latitude", "longitude"],
+                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
+                    // Inner join User if spatial geolocation search is active
+                    required: isGeoSearchActive
                 },
                 {
                     model: address,
                     as: "address",
                     where: Object.keys(addressWhere).length > 0 ? addressWhere : undefined,
-                    required: requireAddress
+                    // Inner join address table ONLY when filtering by pincode
+                    required: !!trimmedPincode
                 }
             ],
         });
@@ -159,7 +159,7 @@ const filterHospitalsCombined = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("[DEBUG] Error Executing Combined Query:", error);
+        console.error("[DEBUG] Error Executing Combined Hospital Query:", error);
         return res.status(500).json({
             success: false,
             error: "Failed to filter organisations",
@@ -167,5 +167,6 @@ const filterHospitalsCombined = async (req, res) => {
         });
     }
 };
+
 
 module.exports = filterHospitalsCombined
