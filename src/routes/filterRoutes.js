@@ -6,6 +6,8 @@ const filterHospitalsByLocation = require("../controllers/filters/filterHospital
 const getDoctorsByOrganisation = require("../controllers/appointment/hospital/getDoctorsFromHospital.js")
 const searchHospitals = require("../controllers/filters/searchHospitals.js")
 const searchDoctors = require("../controllers/filters/searchDoctors.js")
+const filterHospitalsCombined = require("../controllers/filters/filterHospitalUnified.js")
+const filterDoctorCombined = require("../controllers/filters/filterDoctorUnified.js")
 
 const router = express.Router();
 
@@ -17,6 +19,8 @@ router.get("/get-hospital-doctors/:organisation_id", getDoctorsByOrganisation)
 router.get("/search/hospital-by-name", searchHospitals)
 router.get("/search-doctor-name", searchDoctors)
 router.get("/filter-hospital-id-name", filterHospitalIdName);
+router.get("/filter-hospitals-standalone", filterHospitalsCombined);
+router.get("/filter-doctors-standalone", filterDoctorCombined);
 
 
 
