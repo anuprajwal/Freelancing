@@ -9,7 +9,6 @@ const {
 
 const { Op, literal } = require("sequelize");
 
-
 const filterDoctorCombined = async (req, res) => {
     // 1. Extract query parameters
     const { name, specialization, pincode, userLatitude, userLongitude } = req.query;
@@ -76,13 +75,14 @@ const filterDoctorCombined = async (req, res) => {
         }
 
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
-        let distanceFormula = null;
+        let distanceLiteral = null;
         let attributesInclude = [];
         let orderClause = [];
 
         if (isGeoSearchActive) {
-            // Mysql distance formula targeting latitude/longitude on the `User` model (`user` alias)
-            distanceFormula = `
+            // Use ST_Distance_Sphere or ACOS formula referencing user model columns safely via sequelize.literal or literal
+            // Passing the explicit column reference prevents unknown column mapping errors in ORDER BY / WHERE
+            distanceLiteral = literal(`
                 6371000 * ACOS(
                     COS(RADIANS(${parsedLat})) *
                     COS(RADIANS(\`user\`.\`latitude\`)) *
@@ -90,16 +90,24 @@ const filterDoctorCombined = async (req, res) => {
                     SIN(RADIANS(${parsedLat})) *
                     SIN(RADIANS(\`user\`.\`latitude\`))
                 )
-            `;
+            `);
 
-            attributesInclude.push([literal(distanceFormula), "distance"]);
+            attributesInclude.push([distanceLiteral, "distance"]);
 
-            // Apply distance filter directly inside userWhere
+            // Apply distance filter inside userWhere
             userWhere[Op.and] = userWhere[Op.and] || [];
-            userWhere[Op.and].push(literal(`${distanceFormula} <=${filterInMeters}`));
+            userWhere[Op.and].push(literal(`
+                6371000 * ACOS(
+                    COS(RADIANS(${parsedLat})) *
+                    COS(RADIANS(\`user\`.\`latitude\`)) *
+                    COS(RADIANS(\`user\`.\`longitude\`) - RADIANS(${parsedLng})) +
+                    SIN(RADIANS(${parsedLat})) *
+                    SIN(RADIANS(\`user\`.\`latitude\`))
+                ) <= ${filterInMeters}
+            `));
 
-            // Sort by nearest distance first
-            orderClause.push([literal(distanceFormula), "ASC"]);
+            // Order by distance safely using the computed distance alias or explicit field reference
+            orderClause.push([literal('distance'), 'ASC']);
         }
 
         // 4. Address Where Clause (Pincode Match)
@@ -120,19 +128,7 @@ const filterDoctorCombined = async (req, res) => {
 
             attributes: {
                 include: attributesInclude,
-                fields: [
-                    "id",
-                    "user_id",
-                    "date_of_birth",
-                    "gender",
-                    "specialization",
-                    "practice_start_date",
-                    "consultation_fee",
-                    "organisation_id",
-                    "verified_status",
-                    "profile_picture",
-                    "appointment_time"
-                ]
+                exclude: []
             },
 
             include: [
