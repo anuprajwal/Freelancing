@@ -1,5 +1,5 @@
 const express = require("express");
-const filterHospitals  = require("../controllers/filters/filterHospitals.js");
+const {filterHospitals, filterHospitalIdName}  = require("../controllers/filters/filterHospitals.js");
 const filterDoctor  = require("../controllers/filters/filterDoctor.js");
 const filterDoctorByLocation = require("../controllers/filters/filterDoctorsByLocation.js")
 const filterHospitalsByLocation = require("../controllers/filters/filterHospitalByLocation.js")
@@ -16,6 +16,7 @@ router.get("/filter-hptls-by-loc", filterHospitalsByLocation)
 router.get("/get-hospital-doctors/:organisation_id", getDoctorsByOrganisation)
 router.get("/search/hospital-by-name", searchHospitals)
 router.get("/search-doctor-name", searchDoctors)
+router.get("/filter-hospital-id-name", filterHospitalIdName);
 
 
 

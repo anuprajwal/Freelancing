@@ -124,4 +124,70 @@ const filterHospitals = async (req, res) => {
     }
 };
 
-module.exports = filterHospitals;
+
+
+const filterHospitalIdName = async (req, res) => {
+    const {
+        name,
+    } = req.query;
+
+    // Accept both parameter variations
+
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 10);
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+
+    try {
+        const trimmedName = name ? name.trim() : "";
+
+        // User filter
+        const userWhere = {};
+        if (trimmedName) {
+            userWhere.username = {
+                [Op.like]: `%${trimmedName}%`
+            };
+        }
+
+
+        // Base filter condition
+        const organisationWhere = {
+            verified_status: true
+        };
+
+
+        const { count, rows: organisations } = await organisationProfile.findAndCountAll({
+            where: organisationWhere,
+            attributes: ['id', 'organisation_name'], // Only select id and organisation_name
+            limit: limit,
+            offset: offset,
+            distinct: true,
+            include: [
+                {
+                    model: User,
+                    as: "user",
+                    attributes: ["id", "email", "phone_number", "username"],
+                    where: Object.keys(userWhere).length > 0 ? userWhere : undefined,
+                    required: !!trimmedName
+                }
+            ],
+        });
+
+
+        return res.status(200).json({
+            success: true,
+            total: count,
+            limit,
+            offset,
+            organisations: organisations.length > 0 ? organisations : [],
+            message: organisations.length === 0 ? "No organisations found matching the criteria." : "Organisations retrieved successfully"
+        });
+    } catch (error) {
+        console.error("[DEBUG] Error Executing Query:", error);
+        return res.status(500).json({
+            success: false,
+            error: "Failed to filter organisations",
+            details: error.message
+        });
+    }
+};
+
+module.exports = { filterHospitals, filterHospitalIdName };
