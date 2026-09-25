@@ -26,7 +26,7 @@ const {
 } = require("../controllers/appointment/uploadHealthDocument.js")
 const upload = require("../controllers/savingSpaces/connectCloudDb.js")
 const showUpcomingAppointments = require("../controllers/appointment/showUpcomingAppointments.js");
-const showCheckupById = require("../controllers/appointment/getCheckupById.js");
+const {showCheckupById, showCheckupByAppointmentId} = require("../controllers/appointment/getCheckupById.js");
 
 
 
@@ -40,7 +40,8 @@ router.get("/get-single-appointment", protect, checkAccountStatus, showSingleApp
 router.get("/today", protect, checkAccountStatus, showTodayAppointments);
 router.get("/next", protect, checkAccountStatus, showNextAppointment);
 router.get("/upcoming", protect, checkAccountStatus, showUpcomingAppointments);
-router.get("/checkup/:id", protect, checkAccountStatus, showCheckupById);
+router.get("/checkup-by-appointment/:id", protect, checkAccountStatus, showCheckupByAppointmentId);
+router.get("/checkup-by-id/:id", protect, checkAccountStatus, showCheckupById);
 
 router.put("/doctor-update-appointment", protect, checkAccountStatus, appointmentUpdateByDoctor)
 router.get("/get-prescription-for/:appointment_id", protect, checkAccountStatus, getPrescription)
