@@ -2,10 +2,10 @@
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
-  class AdditionalProfile extends Model {
+  class orgPaymentManagement extends Model {
     static associate(models) {
       // Belongs to User
-      AdditionalProfile.belongsTo(models.User, {
+      orgPaymentManagement.belongsTo(models.User, {
         foreignKey: 'user_id',
         targetKey: 'id',
         as: 'user',
@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
 
-  AdditionalProfile.init(
+  orgPaymentManagement.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -57,11 +57,11 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'AdditionalProfile',
-      tableName: 'additional_profiles',
+      modelName: 'orgPaymentManagement',
+      tableName: 'org_payment_management',
       underscored: true,
     }
   );
 
-  return AdditionalProfile;
+  return orgPaymentManagement;
 };
