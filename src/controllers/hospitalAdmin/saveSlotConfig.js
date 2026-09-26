@@ -148,7 +148,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 1: Overall update
   if (!hasIndividualFilters && !hasSpecFilters) {
-    profile.overall = {
+    profile.dataValues.overall = {
       slot_fee: slotFee,
       slot_time: slotTime,
       updated_at: new Date()
@@ -160,9 +160,9 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
-    const currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
+    const currentIndividual = Array.isArray(profile.individual) ? profile.dataValues.individual : [];
 
-    console.log(`checking:`, Array.isArray(profile.individual) ? profile.individual : []);
+    console.log(`checking:`, Array.isArray(profile.individual) ? profile.dataValues.individual : []);
 
     console.log(`Current individual configs:`, currentIndividual);
     
@@ -212,7 +212,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    profile.individual = updatedIndividual;
+    profile.dataValues.individual = updatedIndividual;
     profile.changed('individual', true); // Force Sequelize JSON tracking update
     await profile.save();
     
@@ -253,7 +253,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    profile.specialisation = updatedSpec;
+    profile.dataValues.specialisation = updatedSpec;
     profile.changed('specialisation', true);
     await profile.save();
 
