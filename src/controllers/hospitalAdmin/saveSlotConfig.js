@@ -133,7 +133,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   const hasSpecFilters = specList.length > 0;
 
   // Find or create the profile
-  let [profile] = await AdditionalProfile.findOrCreate({
+  let [profile] = await orgPaymentManagement.findOrCreate({
     where: { user_id: userId },
     defaults: {
       user_id: userId,
