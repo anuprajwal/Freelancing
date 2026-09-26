@@ -179,6 +179,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       });
 
       if (existingIndex !== -1) {
+        console.log(`Updating existing individual config for ${existingIndex}:`, updatedIndividual[existingIndex]);
         // UPDATE existing record: update fee & time, retain created_at
         const existing = updatedIndividual[existingIndex];
         updatedIndividual[existingIndex] = {
@@ -190,6 +191,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           updated_at: now
         };
       } else {
+        console.log(`Adding new individual config for ${name || email}`);
         // APPEND new record: add to the list without overwriting older records
         updatedIndividual.push({
           name,
@@ -199,6 +201,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           created_at: now,
           updated_at: now
         });
+        console.log(`New individual config added:`, updatedIndividual);
       }
     }
 
