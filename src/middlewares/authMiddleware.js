@@ -156,7 +156,7 @@ const protect = (req, res, next) => {
         // Check if role is recognized and request host matches expected domain
         if (!expectedDomain || requestHost !== expectedDomain) {
             return res.status(403).json({
-                error: "Unauthorized access for this domain"
+                error: "Unauthorized access for this domain"+requestHost+" expected "+expectedDomain
             });
         }
 
