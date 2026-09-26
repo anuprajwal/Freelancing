@@ -139,8 +139,8 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     defaults: {
       user_id: userId,
       overall: null,
-      individual: '[]',
-      specialisation: '[]'
+      individual: [],
+      specialisation: []
     }
   });
 
@@ -158,15 +158,9 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
-    // Safely parse JSON string from DB into a JS array
-    let currentIndividual = [];
-    try {
-      currentIndividual = typeof profile.individual === 'string' 
-        ? JSON.parse(profile.individual || '[]') 
-        : (profile.individual || []);
-    } catch (e) {
-      currentIndividual = [];
-    }
+    // Sequelize automatically parses DataTypes.JSON columns into JS arrays, 
+    // but we ensure it defaults to an array safely.
+    let currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
 
     const updatedIndividual = [...currentIndividual];
     const maxLen = Math.max(nameList.length, emailList.length);
@@ -209,8 +203,8 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    // Convert back to JSON string if your DB column expects text/string JSON
-    profile.individual = JSON.stringify(updatedIndividual);
+    // Assign the array directly. DO NOT use JSON.stringify() here.
+    profile.individual = updatedIndividual;
     profile.changed('individual', true);
     await profile.save();
     
@@ -219,15 +213,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 3: Specific Specialisation
   if (hasSpecFilters) {
-    let currentSpec = [];
-    try {
-      currentSpec = typeof profile.specialisation === 'string' 
-        ? JSON.parse(profile.specialisation || '[]') 
-        : (profile.specialisation || []);
-    } catch (e) {
-      currentSpec = [];
-    }
-
+    let currentSpec = Array.isArray(profile.specialisation) ? profile.specialisation : [];
     const updatedSpec = [...currentSpec];
     const now = new Date();
 
@@ -259,12 +245,14 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    profile.specialisation = JSON.stringify(updatedSpec);
+    // Assign the array directly. DO NOT use JSON.stringify() here.
+    profile.specialisation = updatedSpec;
     profile.changed('specialisation', true);
     await profile.save();
 
     return { type: "SPECIALISATION", message: "Specialisation configs merged and updated." };
   }
 };
+
 
 module.exports = { setDoctorsSlotConfig };
