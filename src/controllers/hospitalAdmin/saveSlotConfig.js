@@ -143,7 +143,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     }
   });
 
-  // CASE 1: Overall update (No specific individual or specialisation filters)
+  // CASE 1: Overall update (Replaces overall config directly)
   if (!hasIndividualFilters && !hasSpecFilters) {
     profile.overall = {
       slot_fee: slotFee,
@@ -152,68 +152,73 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     };
 
     await profile.save();
-    return { type: "OVERALL", message: "Overall slot configuration replaced." };
+    return { type: "OVERALL", message: "Overall slot configuration updated." };
   }
 
-  // CASE 2: Specific Doctor (Individual filter based on names / emails)
+  // CASE 2: Specific Doctor (Individual array merge without duplicate users)
   if (hasIndividualFilters) {
     let currentIndividual = Array.isArray(profile.individual) ? [...profile.individual] : [];
 
-    // Construct targets to match
-    const newDoctorsToProcess = [];
+    // Pair up incoming names and emails by index
     const maxLen = Math.max(nameList.length, emailList.length);
+    const incomingDoctors = [];
 
     for (let i = 0; i < maxLen; i++) {
-      newDoctorsToProcess.push({
+      incomingDoctors.push({
         name: nameList[i] || null,
         email: emailList[i] || null
       });
     }
 
-    for (const targetDoc of newDoctorsToProcess) {
-      // Find index of existing record matching name OR email
+    for (const doc of incomingDoctors) {
+      // Find if doctor already exists in array by email OR name match
       const existingIdx = currentIndividual.findIndex((item) => {
-        const nameMatch = targetDoc.name && item.name === targetDoc.name;
-        const emailMatch = targetDoc.email && item.email === targetDoc.email;
-        return nameMatch || emailMatch;
+        const emailMatch = doc.email && item.email && item.email.toLowerCase() === doc.email.toLowerCase();
+        const nameMatch = doc.name && item.name && item.name.toLowerCase() === doc.name.toLowerCase();
+        return emailMatch || nameMatch;
       });
 
       if (existingIdx !== -1) {
-        // Update existing item
+        // Update slot info on existing user while preserving non-null fields
         currentIndividual[existingIdx] = {
           ...currentIndividual[existingIdx],
-          name: targetDoc.name || currentIndividual[existingIdx].name,
-          email: targetDoc.email || currentIndividual[existingIdx].email,
+          name: doc.name || currentIndividual[existingIdx].name,
+          email: doc.email || currentIndividual[existingIdx].email,
           slot_fee: slotFee,
           slot_time: slotTime,
           updated_at: new Date()
         };
       } else {
-        // Add new entry
+        // Append new user to array without duplicating existing ones
         currentIndividual.push({
-          name: targetDoc.name,
-          email: targetDoc.email,
+          name: doc.name,
+          email: doc.email,
           slot_fee: slotFee,
           slot_time: slotTime,
-          created_at: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     }
 
     profile.individual = currentIndividual;
     await profile.save();
-    return { type: "INDIVIDUAL", message: "Individual doctor configurations updated." };
+    return { type: "INDIVIDUAL", message: "Individual doctor configurations updated and merged." };
   }
 
-  // CASE 3: Specific Specialisation
+  // CASE 3: Specific Specialisation (Specialisation array merge without duplicates)
   if (hasSpecFilters) {
     let currentSpec = Array.isArray(profile.specialisation) ? [...profile.specialisation] : [];
 
     for (const specName of specList) {
-      const existingIdx = currentSpec.findIndex((item) => item.specialisation === specName);
+      if (!specName) continue;
+
+      const existingIdx = currentSpec.findIndex(
+        (item) => item.specialisation && item.specialisation.toLowerCase() === specName.toLowerCase()
+      );
 
       if (existingIdx !== -1) {
-        // Update existing specialization item
+        // Update slot info for existing specialisation
         currentSpec[existingIdx] = {
           ...currentSpec[existingIdx],
           slot_fee: slotFee,
@@ -221,19 +226,20 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           updated_at: new Date()
         };
       } else {
-        // Add new specialization item
+        // Append new specialisation without duplicating existing ones
         currentSpec.push({
           specialisation: specName,
           slot_fee: slotFee,
           slot_time: slotTime,
-          created_at: new Date()
+          created_at: new Date(),
+          updated_at: new Date()
         });
       }
     }
 
     profile.specialisation = currentSpec;
     await profile.save();
-    return { type: "SPECIALISATION", message: "Specialisation slot configurations updated." };
+    return { type: "SPECIALISATION", message: "Specialisation configurations updated and merged." };
   }
 };
 

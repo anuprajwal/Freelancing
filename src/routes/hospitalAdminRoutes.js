@@ -13,6 +13,7 @@ const getAllRequests = require("../controllers/hospitalAdmin/getAllRequest.js")
 const requestAdmissionRequest = require("../controllers/hospitalAdmin/requestAHospitalAdmission.js")
 const acceptDocRequests = require('../controllers/hospitalAdmin/acceptDocRequests.js')
 const { setDoctorsSlotConfig } = require("../controllers/hospitalAdmin/saveSlotConfig.js")
+const getSlotConfig = require("../controllers/hospitalAdmin/getSLotConfig.js")
 
 
 
@@ -27,4 +28,7 @@ router.get('/get-admission-request', protect, checkAccountStatus, hospitalAdminA
 router.post('/doctor-request-admission', protect, checkAccountStatus, requestAdmissionRequest)
 router.put('/react-to-admission', protect, checkAccountStatus, hospitalAdminAuth, acceptDocRequests)
 router.put('/set-doctors-slot-config', protect, checkAccountStatus, hospitalAdminAuth, setDoctorsSlotConfig)
+router.get('/get-doctors-slot-config', protect, checkAccountStatus, hospitalAdminAuth, getSlotConfig)
+
+
 module.exports = router;
