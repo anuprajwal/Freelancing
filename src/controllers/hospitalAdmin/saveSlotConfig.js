@@ -150,33 +150,35 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       slot_time: slotTime,
       updated_at: new Date()
     };
+    profile.changed('overall', true);
     await profile.save();
     return { type: "OVERALL", message: "Overall config updated." };
   }
 
-  // CASE 2: Specific Doctor (Individual) - Optimized using a Map/Dictionary
+  // CASE 2: Specific Doctor (Individual) - Merges incoming with existing records safely
   if (hasIndividualFilters) {
-    // 1. Convert current array into a Map using email (or name as fallback) as the unique key for O(1) lookup
+    // 1. Load ALL existing records into a Map so we don't lose any past records
     const map = new Map();
     const currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
     
     for (const item of currentIndividual) {
-      const key = (item.email || item.name || "").toLowerCase();
+      const key = (item.email || item.name || "").trim().toLowerCase();
       if (key) map.set(key, item);
     }
 
     const maxLen = Math.max(nameList.length, emailList.length);
     const now = new Date();
 
+    // 2. Loop through incoming doctors from the request payload
     for (let i = 0; i < maxLen; i++) {
       const name = nameList[i] || null;
       const email = emailList[i] || null;
-      const lookupKey = (email || name || "").toLowerCase();
+      const lookupKey = (email || name || "").trim().toLowerCase();
 
       if (!lookupKey) continue;
 
       if (map.has(lookupKey)) {
-        // Update existing record in-place, keeping original created_at
+        // If user already exists in DB -> Update slot info, keep original created_at
         const existing = map.get(lookupKey);
         map.set(lookupKey, {
           ...existing,
@@ -187,7 +189,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           updated_at: now
         });
       } else {
-        // Insert new record
+        // If user is NOT in DB -> Append them as a new record, keeping all older records intact
         map.set(lookupKey, {
           name,
           email,
@@ -199,21 +201,21 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    // Convert Map back to array
+    // Convert Map back to array containing both old (untouched) and new/updated records
     profile.individual = Array.from(map.values());
-    profile.changed('individual', true); // Force Sequelize to detect JSON change
+    profile.changed('individual', true); // Force Sequelize to commit JSON updates
     await profile.save();
     
-    return { type: "INDIVIDUAL", message: "Individual configs synchronized." };
+    return { type: "INDIVIDUAL", message: "Individual configs merged and updated." };
   }
 
-  // CASE 3: Specific Specialisation - Optimized using a Map/Dictionary
+  // CASE 3: Specific Specialisation - Merges incoming with existing specialisations safely
   if (hasSpecFilters) {
     const map = new Map();
     const currentSpec = Array.isArray(profile.specialisation) ? profile.specialisation : [];
 
     for (const item of currentSpec) {
-      const key = (item.specialisation || "").toLowerCase();
+      const key = (item.specialisation || "").trim().toLowerCase();
       if (key) map.set(key, item);
     }
 
@@ -221,7 +223,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
     for (const specName of specList) {
       if (!specName) continue;
-      const lookupKey = specName.toLowerCase();
+      const lookupKey = specName.trim().toLowerCase();
 
       if (map.has(lookupKey)) {
         const existing = map.get(lookupKey);
@@ -244,12 +246,14 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     }
 
     profile.specialisation = Array.from(map.values());
-    profile.changed('specialisation', true); // Force Sequelize to detect JSON change
+    profile.changed('specialisation', true);
     await profile.save();
 
-    return { type: "SPECIALISATION", message: "Specialisation configs synchronized." };
+    return { type: "SPECIALISATION", message: "Specialisation configs merged and updated." };
   }
 };
+
+
 
 
 module.exports = { setDoctorsSlotConfig };
