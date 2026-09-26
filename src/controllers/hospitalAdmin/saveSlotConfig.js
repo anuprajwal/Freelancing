@@ -159,6 +159,8 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
     const currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
+
+    console.log(`Current individual configs:`, currentIndividual);
     
     // Map entries by index/reference to update existing items directly
     const updatedIndividual = [...currentIndividual];
