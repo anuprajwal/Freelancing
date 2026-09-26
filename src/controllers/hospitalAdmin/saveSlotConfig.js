@@ -1,4 +1,4 @@
-const { User, doctorProfile, organisationProfile } = require("../../../models");
+const { User, doctorProfile, organisationProfile, orgPaymentManagement } = require("../../../models");
 const { Op } = require("sequelize");
 
 const setDoctorsSlotConfig = async (req, res) => {
@@ -133,8 +133,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   const hasIndividualFilters = nameList.length > 0 || emailList.length > 0;
   const hasSpecFilters = specList.length > 0;
 
-  // Find or initialize the AdditionalProfile record for this user_id
-  let [profile] = await AdditionalProfile.findOrCreate({
+  let [profile] = await orgPaymentManagement.findOrCreate({
     where: { user_id: userId },
     defaults: {
       user_id: userId,
