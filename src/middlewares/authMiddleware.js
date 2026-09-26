@@ -14,20 +14,19 @@ const EXCLUDED_ROUTES = ['/register', '/auth/login'];
 //         if (EXCLUDED_ROUTES.includes(req.path)) {
 //             return next();
 //         }
+
 //         // Detect request origin
 //         let origin = null;
 
 //         if (req.headers && req.headers.origin) {
 //             origin = req.headers.origin;
 //         } else if (req.headers && req.headers.referer) {
-//             origin = req.headers.referer.replace(/\/$/, '');
+//             origin = req.headers.referer;
 //         }
 
 //         let token = null;
-//         let tokenKey = null;
 
 //         // 🌐 Browser
-        
 //         if (
 //             req.headers &&
 //             req.headers.authorization &&
@@ -35,15 +34,13 @@ const EXCLUDED_ROUTES = ['/register', '/auth/login'];
 //         ) {
 //             token = req.headers.authorization.split(' ')[1];
 //         }
-        
 
 //         if (!token) {
-//             console.log("token not found")
+//             console.log("token not found");
 //             return res.status(401).json({
 //                 error: "Auth token not found"
 //             });
 //         }
-
 
 //         // Verify JWT
 //         const decoded = decodeToken(token);
@@ -54,17 +51,46 @@ const EXCLUDED_ROUTES = ['/register', '/auth/login'];
 //             });
 //         }
 
-//         // Optional IP validation (if enabled later)
-//         /*
-//         if (decoded.payload.ip !== req.ip) {
+//         // --- ROLE & URL VALIDATION START ---
+
+//         // Define expected domain mapping per role
+//         const roleDomainMap = {
+//             general_user: 'users.docapp.co.in',
+//             doctor: 'doctors.docapp.co.in', // Corrected minor typo from doctors_docapp.co.in
+//             hospital_organisation: 'hospitals.docapp.co.in'
+//         };
+
+//         const userRole = decoded.payload.scope; // Adjust based on your decodeToken structure
+
+//         if (!origin) {
 //             return res.status(403).json({
-//                 error: "IP changed. Login required"
+//                 error: "Unauthorized access: Missing origin or referer header"
 //             });
 //         }
-//         */
 
-//         // Attach user info
-//         req.user = decoded,
+//         // Extract hostname safely from origin/referer (handles http://, https://, ports, and subpaths)
+//         let requestHost = '';
+//         try {
+//             requestHost = new URL(origin).hostname;
+//         } catch (e) {
+//             return res.status(400).json({
+//                 error: "Invalid Origin or Referer header"
+//             });
+//         }
+
+//         const expectedDomain = roleDomainMap[userRole];
+
+//         // Check if role is recognized and request host matches expected domain
+//         if (!expectedDomain || requestHost !== expectedDomain) {
+//             return res.status(403).json({
+//                 error: "Unauthorized access for this domain"+requestHost+" expected "+expectedDomain+" role "+userRole
+//             });
+//         }
+
+//         // --- ROLE & URL VALIDATION END ---
+
+//         // Attach user info (Fixed syntax error: comma replaced with semicolon)
+//         req.user = decoded;
 
 //         next();
 
@@ -76,8 +102,6 @@ const EXCLUDED_ROUTES = ['/register', '/auth/login'];
 //     }
 // };
 
-// JWT decoder
-
 
 const protect = (req, res, next) => {
     try {
@@ -88,23 +112,15 @@ const protect = (req, res, next) => {
             return next();
         }
 
-        // Detect request origin
-        let origin = null;
-
-        if (req.headers && req.headers.origin) {
-            origin = req.headers.origin;
-        } else if (req.headers && req.headers.referer) {
-            origin = req.headers.referer;
-        }
-
         let token = null;
 
-        // 🌐 Browser
-        if (
-            req.headers &&
-            req.headers.authorization &&
-            req.headers.authorization.startsWith('Bearer ')
-        ) {
+        // 1. Extract Token: Check HttpOnly Cookies first (Web / Browser requests)
+        if (req.cookies && req.cookies.auth_token) {
+            token = req.cookies.auth_token;
+        }
+
+        // 2. Extract Token: Fallback to Bearer token in Authorization Header (cURL / Postman / Mobile API)
+        if (!token && req.headers && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
             token = req.headers.authorization.split(' ')[1];
         }
 
@@ -126,43 +142,41 @@ const protect = (req, res, next) => {
 
         // --- ROLE & URL VALIDATION START ---
 
-        // Define expected domain mapping per role
-        const roleDomainMap = {
-            general_user: 'users.docapp.co.in',
-            doctor: 'doctors.docapp.co.in', // Corrected minor typo from doctors_docapp.co.in
-            hospital_organisation: 'hospitals.docapp.co.in'
-        };
+        // Detect request origin or referer (Present on Browser requests, typically absent on cURL/Postman)
+        let origin = req.headers?.origin || req.headers?.referer || null;
 
-        const userRole = decoded.payload.scope; // Adjust based on your decodeToken structure
+        // Only enforce domain/origin matching IF the request is coming from a web browser (origin is present)
+        if (origin) {
+            const roleDomainMap = {
+                general_user: 'users.docapp.co.in',
+                doctor: 'doctors.docapp.co.in',
+                hospital_organisation: 'hospitals.docapp.co.in'
+            };
 
-        if (!origin) {
-            return res.status(403).json({
-                error: "Unauthorized access: Missing origin or referer header"
-            });
-        }
+            const userRole = decoded.payload?.scope; // Adjust based on your decodeToken structure
 
-        // Extract hostname safely from origin/referer (handles http://, https://, ports, and subpaths)
-        let requestHost = '';
-        try {
-            requestHost = new URL(origin).hostname;
-        } catch (e) {
-            return res.status(400).json({
-                error: "Invalid Origin or Referer header"
-            });
-        }
+            let requestHost = '';
+            try {
+                requestHost = new URL(origin).hostname;
+            } catch (e) {
+                return res.status(400).json({
+                    error: "Invalid Origin or Referer header"
+                });
+            }
 
-        const expectedDomain = roleDomainMap[userRole];
+            const expectedDomain = roleDomainMap[userRole];
 
-        // Check if role is recognized and request host matches expected domain
-        if (!expectedDomain || requestHost !== expectedDomain) {
-            return res.status(403).json({
-                error: "Unauthorized access for this domain"+requestHost+" expected "+expectedDomain+" role "+userRole
-            });
+            // Verify if host matches the expected domain for the given role
+            if (!expectedDomain || requestHost !== expectedDomain) {
+                return res.status(403).json({
+                    error: `Unauthorized access for domain ${requestHost}. Expected ${expectedDomain} for role ${userRole}`
+                });
+            }
         }
 
         // --- ROLE & URL VALIDATION END ---
 
-        // Attach user info (Fixed syntax error: comma replaced with semicolon)
+        // Attach decoded payload to request
         req.user = decoded;
 
         next();
@@ -174,7 +188,6 @@ const protect = (req, res, next) => {
         });
     }
 };
-
 
 const decodeToken = (token) => {
     try {

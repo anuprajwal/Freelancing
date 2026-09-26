@@ -68,7 +68,7 @@ const loginUser = async (req, res) => {
         const token = generateToken(user, user_ip);
 
         if (clientType === 'web') {
-            res.cookie(`${role}_token`, token.token, {
+            res.cookie(`auth_token`, token.token, {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
