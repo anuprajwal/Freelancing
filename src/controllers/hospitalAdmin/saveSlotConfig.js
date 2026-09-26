@@ -144,6 +144,20 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     }
   });
 
+  // Helper function to safely extract array from database values (handles both Array and accidental JSON Strings)
+  const parseJsonField = (fieldValue) => {
+    if (Array.isArray(fieldValue)) return fieldValue;
+    if (typeof fieldValue === 'string') {
+      try {
+        const parsed = JSON.parse(fieldValue);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  };
+
   // CASE 1: Overall update
   if (!hasIndividualFilters && !hasSpecFilters) {
     profile.overall = {
@@ -158,10 +172,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
-    // Sequelize automatically parses DataTypes.JSON columns into JS arrays, 
-    // but we ensure it defaults to an array safely.
-    let currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
-
+    let currentIndividual = parseJsonField(profile.individual);
     const updatedIndividual = [...currentIndividual];
     const maxLen = Math.max(nameList.length, emailList.length);
     const now = new Date();
@@ -180,7 +191,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       });
 
       if (existingIndex !== -1) {
-        // UPDATE existing record: update fee & time, retain created_at
+        // UPDATE existing record: update fee & time, retain original created_at
         const existing = updatedIndividual[existingIndex];
         updatedIndividual[existingIndex] = {
           ...existing,
@@ -203,7 +214,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    // Assign the array directly. DO NOT use JSON.stringify() here.
+    // Assign native JavaScript array directly. Sequelize handles serialization.
     profile.individual = updatedIndividual;
     profile.changed('individual', true);
     await profile.save();
@@ -213,7 +224,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 3: Specific Specialisation
   if (hasSpecFilters) {
-    let currentSpec = Array.isArray(profile.specialisation) ? profile.specialisation : [];
+    let currentSpec = parseJsonField(profile.specialisation);
     const updatedSpec = [...currentSpec];
     const now = new Date();
 
@@ -245,7 +256,6 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    // Assign the array directly. DO NOT use JSON.stringify() here.
     profile.specialisation = updatedSpec;
     profile.changed('specialisation', true);
     await profile.save();
