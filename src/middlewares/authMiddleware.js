@@ -140,7 +140,6 @@ const protect = (req, res, next) => {
             //     error: "Unauthorized access: Missing origin or referer header"
             // });
 
-            pass // Allow requests without origin for testing or internal calls
         }
 
         // Extract hostname safely from origin/referer (handles http://, https://, ports, and subpaths)
