@@ -133,7 +133,7 @@ const protect = (req, res, next) => {
             hospital_organisation: 'hospitals.docapp.co.in'
         };
 
-        const userRole = decoded.payload?.role || decoded.role; // Adjust based on your decodeToken structure
+        const userRole = decoded.payload.scope; // Adjust based on your decodeToken structure
 
         if (!origin) {
             return res.status(403).json({
