@@ -72,7 +72,7 @@ const loginUser = async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
-                domain: ".local.docapp",
+                domain: ".docapp.co.in",
                 maxAge: parseInt(token.expiresIn, 10),
             });
         }
