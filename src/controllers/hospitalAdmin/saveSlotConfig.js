@@ -122,7 +122,6 @@ const setDoctorsSlotConfig = async (req, res) => {
   }
 };
 
-
 const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   const { names, emails, specializations } = filters || {};
 
@@ -133,7 +132,8 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   const hasIndividualFilters = nameList.length > 0 || emailList.length > 0;
   const hasSpecFilters = specList.length > 0;
 
-  let [profile] = await orgPaymentManagement.findOrCreate({
+  // Find or create the profile
+  let [profile] = await AdditionalProfile.findOrCreate({
     where: { user_id: userId },
     defaults: {
       user_id: userId,
@@ -143,103 +143,111 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     }
   });
 
-  // CASE 1: Overall update (Replaces overall config directly)
+  // CASE 1: Overall update
   if (!hasIndividualFilters && !hasSpecFilters) {
     profile.overall = {
       slot_fee: slotFee,
       slot_time: slotTime,
       updated_at: new Date()
     };
-
     await profile.save();
-    return { type: "OVERALL", message: "Overall slot configuration updated." };
+    return { type: "OVERALL", message: "Overall config updated." };
   }
 
-  // CASE 2: Specific Doctor (Individual array merge without duplicate users)
+  // CASE 2: Specific Doctor (Individual) - Optimized using a Map/Dictionary
   if (hasIndividualFilters) {
-    let currentIndividual = Array.isArray(profile.individual) ? [...profile.individual] : [];
-
-    // Pair up incoming names and emails by index
-    const maxLen = Math.max(nameList.length, emailList.length);
-    const incomingDoctors = [];
-
-    for (let i = 0; i < maxLen; i++) {
-      incomingDoctors.push({
-        name: nameList[i] || null,
-        email: emailList[i] || null
-      });
+    // 1. Convert current array into a Map using email (or name as fallback) as the unique key for O(1) lookup
+    const map = new Map();
+    const currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
+    
+    for (const item of currentIndividual) {
+      const key = (item.email || item.name || "").toLowerCase();
+      if (key) map.set(key, item);
     }
 
-    for (const doc of incomingDoctors) {
-      // Find if doctor already exists in array by email OR name match
-      const existingIdx = currentIndividual.findIndex((item) => {
-        const emailMatch = doc.email && item.email && item.email.toLowerCase() === doc.email.toLowerCase();
-        const nameMatch = doc.name && item.name && item.name.toLowerCase() === doc.name.toLowerCase();
-        return emailMatch || nameMatch;
-      });
+    const maxLen = Math.max(nameList.length, emailList.length);
+    const now = new Date();
 
-      if (existingIdx !== -1) {
-        // Update slot info on existing user while preserving non-null fields
-        currentIndividual[existingIdx] = {
-          ...currentIndividual[existingIdx],
-          name: doc.name || currentIndividual[existingIdx].name,
-          email: doc.email || currentIndividual[existingIdx].email,
+    for (let i = 0; i < maxLen; i++) {
+      const name = nameList[i] || null;
+      const email = emailList[i] || null;
+      const lookupKey = (email || name || "").toLowerCase();
+
+      if (!lookupKey) continue;
+
+      if (map.has(lookupKey)) {
+        // Update existing record in-place, keeping original created_at
+        const existing = map.get(lookupKey);
+        map.set(lookupKey, {
+          ...existing,
+          name: name || existing.name,
+          email: email || existing.email,
           slot_fee: slotFee,
           slot_time: slotTime,
-          updated_at: new Date()
-        };
+          updated_at: now
+        });
       } else {
-        // Append new user to array without duplicating existing ones
-        currentIndividual.push({
-          name: doc.name,
-          email: doc.email,
+        // Insert new record
+        map.set(lookupKey, {
+          name,
+          email,
           slot_fee: slotFee,
           slot_time: slotTime,
-          created_at: new Date(),
-          updated_at: new Date()
+          created_at: now,
+          updated_at: now
         });
       }
     }
 
-    profile.individual = currentIndividual;
+    // Convert Map back to array
+    profile.individual = Array.from(map.values());
+    profile.changed('individual', true); // Force Sequelize to detect JSON change
     await profile.save();
-    return { type: "INDIVIDUAL", message: "Individual doctor configurations updated and merged." };
+    
+    return { type: "INDIVIDUAL", message: "Individual configs synchronized." };
   }
 
-  // CASE 3: Specific Specialisation (Specialisation array merge without duplicates)
+  // CASE 3: Specific Specialisation - Optimized using a Map/Dictionary
   if (hasSpecFilters) {
-    let currentSpec = Array.isArray(profile.specialisation) ? [...profile.specialisation] : [];
+    const map = new Map();
+    const currentSpec = Array.isArray(profile.specialisation) ? profile.specialisation : [];
+
+    for (const item of currentSpec) {
+      const key = (item.specialisation || "").toLowerCase();
+      if (key) map.set(key, item);
+    }
+
+    const now = new Date();
 
     for (const specName of specList) {
       if (!specName) continue;
+      const lookupKey = specName.toLowerCase();
 
-      const existingIdx = currentSpec.findIndex(
-        (item) => item.specialisation && item.specialisation.toLowerCase() === specName.toLowerCase()
-      );
-
-      if (existingIdx !== -1) {
-        // Update slot info for existing specialisation
-        currentSpec[existingIdx] = {
-          ...currentSpec[existingIdx],
-          slot_fee: slotFee,
-          slot_time: slotTime,
-          updated_at: new Date()
-        };
-      } else {
-        // Append new specialisation without duplicating existing ones
-        currentSpec.push({
+      if (map.has(lookupKey)) {
+        const existing = map.get(lookupKey);
+        map.set(lookupKey, {
+          ...existing,
           specialisation: specName,
           slot_fee: slotFee,
           slot_time: slotTime,
-          created_at: new Date(),
-          updated_at: new Date()
+          updated_at: now
+        });
+      } else {
+        map.set(lookupKey, {
+          specialisation: specName,
+          slot_fee: slotFee,
+          slot_time: slotTime,
+          created_at: now,
+          updated_at: now
         });
       }
     }
 
-    profile.specialisation = currentSpec;
+    profile.specialisation = Array.from(map.values());
+    profile.changed('specialisation', true); // Force Sequelize to detect JSON change
     await profile.save();
-    return { type: "SPECIALISATION", message: "Specialisation configurations updated and merged." };
+
+    return { type: "SPECIALISATION", message: "Specialisation configs synchronized." };
   }
 };
 
