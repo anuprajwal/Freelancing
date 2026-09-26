@@ -30,7 +30,7 @@ const verifyOtp = async (req, res) => {
 
     if (email) {
       verificationType = "email";
-      whereCondition.email = email;
+      whereCondition.email = user.email;
 
       if (user.is_email_verified) {
         return res.status(400).json({ message: "Email already verified" });
@@ -39,7 +39,7 @@ const verifyOtp = async (req, res) => {
 
     if (phoneNumber) {
       verificationType = "phone";
-      whereCondition.phone_number = phoneNumber;
+      whereCondition.phone_number = user.phone_number;
 
       if (user.is_phone_verified) {
         return res.status(400).json({ message: "Phone already verified" });
