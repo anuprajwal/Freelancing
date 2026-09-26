@@ -136,10 +136,9 @@ const protect = (req, res, next) => {
         const userRole = decoded.payload.scope; // Adjust based on your decodeToken structure
 
         if (!origin) {
-            // return res.status(403).json({
-            //     error: "Unauthorized access: Missing origin or referer header"
-            // });
-
+            return res.status(403).json({
+                error: "Unauthorized access: Missing origin or referer header"
+            });
         }
 
         // Extract hostname safely from origin/referer (handles http://, https://, ports, and subpaths)
