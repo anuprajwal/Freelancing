@@ -134,14 +134,14 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   const hasSpecFilters = specList.length > 0;
 
   // Find or create the profile
-  let profile = await orgPaymentManagement.findOne({
+  let [profile] = await orgPaymentManagement.findOrCreate({
     where: { user_id: userId },
-    // defaults: {
-    //   user_id: userId,
-    //   overall: null,
-    //   individual: [],
-    //   specialisation: []
-    // }
+    defaults: {
+      user_id: userId,
+      overall: null,
+      individual: [],
+      specialisation: []
+    }
   });
 
   console.log(`Fetched profile for user ${userId}:`, profile);
@@ -161,6 +161,8 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
     const currentIndividual = Array.isArray(profile.individual) ? profile.individual : [];
+
+    console.log(`checking:`, Array.isArray(profile.individual) ? profile.individual : []);
 
     console.log(`Current individual configs:`, currentIndividual);
     
