@@ -139,16 +139,14 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
     defaults: {
       user_id: userId,
       overall: null,
-      individual: [],
-      specialisation: []
+      individual: '[]',
+      specialisation: '[]'
     }
   });
 
-  console.log(`Fetched profile for user ${userId}:`, profile);
-
   // CASE 1: Overall update
   if (!hasIndividualFilters && !hasSpecFilters) {
-    profile.dataValues.overall = {
+    profile.overall = {
       slot_fee: slotFee,
       slot_time: slotTime,
       updated_at: new Date()
@@ -160,13 +158,16 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
-    const currentIndividual = Array.isArray(profile.dataValues.individual) ? profile.dataValues.individual : [];
+    // Safely parse JSON string from DB into a JS array
+    let currentIndividual = [];
+    try {
+      currentIndividual = typeof profile.individual === 'string' 
+        ? JSON.parse(profile.individual || '[]') 
+        : (profile.individual || []);
+    } catch (e) {
+      currentIndividual = [];
+    }
 
-    console.log(`checking:`, Array.isArray(profile.dataValues.individual) ? profile.dataValues.individual : []);
-
-    console.log(`Current individual configs:`, currentIndividual);
-    
-    // Map entries by index/reference to update existing items directly
     const updatedIndividual = [...currentIndividual];
     const maxLen = Math.max(nameList.length, emailList.length);
     const now = new Date();
@@ -185,7 +186,6 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       });
 
       if (existingIndex !== -1) {
-        console.log(`Updating existing individual config for ${existingIndex}:`, updatedIndividual[existingIndex]);
         // UPDATE existing record: update fee & time, retain created_at
         const existing = updatedIndividual[existingIndex];
         updatedIndividual[existingIndex] = {
@@ -197,8 +197,6 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           updated_at: now
         };
       } else {
-        console.log(`Adding new individual config for ${name || email}`);
-        console.log(`Current individual configs:`, updatedIndividual);
         // APPEND new record: add to the list without overwriting older records
         updatedIndividual.push({
           name,
@@ -208,12 +206,12 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
           created_at: now,
           updated_at: now
         });
-        console.log(`New individual config added:`, updatedIndividual);
       }
     }
 
-    profile.dataValues.individual = updatedIndividual;
-    profile.changed('individual', true); // Force Sequelize JSON tracking update
+    // Convert back to JSON string if your DB column expects text/string JSON
+    profile.individual = JSON.stringify(updatedIndividual);
+    profile.changed('individual', true);
     await profile.save();
     
     return { type: "INDIVIDUAL", message: "Individual configs merged and updated." };
@@ -221,7 +219,15 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 3: Specific Specialisation
   if (hasSpecFilters) {
-    const currentSpec = Array.isArray(profile.specialisation) ? profile.specialisation : [];
+    let currentSpec = [];
+    try {
+      currentSpec = typeof profile.specialisation === 'string' 
+        ? JSON.parse(profile.specialisation || '[]') 
+        : (profile.specialisation || []);
+    } catch (e) {
+      currentSpec = [];
+    }
+
     const updatedSpec = [...currentSpec];
     const now = new Date();
 
@@ -253,7 +259,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
       }
     }
 
-    profile.dataValues.specialisation = updatedSpec;
+    profile.specialisation = JSON.stringify(updatedSpec);
     profile.changed('specialisation', true);
     await profile.save();
 
