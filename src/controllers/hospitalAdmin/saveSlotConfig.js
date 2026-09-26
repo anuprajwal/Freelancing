@@ -192,6 +192,7 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
         };
       } else {
         console.log(`Adding new individual config for ${name || email}`);
+        console.log(`Current individual configs:`, updatedIndividual);
         // APPEND new record: add to the list without overwriting older records
         updatedIndividual.push({
           name,
