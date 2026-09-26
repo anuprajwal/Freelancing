@@ -46,6 +46,8 @@ const setDoctorsSlotConfig = async (req, res) => {
       }
     }
 
+    userWhere.role = "doctor"; // Ensure we only target doctors
+
     if (specializations) {
       const specList = Array.isArray(specializations)
         ? specializations
@@ -102,14 +104,139 @@ const setDoctorsSlotConfig = async (req, res) => {
       }
     );
 
+    const syncResult = await saveDoctorSlotConfig(
+      admin_id,
+      slot_fee,
+      slot_time,
+      filters
+    );
+
     return res.status(200).json({
       message: `Successfully updated ${updatedCount} doctor profile(s).`,
       updatedCount,
+      syncResult,
     });
   } catch (err) {
     console.error("Error setting doctor slot configuration:", err);
     return res.status(500).json({ error: "Internal server error." });
   }
 };
+
+
+const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
+  const { names, emails, specializations } = filters || {};
+
+  const nameList = names ? (Array.isArray(names) ? names : [names]) : [];
+  const emailList = emails ? (Array.isArray(emails) ? emails : [emails]) : [];
+  const specList = specializations ? (Array.isArray(specializations) ? specializations : [specializations]) : [];
+
+  const hasIndividualFilters = nameList.length > 0 || emailList.length > 0;
+  const hasSpecFilters = specList.length > 0;
+
+  // Find or initialize the AdditionalProfile record for this user_id
+  let [profile] = await AdditionalProfile.findOrCreate({
+    where: { user_id: userId },
+    defaults: {
+      user_id: userId,
+      overall: null,
+      individual: [],
+      specialisation: []
+    }
+  });
+
+  // CASE 1: Overall update (No specific individual or specialisation filters)
+  if (!hasIndividualFilters && !hasSpecFilters) {
+    profile.overall = {
+      slot_fee: slotFee,
+      slot_time: slotTime,
+      updated_at: new Date()
+    };
+
+    await profile.save();
+    return { type: "OVERALL", message: "Overall slot configuration replaced." };
+  }
+
+  // CASE 2: Specific Doctor (Individual filter based on names / emails)
+  if (hasIndividualFilters) {
+    let currentIndividual = Array.isArray(profile.individual) ? [...profile.individual] : [];
+
+    // Construct targets to match
+    const newDoctorsToProcess = [];
+    const maxLen = Math.max(nameList.length, emailList.length);
+
+    for (let i = 0; i < maxLen; i++) {
+      newDoctorsToProcess.push({
+        name: nameList[i] || null,
+        email: emailList[i] || null
+      });
+    }
+
+    for (const targetDoc of newDoctorsToProcess) {
+      // Find index of existing record matching name OR email
+      const existingIdx = currentIndividual.findIndex((item) => {
+        const nameMatch = targetDoc.name && item.name === targetDoc.name;
+        const emailMatch = targetDoc.email && item.email === targetDoc.email;
+        return nameMatch || emailMatch;
+      });
+
+      if (existingIdx !== -1) {
+        // Update existing item
+        currentIndividual[existingIdx] = {
+          ...currentIndividual[existingIdx],
+          name: targetDoc.name || currentIndividual[existingIdx].name,
+          email: targetDoc.email || currentIndividual[existingIdx].email,
+          slot_fee: slotFee,
+          slot_time: slotTime,
+          updated_at: new Date()
+        };
+      } else {
+        // Add new entry
+        currentIndividual.push({
+          name: targetDoc.name,
+          email: targetDoc.email,
+          slot_fee: slotFee,
+          slot_time: slotTime,
+          created_at: new Date()
+        });
+      }
+    }
+
+    profile.individual = currentIndividual;
+    await profile.save();
+    return { type: "INDIVIDUAL", message: "Individual doctor configurations updated." };
+  }
+
+  // CASE 3: Specific Specialisation
+  if (hasSpecFilters) {
+    let currentSpec = Array.isArray(profile.specialisation) ? [...profile.specialisation] : [];
+
+    for (const specName of specList) {
+      const existingIdx = currentSpec.findIndex((item) => item.specialisation === specName);
+
+      if (existingIdx !== -1) {
+        // Update existing specialization item
+        currentSpec[existingIdx] = {
+          ...currentSpec[existingIdx],
+          slot_fee: slotFee,
+          slot_time: slotTime,
+          updated_at: new Date()
+        };
+      } else {
+        // Add new specialization item
+        currentSpec.push({
+          specialisation: specName,
+          slot_fee: slotFee,
+          slot_time: slotTime,
+          created_at: new Date()
+        });
+      }
+    }
+
+    profile.specialisation = currentSpec;
+    await profile.save();
+    return { type: "SPECIALISATION", message: "Specialisation slot configurations updated." };
+  }
+};
+
 
 module.exports = { setDoctorsSlotConfig };
