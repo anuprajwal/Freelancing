@@ -160,9 +160,9 @@ const saveDoctorSlotConfig = async (userId, slotFee, slotTime, filters) => {
 
   // CASE 2: Specific Doctor (Individual)
   if (hasIndividualFilters) {
-    const currentIndividual = Array.isArray(profile.individual) ? profile.dataValues.individual : [];
+    const currentIndividual = Array.isArray(profile.dataValues.individual) ? profile.dataValues.individual : [];
 
-    console.log(`checking:`, Array.isArray(profile.individual) ? profile.dataValues.individual : []);
+    console.log(`checking:`, Array.isArray(profile.dataValues.individual) ? profile.dataValues.individual : []);
 
     console.log(`Current individual configs:`, currentIndividual);
     
