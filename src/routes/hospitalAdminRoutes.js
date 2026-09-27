@@ -30,7 +30,7 @@ router.post('/doctor-request-admission', protect, checkAccountStatus, requestAdm
 router.put('/react-to-admission', protect, checkAccountStatus, hospitalAdminAuth, acceptDocRequests)
 router.put('/set-doctors-slot-config', protect, checkAccountStatus, hospitalAdminAuth, setDoctorsSlotConfig)
 router.get('/get-doctors-slot-config', protect, checkAccountStatus, hospitalAdminAuth, getSlotConfig)
-router.get('/check-doctor-request', protect, checkAccountStatus, hospitalAdminAuth, checkDoctorRequests)
+router.get('/check-doctor-request', protect, checkAccountStatus, checkDoctorRequests)
 
 
 
