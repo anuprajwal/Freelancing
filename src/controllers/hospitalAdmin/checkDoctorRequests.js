@@ -19,13 +19,13 @@ const checkDoctorRequests = async (req, res)=>{
     if (!req_details){
         return res.status(404).json({error:"Doctor has not requested any organisation yet"})
     }else if (req_details.request_status === "pending"){
-        const {organisation_name} = await organisationProfile.findById(req_details.org_id)
+        const {organisation_name} = await organisationProfile.findByPk(req_details.org_id)
         return res.status(200).json({message:"Doctor has requested an organisation and is waiting for the response", request_status:req_details.request_status, requested_organisation:organisation_name, request_id:req_details.id})
     }else if (req_details.request_status === "accepted"){
-        const {organisation_name} = await organisationProfile.findById(req_details.org_id)
+        const {organisation_name} = await organisationProfile.findByPk(req_details.org_id)
         return res.status(200).json({message:"Doctor has requested an organisation and the request has been accepted", request_status:req_details.request_status, requested_organisation:organisation_name, request_id:req_details.id})
     }else if (req_details.request_status === "rejected"){
-        const {organisation_name} = await organisationProfile.findById(req_details.org_id)
+        const {organisation_name} = await organisationProfile.findByPk(req_details.org_id)
         return res.status(200).json({message:"Doctor has requested an organisation and the request has been rejected", request_status:req_details.request_status, requested_organisation:organisation_name, request_id:req_details.id})
     }
 
