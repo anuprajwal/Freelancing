@@ -18,7 +18,7 @@ const requestAdmissionRequest = async (req, res)=>{
     })
 
     if (existingRequests){
-        return res.status(400).json({error:"succesfully requested the organisation"})
+        return res.status(400).json({error:"You have already requested other organisation. Please wait for the response from the organisation before requesting another one, or you can cancel the existing request and make a new one"})
     }
 
     if (!organisation_id){

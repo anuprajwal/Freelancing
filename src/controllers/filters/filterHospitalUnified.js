@@ -88,7 +88,10 @@ const filterHospitalsCombined = async (req, res) => {
         // 4. User Where Clause (Location Distance Match)
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
         const userWhere = {};
-        let attributesInclude = [];
+        let attributesInclude = ['id', 'user_id', 'organisation_name', 'organisation_type', 
+            'registration_number', 'establishment_year', 'ambulance_available', 'website_url', 
+            'verified_status', 'specializations_provided', 'description', 'profile_picture', 
+        ];
         let orderClause = [];
 
         if (isGeoSearchActive) {
@@ -120,9 +123,7 @@ const filterHospitalsCombined = async (req, res) => {
 
         // Execute combined query
         const { count, rows: organisations } = await organisationProfile.findAndCountAll({
-            attributes: {
-                include: attributesInclude
-            },
+            attributes: [...attributesInclude],
             where: organisationWhere,
             limit: limit,
             offset: offset,
