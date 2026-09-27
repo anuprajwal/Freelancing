@@ -89,7 +89,7 @@ const filterHospitalsCombined = async (req, res) => {
         const isGeoSearchActive = parsedLat !== null && parsedLng !== null;
         const userWhere = {};
         let attributesInclude = ['id', 'user_id', 'organisation_name', 'organisation_type', 
-            'registration_number', 'establishment_year', 'ambulance_available', 'website_url', 
+            'regestration_number', 'establishment_year', 'ambulance_available', 'website_url', 
             'verified_status', 'specializations_provided', 'description', 'profile_picture', 
         ];
         let orderClause = [];
