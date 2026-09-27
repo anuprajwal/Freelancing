@@ -10,6 +10,10 @@ const requestAdmissionRequest = async (req, res)=>{
     
     const {organisation_id} = req.body
 
+    if (!organisation_id){
+        return res.status(400).json({error:"the organisation id is required in the body"})
+    }
+
     const existingRequests = await organisationRequest.findOne({
         where:{
             doctor_id : id,
