@@ -1,4 +1,4 @@
-const {organisationRequest} = require("../../../models")
+const {organisationRequest, organisationProfile} = require("../../../models")
 
 const checkDoctorRequests = async (req, res)=>{
     const {id} = req.user.payload
