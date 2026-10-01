@@ -5,9 +5,7 @@ const {
 // not much use full
 
 const validateUserRole = async (userId, expectedRole) => {
-    console.log(userId)
     const user = await User.findByPk(userId);
-    console.log(user)
     console.log("expectedRole", expectedRole);
 
     if (!user) {

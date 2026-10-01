@@ -160,10 +160,6 @@ exports.getOnboardingStatus = async (req, res) => {
       where: { user_id: req.params.id },
     });
 
-    if (!hospital) {
-      hospital = await organisationProfile.findByPk(req.params.id);
-    }
-
     if (!hospital?.rzp_account_id) {
       return res.status(400).json({
         message: "Hospital not onboarded yet",

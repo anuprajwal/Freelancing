@@ -39,8 +39,18 @@ const updateDoctorProfile = async (req, res, doctorObj)=>{
     profile_picture,
     specialization,
     license_number,
-    practice_start_date,
   } = req.body;
+
+  // Parse the incoming date value
+  const rawDate = req.body.practice_start_date;
+  let practiceStartDate = rawDate ? new Date(rawDate) : null;
+
+  // Validate: If a value was provided but is invalid, return an error
+  if (practiceStartDate && isNaN(practiceStartDate.getTime())) {
+    return res.status(400).json({ 
+      error: 'Invalid date format provided for practice_start_date' 
+    });
+  }
 
   
   if (!date_of_birth || !specialization || !license_number){
