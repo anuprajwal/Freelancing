@@ -5,8 +5,8 @@ const verifyAdminAuth = (req, res, next) => {
     try {
         let token = null;
 
-         if (req.cookies && req.cookies.auth_token) {
-            token = req.cookies.auth_token;
+         if (req.cookies && req.cookies.AdminToken) {
+            token = req.cookies.AdminToken;
         }
 
         let origin = null;
