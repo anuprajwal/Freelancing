@@ -63,7 +63,7 @@ const loginAdmin = async (req, res) => {
                 httpOnly: true,
                 secure: true,
                 sameSite: "None",
-                domain: ".local.docapp",
+                domain: ".docapp.co.in",
                 maxAge: 3600000, // 1 hour in ms
             });
         }
