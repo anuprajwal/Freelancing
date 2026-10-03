@@ -71,13 +71,8 @@ const loginAdmin = async (req, res) => {
         // 📱 Mobile / API → Return token in JSON
         return res.status(200).json({
             message: "Login successful",
-            token: token,
             clientType,
-            admin: {
-                id: existingAdmin.id,
-                email: existingAdmin.email,
-                role: "admin"
-            }
+            
         });
 
     } catch (err) {
