@@ -4,6 +4,11 @@ const jwt = require("jsonwebtoken");
 const verifyAdminAuth = (req, res, next) => {
     try {
         let token = null;
+
+         if (req.cookies && req.cookies.auth_token) {
+            token = req.cookies.auth_token;
+        }
+
         let origin = null;
 
         // 1. Detect Request Origin (to distinguish Browser vs. Mobile)
@@ -15,6 +20,7 @@ const verifyAdminAuth = (req, res, next) => {
 
         
             if (
+                token === null &&
                 req.headers &&
                 req.headers.authorization &&
                 req.headers.authorization.startsWith('Bearer ')
