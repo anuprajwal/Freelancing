@@ -14,7 +14,7 @@ const addAddress = async (req, res) => {
     pincode = "",
     street = "",
     landmark = "",
-    houseNo = ""
+    house_no = ""
   } = req.body;
 
   // Validation
@@ -43,7 +43,7 @@ const addAddress = async (req, res) => {
       pincode: pincode,
       street: street,
       landmark: landmark,
-      house_no: houseNo,
+      house_no: house_no,
       active: true,
     });
 

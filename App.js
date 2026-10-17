@@ -47,9 +47,6 @@ const notificationRoutes = require("./src/routes/notificationRoutes.js");
 const ratingRoutes = require("./src/routes/reviewRatingsRoutes.js");
 const webhookRoutes = require("./src/routes/webHookroutes.js");
 
-const https = require("https");
-const fs = require("fs");
-
 const startCron = require("./src/cronjobs/checkPaidAppointments");
 
 startCron();
@@ -68,11 +65,6 @@ const allowedOrigins = [
     "http://localhost:8000",
     "https://docwebsite-ecru.vercel.app",
     "https://wonderful-tartufo-5f805e.netlify.app",
-    "https://auth.local.docapp:5100",
-    "https://users.local.docapp:5200",
-    "https://doctors.local.docapp:5300",
-    "https://hospitals.local.docapp:5400",
-    "https://admin.local.docapp:5500",
     "http://localhost:7000",
         "http://localhost:7001",
         "http://localhost:7002",
@@ -164,6 +156,6 @@ app._router.stack.forEach((middleware) => {
 });
 
 app.listen(PORT, "0.0.0.0", () => {
-    console.log("Auth backend HTTPS running on https://auth.local.docapp:5000");
+    console.log("running well   on port " + PORT);
 });
 })();
