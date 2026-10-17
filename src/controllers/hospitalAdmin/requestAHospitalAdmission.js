@@ -18,7 +18,7 @@ const requestAdmissionRequest = async (req, res)=>{
         where:{
             doctor_id : id,
             org_id : organisation_id,
-            status : "pending" || "accepted"
+            request_status : "pending" || "accepted"
         }
     })
 
