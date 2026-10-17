@@ -40,6 +40,12 @@ const requestAdmissionRequest = async (req, res)=>{
         }
     })
 
+    await organisationRequest.destroy({
+        where:{
+            doctor_id : id,
+            request_status : "rejected"}
+    })
+
     await organisationRequest.create({
         doctor_id : id,
         org_id : organisation_id
