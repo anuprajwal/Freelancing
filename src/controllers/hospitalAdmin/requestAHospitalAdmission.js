@@ -17,7 +17,8 @@ const requestAdmissionRequest = async (req, res)=>{
     const existingRequests = await organisationRequest.findOne({
         where:{
             doctor_id : id,
-            org_id : organisation_id
+            org_id : organisation_id,
+            status : "pending" || "accepted"
         }
     })
 
