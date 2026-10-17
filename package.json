@@ -29,6 +29,7 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
+    "prompt-sync": "^4.2.0",
     "razorpay": "^2.9.6",
     "require": "^2.4.20",
     "sequelize": "^6.37.7",

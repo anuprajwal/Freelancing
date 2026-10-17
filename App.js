@@ -163,12 +163,7 @@ app._router.stack.forEach((middleware) => {
     }
 });
 
-https.createServer({
-        key: fs.readFileSync("./_wildcard.local.docapp-key.pem"),
-        cert: fs.readFileSync("./_wildcard.local.docapp.pem"),
-    },
-    app
-).listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, "0.0.0.0", () => {
     console.log("Auth backend HTTPS running on https://auth.local.docapp:5000");
 });
 })();

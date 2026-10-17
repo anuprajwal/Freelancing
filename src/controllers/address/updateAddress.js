@@ -21,7 +21,7 @@ const updateAddress =async(req, res)=>{
         return res.status(404).json({error:"requested address not found"})
     }
 
-    const {country = getAddress.country, state=getAddress.state, city=getAddress.city, pincode=getAddress.pincode, street=getAddress.street,landmark=getAddress.landmark,houseNo=getAddress.houseNo} = req.body
+    const {country = getAddress.country, state=getAddress.state, city=getAddress.city, pincode=getAddress.pincode, street=getAddress.street,landmark=getAddress.landmark,house_no=getAddress.house_no} = req.body
 
     if (!city || !pincode || !street){
         // logger.warning(`fields are not complete in the request made by the user : ${id}`)
@@ -37,7 +37,7 @@ const updateAddress =async(req, res)=>{
         { where: { user_id: id } }
     );
 
-    await getAddress.update({country:country, state:state, city:city, pincode:pincode, street:street, landmark:landmark, house_no:houseNo, active:true})
+    await getAddress.update({country:country, state:state, city:city, pincode:pincode, street:street, landmark:landmark, house_no:house_no, active:true})
 
     // logger.info(`the request to update address: ${addressId} by user: ${id}, is complete succesfully`)
     return res.status(200).json({message:"address updated succesfully"})
